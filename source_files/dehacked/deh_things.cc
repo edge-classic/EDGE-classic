@@ -115,7 +115,7 @@ struct ScratchAttack
 
 std::vector<ScratchAttack> scratchers;
 
-const char *AddScratchAttack(int damage, const char *sfx);
+const char *AddScratchAttack(int damage, const std::string &sfx);
 
 void BeginLump(void)
 {
@@ -156,22 +156,22 @@ const ExtraAttack attack_extra[] = {{kMT_FIRE, "TRACKER", 0, 75, "FS"},
 void HandleSounds(const DehackedMapObjectDefinition *info, int mt_num)
 {
     if (info->seesound != ksfx_None)
-        wad::Printf("LAUNCH_SOUND = \"%s\";\n", sounds::GetSound(info->seesound));
+        wad::Printf("LAUNCH_SOUND = \"%s\";\n", sounds::GetSound(info->seesound).c_str());
 
     if (info->deathsound != ksfx_None)
-        wad::Printf("DEATH_SOUND = \"%s\";\n", sounds::GetSound(info->deathsound));
+        wad::Printf("DEATH_SOUND = \"%s\";\n", sounds::GetSound(info->deathsound).c_str());
 
     if (info->rip_sound != ksfx_None)
-        wad::Printf("RIP_SOUND = \"%s\";\n", sounds::GetSound(info->rip_sound));
+        wad::Printf("RIP_SOUND = \"%s\";\n", sounds::GetSound(info->rip_sound).c_str());
 
     if (mt_num == kMT_FIRE)
     {
-        wad::Printf("ATTEMPT_SOUND = \"%s\";\n", sounds::GetSound(ksfx_vilatk));
-        wad::Printf("ENGAGED_SOUND = \"%s\";\n", sounds::GetSound(ksfx_barexp));
+        wad::Printf("ATTEMPT_SOUND = \"%s\";\n", sounds::GetSound(ksfx_vilatk).c_str());
+        wad::Printf("ENGAGED_SOUND = \"%s\";\n", sounds::GetSound(ksfx_barexp).c_str());
     }
 
     if (mt_num == kMT_FATSHOT)
-        wad::Printf("ATTEMPT_SOUND = \"%s\";\n", sounds::GetSound(ksfx_manatk));
+        wad::Printf("ATTEMPT_SOUND = \"%s\";\n", sounds::GetSound(ksfx_manatk).c_str());
 }
 
 void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
@@ -325,15 +325,14 @@ void ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num, bool plr
 void ConvertScratch(const ScratchAttack *atk);
 } // namespace Attacks
 
-const char *Attacks::AddScratchAttack(int damage, const char *sfx)
+const char *Attacks::AddScratchAttack(int damage, const std::string &sfx)
 {
     std::string safe_sfx = "QUIET";
-    if (sfx != nullptr)
+    if (!sfx.empty())
     {
         safe_sfx.clear();
-        while (*sfx)
+        for (const char &ch : sfx)
         {
-            char ch = *sfx++;
             if (epi::IsAlphanumericASCII(ch) || ch == '_')
                 safe_sfx.push_back(ch);
         }
@@ -349,7 +348,7 @@ const char *Attacks::AddScratchAttack(int damage, const char *sfx)
             return namebuf;
     }
 
-    scratchers.push_back({damage, sfx ? sfx : "", namebuf});
+    scratchers.push_back({damage, (sfx.empty() ? "" : sfx), namebuf});
 
     return namebuf;
 }
@@ -703,7 +702,7 @@ bool things::IsSpawnable(int mt_num)
     return info->doomednum > 0;
 }
 
-const char *things::AddScratchAttack(int damage, const char *sfx)
+const char *things::AddScratchAttack(int damage, const std::string &sfx)
 {
     return Attacks::AddScratchAttack(damage, sfx);
 }
@@ -1191,31 +1190,31 @@ void HandleSounds(const DehackedMapObjectDefinition *info, int mt_num)
     if (info->activesound != ksfx_None)
     {
         if (info->flags & kMF_PICKUP)
-            wad::Printf("PICKUP_SOUND = \"%s\";\n", sounds::GetSound(info->activesound));
+            wad::Printf("PICKUP_SOUND = \"%s\";\n", sounds::GetSound(info->activesound).c_str());
         else
-            wad::Printf("ACTIVE_SOUND = \"%s\";\n", sounds::GetSound(info->activesound));
+            wad::Printf("ACTIVE_SOUND = \"%s\";\n", sounds::GetSound(info->activesound).c_str());
     }
     else if (mt_num == kMT_TELEPORTMAN)
-        wad::Printf("ACTIVE_SOUND = \"%s\";\n", sounds::GetSound(ksfx_telept));
+        wad::Printf("ACTIVE_SOUND = \"%s\";\n", sounds::GetSound(ksfx_telept).c_str());
 
     if (info->seesound != ksfx_None)
-        wad::Printf("SIGHTING_SOUND = \"%s\";\n", sounds::GetSound(info->seesound));
+        wad::Printf("SIGHTING_SOUND = \"%s\";\n", sounds::GetSound(info->seesound).c_str());
     else if (mt_num == kMT_BOSSSPIT)
-        wad::Printf("SIGHTING_SOUND = \"%s\";\n", sounds::GetSound(ksfx_bossit));
+        wad::Printf("SIGHTING_SOUND = \"%s\";\n", sounds::GetSound(ksfx_bossit).c_str());
 
     // Dasho - Removed melee state requirement, as the MBF21 A_MonsterBulletAttack codepointer
     // uses this sound
     if (info->attacksound != ksfx_None) // && info->meleestate != kS_NULL)
-        wad::Printf("STARTCOMBAT_SOUND = \"%s\";\n", sounds::GetSound(info->attacksound));
+        wad::Printf("STARTCOMBAT_SOUND = \"%s\";\n", sounds::GetSound(info->attacksound).c_str());
 
     if (info->painsound != ksfx_None)
-        wad::Printf("PAIN_SOUND = \"%s\";\n", sounds::GetSound(info->painsound));
+        wad::Printf("PAIN_SOUND = \"%s\";\n", sounds::GetSound(info->painsound).c_str());
 
     if (info->deathsound != ksfx_None)
-        wad::Printf("DEATH_SOUND = \"%s\";\n", sounds::GetSound(info->deathsound));
+        wad::Printf("DEATH_SOUND = \"%s\";\n", sounds::GetSound(info->deathsound).c_str());
 
     if (info->rip_sound != ksfx_None)
-        wad::Printf("RIP_SOUND = \"%s\";\n", sounds::GetSound(info->rip_sound));
+        wad::Printf("RIP_SOUND = \"%s\";\n", sounds::GetSound(info->rip_sound).c_str());
 }
 
 void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
@@ -1422,7 +1421,7 @@ void HandleItem(const DehackedMapObjectDefinition *info, int mt_num)
     {
         wad::Printf("PICKUP_BENEFIT = POWERUP_BERSERK(60:60),HEALTH(100:100);\n");
         wad::Printf("PICKUP_MESSAGE = GotBerserk;\n");
-        wad::Printf("PICKUP_SOUND = %s;\n", sounds::GetSound(ksfx_getpow));
+        wad::Printf("PICKUP_SOUND = %s;\n", sounds::GetSound(ksfx_getpow).c_str());
         wad::Printf("PICKUP_EFFECT = SWITCH_WEAPON(FIST);\n");
         return;
     }
@@ -1432,7 +1431,7 @@ void HandleItem(const DehackedMapObjectDefinition *info, int mt_num)
         wad::Printf("HEALTH(%d:%d),", miscellaneous::mega_health, miscellaneous::mega_health);
         wad::Printf("BLUE_ARMOUR(%d:%d);\n", miscellaneous::max_armour, miscellaneous::max_armour);
         wad::Printf("PICKUP_MESSAGE = GotMega;\n");
-        wad::Printf("PICKUP_SOUND = %s;\n", sounds::GetSound(ksfx_getpow));
+        wad::Printf("PICKUP_SOUND = %s;\n", sounds::GetSound(ksfx_getpow).c_str());
         return;
     }
     else if (spr_num == kSPR_BPAK) // Backpack full of AMMO
@@ -1444,7 +1443,7 @@ void HandleItem(const DehackedMapObjectDefinition *info, int mt_num)
         wad::Printf("    CELLS.LIMIT(%d),\n", 2 * ammo::player_max[kAmmoTypeCell]);
         wad::Printf("    BULLETS(10), SHELLS(4), ROCKETS(1), CELLS(20);\n");
         wad::Printf("PICKUP_MESSAGE = GotBackpack;\n");
-        wad::Printf("PICKUP_SOUND = %s;\n", sounds::GetSound(ksfx_itemup));
+        wad::Printf("PICKUP_SOUND = %s;\n", sounds::GetSound(ksfx_itemup).c_str());
         return;
     }
 
@@ -1541,7 +1540,7 @@ void HandleItem(const DehackedMapObjectDefinition *info, int mt_num)
     wad::Printf("PICKUP_MESSAGE = %s;\n", pu->ldf);
 
     if (info->activesound == ksfx_None)
-        wad::Printf("PICKUP_SOUND = %s;\n", sounds::GetSound(pu->sound));
+        wad::Printf("PICKUP_SOUND = %s;\n", sounds::GetSound(pu->sound).c_str());
 }
 
 const char *cast_titles[kCastMaximum] = {

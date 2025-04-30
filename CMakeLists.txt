@@ -49,6 +49,7 @@ option(EDGE_CLASSIC "Enable default features for EDGE-Classic" ON)
 
 # Development 
 option(EDGE_SANITIZE "Enable code sanitizing" OFF)
+option(EDGE_SANITIZE_THREADS "Enable thread sanitizing (No-op with MSVC)" OFF)
 option(EDGE_PROFILING "Enable Profiling" OFF)
 option(EDGE_EXTRA_CHECKS "Enable diagnostic checks/functions" OFF)
 
@@ -85,7 +86,7 @@ endif()
 if(MSVC)
     # Use static C runtime, necessary for mimalloc and also means matching C runtime doesn't need to be on users box
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:Debug>")   
-      if (EDGE_MIMALLOC)
+    if (EDGE_MIMALLOC)
       # Override memory allocations to use mimalloc
       add_compile_options(/FI${CMAKE_SOURCE_DIR}/libraries/mimalloc/include/mimalloc-override.h)
     endif()
@@ -138,6 +139,12 @@ if (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address /Oy-")
   endif()
 
+  # Not supported with MSVC
+  if (EDGE_SANITIZE_THREADS)
+    message( SEND_ERROR "EDGE_SANITIZE_THREADS not supported for MSVC; disabling" )
+    set(EDGE_SANITIZE_THREADS OFF)
+  endif()
+
   if (CLANG)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++98-compat -Wno-c++98-compat-pedantic")
   endif()
@@ -155,12 +162,21 @@ else()
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fno-exceptions -fno-strict-aliasing")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fno-exceptions -fno-rtti -fno-strict-aliasing")
 
-  if (EDGE_SANITIZE)
+  if (EDGE_SANITIZE AND EDGE_SANITIZE_THREADS)
+    message( FATAL_ERROR "Cannot enable both EDGE_SANITIZE AND EDGE_SANITIZE_THREADS!" )
+  elseif (EDGE_SANITIZE)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
     if (NOT CLANG)
       set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libasan")
+    endif()
+  elseif (EDGE_SANITIZE_THREADS)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=thread -g -fno-omit-frame-pointer")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=thread -g -fno-omit-frame-pointer")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=thread -g")
+    if (NOT CLANG)
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libtsan")
     endif()
   endif()
  

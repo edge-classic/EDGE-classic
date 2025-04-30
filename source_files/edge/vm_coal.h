@@ -25,6 +25,7 @@ bool GetCOALDetected();
 void SetCOALDetected(bool detected);
 
 void InitializeCOAL();
+void ShutdownCOAL();
 
 void COALAddScript(int type, std::string &data, const std::string &source);
 void COALLoadScripts();

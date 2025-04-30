@@ -324,6 +324,8 @@ SoundEffect *SoundEffectDefinitionContainer::GetEffect(const char *name, bool er
 
     EPI_ASSERT(r->num == count);
 
+    dynamic_sound_effects_.push_back((uint8_t *)r);
+
     return r;
 }
 

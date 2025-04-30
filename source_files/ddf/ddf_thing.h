@@ -750,22 +750,22 @@ class MapObjectDefinition
     float       explode_radius_; // normally zero (radius == damage)
 
     // linked list of losing benefits, or nullptr
-    Benefit *lose_benefits_;
+    Benefit *lose_benefits_ = nullptr;
 
     // linked list of pickup benefits, or nullptr
-    Benefit *pickup_benefits_;
+    Benefit *pickup_benefits_ = nullptr;
 
     // linked list of kill benefits, or nullptr
-    Benefit *kill_benefits_;
+    Benefit *kill_benefits_ = nullptr;
 
     // linked list of pickup effects, or nullptr
-    PickupEffect *pickup_effects_;
+    PickupEffect *pickup_effects_ = nullptr;
+
+    // linked list of initial benefits for players, or nullptr if none
+    Benefit *initial_benefits_ = nullptr;
 
     // pickup message, a reference to languages.ldf
     std::string pickup_message_;
-
-    // linked list of initial benefits for players, or nullptr if none
-    Benefit *initial_benefits_;
 
     int             castorder_;
     std::string     cast_title_;
@@ -955,6 +955,10 @@ class MapObjectDefinitionContainer : public std::vector<MapObjectDefinition *>
     const MapObjectDefinition *LookupCastMember(int castpos);
     const MapObjectDefinition *LookupPlayer(int playernum);
     const MapObjectDefinition *LookupDoorKey(int theKey);
+
+    // We won't be looking these up during gameplay, but need
+    // to track them for deletion on shutdown
+    std::vector<MapObjectDefinition *> dynamic_atk_mobjtypes;
 };
 
 // -------EXTERNALISATIONS-------

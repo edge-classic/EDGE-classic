@@ -150,7 +150,7 @@ class ImageData
     void FillMarginY(int actual_height);
 
     // Change various HSV color values if needed
-    void SetHsv(int rotation, int saturation, int value);
+    void SetHSV(int rotation, int saturation, int value);
 };
 
 //--- editor settings ---

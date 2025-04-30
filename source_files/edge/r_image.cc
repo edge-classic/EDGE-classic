@@ -57,14 +57,17 @@
 #include "im_filter.h"
 #include "im_funcs.h"
 #include "m_argv.h"
+#include "m_menu.h"
 #include "m_misc.h"
 #include "p_local.h"
 #include "r_colormap.h"
 #include "r_defs.h"
 #include "r_gldefs.h"
 #include "r_misc.h"
+#include "r_shader.h"
 #include "r_sky.h"
 #include "r_texgl.h"
+#include "r_wipe.h"
 #include "w_epk.h"
 #include "w_files.h"
 #include "w_texture.h"
@@ -1385,7 +1388,7 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
     }
 
     if (rim->hsv_rotation_ || rim->hsv_saturation_ > -1 || rim->hsv_value_)
-        tmp_img->SetHsv(rim->hsv_rotation_, rim->hsv_saturation_, rim->hsv_value_);
+        tmp_img->SetHSV(rim->hsv_rotation_, rim->hsv_saturation_, rim->hsv_value_);
 
     if (do_whiten)
         tmp_img->Whiten();
@@ -1583,6 +1586,7 @@ static const Image *BackupGraphic(const char *gfx_name, int flags)
 
     // keep dummy graphic so that future lookups will succeed
     AddImageToMap(real_graphics, gfx_name, dummy);
+
     return dummy;
 }
 
@@ -1967,7 +1971,7 @@ void AnimationTicker(void)
     }
 }
 
-void DeleteAllImages(void)
+void DeleteAllImages(bool shutdown)
 {
     std::list<CachedImage *>::iterator CI;
 
@@ -1985,6 +1989,123 @@ void DeleteAllImages(void)
 
     DeleteSkyTextures();
     DeleteColourmapTextures();
+
+    // Delete images that should otherwise persist for the program lifetime
+    if (shutdown)
+    {
+        DeleteAllLightImages();
+        for (Font *font : hud_fonts)
+        {
+            for (int i = 0; i < 3; ++i)
+            {
+                if (font->truetype_texture_id_[i])
+                {
+                    render_state->DeleteTexture(&font->truetype_texture_id_[i]);
+                }
+                if (font->truetype_smoothed_texture_id_[i])
+                {
+                    render_state->DeleteTexture(&font->truetype_smoothed_texture_id_[i]);
+                }
+            }
+            if (font->patch_font_cache_.atlas_texture_id)
+                render_state->DeleteTexture(&font->patch_font_cache_.atlas_texture_id);
+            if (font->patch_font_cache_.atlas_smoothed_texture_id)
+                render_state->DeleteTexture(&font->patch_font_cache_.atlas_smoothed_texture_id);
+            if (font->patch_font_cache_.atlas_whitened_texture_id)
+                render_state->DeleteTexture(&font->patch_font_cache_.atlas_whitened_texture_id);
+            if (font->patch_font_cache_.atlas_whitened_smoothed_texture_id)
+                render_state->DeleteTexture(&font->patch_font_cache_.atlas_whitened_smoothed_texture_id);
+        }
+        ImageMap::iterator iter;
+        ImageMap::iterator iter_end;
+        for (iter = real_graphics.begin(), iter_end = real_graphics.end(); iter != iter_end; ++iter)
+        {
+            for (Image *im : iter->second)
+            {
+                if (im->source_.graphic.packfile_name)
+                    free(im->source_.graphic.packfile_name);
+                if (im->blurred_version_)
+                {
+                    for (CachedImage *cim : im->blurred_version_->cache_)
+                    {
+                        delete cim;
+                    }
+                    delete im->blurred_version_;
+                }
+                for (CachedImage *cim : im->cache_)
+                {
+                    delete cim;
+                }
+                delete im;
+            }
+        }
+        for (iter = real_textures.begin(), iter_end = real_textures.end(); iter != iter_end; ++iter)
+        {
+            for (Image *im : iter->second)
+            {
+                if (im->source_.graphic.packfile_name)
+                    free(im->source_.graphic.packfile_name);
+                if (im->blurred_version_)
+                {
+                    for (CachedImage *cim : im->blurred_version_->cache_)
+                    {
+                        delete cim;
+                    }
+                    delete im->blurred_version_;
+                }
+                for (CachedImage *cim : im->cache_)
+                {
+                    delete cim;
+                }
+                delete im;
+            }
+        }
+        for (iter = real_flats.begin(), iter_end = real_flats.end(); iter != iter_end; ++iter)
+        {
+            for (Image *im : iter->second)
+            {
+                if (im->source_.graphic.packfile_name)
+                    free(im->source_.graphic.packfile_name);
+                if (im->blurred_version_)
+                {
+                    for (CachedImage *cim : im->blurred_version_->cache_)
+                    {
+                        delete cim;
+                    }
+                    delete im->blurred_version_;
+                }
+                for (CachedImage *cim : im->cache_)
+                {
+                    delete cim;
+                }
+                delete im;
+            }
+        }
+        for (iter = real_sprites.begin(), iter_end = real_sprites.end(); iter != iter_end; ++iter)
+        {
+            for (Image *im : iter->second)
+            {
+                if (im->source_.graphic.packfile_name)
+                    free(im->source_.graphic.packfile_name);
+                if (im->blurred_version_)
+                {
+                    for (CachedImage *cim : im->blurred_version_->cache_)
+                    {
+                        delete cim;
+                    }
+                    delete im->blurred_version_;
+                }
+                for (CachedImage *cim : im->cache_)
+                {
+                    delete cim;
+                }
+                delete im;
+            }
+        }
+        ShutdownTextureSets();
+        StopWipe();
+        MenuShutdown();
+    }
 }
 
 //

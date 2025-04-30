@@ -113,6 +113,11 @@ class SoundEffectDefinitionContainer : public std::vector<SoundEffectDefinition 
             delete s;
             s = nullptr;
         }
+        for (uint8_t *sfx : dynamic_sound_effects_)
+        {
+            delete[] sfx;
+            sfx = nullptr;
+        }
     }
 
   public:
@@ -120,6 +125,9 @@ class SoundEffectDefinitionContainer : public std::vector<SoundEffectDefinition 
     SoundEffect           *GetEffect(const char *name, bool error = true);
     SoundEffectDefinition *Lookup(const char *name);
     SoundEffectDefinition *DEHLookup(uint32_t id);
+
+  private:
+    std::vector<uint8_t *> dynamic_sound_effects_;
 };
 
 // ----------EXTERNALISATIONS----------

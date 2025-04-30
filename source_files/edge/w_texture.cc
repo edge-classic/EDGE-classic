@@ -46,6 +46,11 @@ class TextureSet
 
     ~TextureSet()
     {
+        for (int i = 0; i < total_textures_; ++i)
+        {
+            if (textures_[i])
+                free(textures_[i]);
+        }
         delete[] textures_;
     }
 
@@ -54,6 +59,14 @@ class TextureSet
 };
 
 static std::vector<TextureSet *> texture_sets;
+
+void ShutdownTextureSets()
+{
+    for (TextureSet *set : texture_sets)
+    {
+        delete set;
+    }
+}
 
 //
 // InstallTextureLumps

@@ -61,10 +61,10 @@ Font::Font(FontDefinition *definition) : definition_(definition)
     EPI_CLEAR_MEMORY(truetype_kerning_scale_, float, 3);
     EPI_CLEAR_MEMORY(truetype_reference_yshift_, float, 3);
     EPI_CLEAR_MEMORY(truetype_reference_height_, float, 3);
+    EPI_CLEAR_MEMORY(truetype_texture_id_, unsigned int, 3);
+    EPI_CLEAR_MEMORY(truetype_smoothed_texture_id_, unsigned int, 3);
 }
 
-// TODO: Break each font type out into its own class; sort out what should be
-// allocated with malloc v. new, etc - Dasho
 Font::~Font()
 {
     if (individual_char_widths_)
@@ -86,16 +86,6 @@ Font::~Font()
             delete truetype_atlas_[i];
             truetype_atlas_[i] = nullptr;
         }
-    }
-    if (truetype_buffer_)
-    {
-        delete[] truetype_buffer_;
-        truetype_buffer_ = nullptr;
-    }
-    if (truetype_info_)
-    {
-        delete truetype_info_;
-        truetype_info_ = nullptr;
     }
 }
 
@@ -168,10 +158,14 @@ void Font::LoadPatches()
 
     if (missing)
     {
-        ImageData *tmp_img = ReadAsEpiBlock((Image *)(missing));
+        ImageData *tmp_img      = ReadAsEpiBlock((Image *)(missing));
+        uint8_t   *what_palette = nullptr;
+        if (missing->source_palette_ >= 0)
+            what_palette = LoadLumpIntoMemory(missing->source_palette_);
         if (tmp_img->depth_ == 1)
         {
-            ImageData *rgb_img = RGBFromPalettised(tmp_img, (const uint8_t *)&playpal_data[0], missing->opacity_);
+            ImageData *rgb_img = RGBFromPalettised(
+                tmp_img, what_palette ? what_palette : (const uint8_t *)&playpal_data[0], missing->opacity_);
             delete tmp_img;
             missing_imdata = rgb_img;
         }
@@ -181,6 +175,8 @@ void Font::LoadPatches()
         missing_imdata->offset_y_ = missing->offset_y_;
         missing_imdata->scale_x_  = missing->scale_x_;
         missing_imdata->scale_y_  = missing->scale_y_;
+        if (what_palette)
+            delete[] what_palette;
     }
 
     // First pass, add the images that are good
@@ -201,11 +197,15 @@ void Font::LoadPatches()
 
             if (images[idx])
             {
-                ImageData *tmp_img = ReadAsEpiBlock((Image *)(images[idx]));
+                ImageData *tmp_img      = ReadAsEpiBlock((Image *)(images[idx]));
+                uint8_t   *what_palette = nullptr;
+                if (images[idx]->source_palette_ >= 0)
+                    what_palette = LoadLumpIntoMemory(images[idx]->source_palette_);
                 if (tmp_img->depth_ == 1)
                 {
                     ImageData *rgb_img =
-                        RGBFromPalettised(tmp_img, (const uint8_t *)&playpal_data[0], images[idx]->opacity_);
+                        RGBFromPalettised(tmp_img, what_palette ? what_palette : (const uint8_t *)&playpal_data[0],
+                                          images[idx]->opacity_);
                     delete tmp_img;
                     tmp_img = rgb_img;
                 }
@@ -215,6 +215,8 @@ void Font::LoadPatches()
                 tmp_img->scale_y_  = images[idx]->scale_y_;
                 patch_data.try_emplace(kCP437UnicodeValues[(uint8_t)ch], tmp_img);
                 temp_imdata.push_back(tmp_img);
+                if (what_palette)
+                    delete[] what_palette;
             }
         }
     }
@@ -375,17 +377,11 @@ void Font::LoadFontTTF()
             FatalError("LoadFontTTF: No TTF file/lump name provided for font %s!", definition_->name_.c_str());
         }
 
-        for (size_t i = 0; i < hud_fonts.size(); i++)
-        {
-            if (epi::StringCaseCompareASCII(hud_fonts[i]->definition_->truetype_name_, definition_->truetype_name_) ==
-                0)
-            {
-                if (hud_fonts[i]->truetype_buffer_)
-                    truetype_buffer_ = hud_fonts[i]->truetype_buffer_;
-                if (hud_fonts[i]->truetype_info_)
-                    truetype_info_ = hud_fonts[i]->truetype_info_;
-            }
-        }
+        if (hud_fonts.ttf_buffers.count(definition_->truetype_name_))
+            truetype_buffer_ = hud_fonts.ttf_buffers[definition_->truetype_name_];
+
+        if (hud_fonts.ttf_infos.count(definition_->truetype_name_))
+            truetype_info_ = hud_fonts.ttf_infos[definition_->truetype_name_];
 
         if (!truetype_buffer_)
         {
@@ -402,6 +398,8 @@ void Font::LoadFontTTF()
 
             truetype_buffer_ = F->LoadIntoMemory();
 
+            hud_fonts.ttf_buffers.try_emplace(definition_->truetype_name_, truetype_buffer_);
+
             delete F;
         }
 
@@ -410,6 +408,7 @@ void Font::LoadFontTTF()
             truetype_info_ = new stbtt_fontinfo;
             if (!stbtt_InitFont(truetype_info_, truetype_buffer_, 0))
                 FatalError("LoadFontTTF: Could not initialize font %s.\n", definition_->name_.c_str());
+            hud_fonts.ttf_infos.try_emplace(definition_->truetype_name_, truetype_info_);
         }
 
         TrueTypeCharacter ref;

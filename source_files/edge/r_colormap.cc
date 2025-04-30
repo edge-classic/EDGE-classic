@@ -565,6 +565,7 @@ class ColormapShader : public AbstractShader
     virtual ~ColormapShader()
     {
         DeleteTex();
+        delete colormap_; // maybe, hopefully not a double free
     }
 
   private:

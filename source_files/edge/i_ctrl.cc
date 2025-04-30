@@ -778,6 +778,7 @@ void ShutdownControl(void)
 {
     if (SDL_WasInit(SDL_INIT_GAMECONTROLLER))
     {
+        SDL_GameControllerEventState(SDL_IGNORE);
         if (gamepad_info)
         {
             SDL_GameControllerClose(gamepad_info);

@@ -39,7 +39,7 @@ class ReverbDefinition final
 {
   public:
     ReverbDefinition();
-    ~ReverbDefinition() {};
+    ~ReverbDefinition(){};
 
     void                            Default(void);
     void                            CopyDetail(const ReverbDefinition &src);

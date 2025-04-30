@@ -44,11 +44,20 @@ struct DDFCommandList
 };
 
 // NOTE: requires an instantiated base struct
-#define DDF_FIELD(name, base, field, parser) {name, parser, ((char *)&base.field - (char *)&base), nullptr}
+#define DDF_FIELD(name, base, field, parser)                                                                           \
+    {                                                                                                                  \
+        name, parser, ((char *)&base.field - (char *)&base), nullptr                                                   \
+    }
 
-#define DDF_SUB_LIST(name, base, field, subcomms) {"*" name, nullptr, ((char *)&base.field - (char *)&base), subcomms}
+#define DDF_SUB_LIST(name, base, field, subcomms)                                                                      \
+    {                                                                                                                  \
+        "*" name, nullptr, ((char *)&base.field - (char *)&base), subcomms                                             \
+    }
 
-#define DDF_STATE(name, redir, base, field) {name, redir, ((char *)&base.field - (char *)&base)}
+#define DDF_STATE(name, redir, base, field)                                                                            \
+    {                                                                                                                  \
+        name, redir, ((char *)&base.field - (char *)&base)                                                             \
+    }
 
 //
 // This structure passes the information needed to DDFMainReadFile, so that

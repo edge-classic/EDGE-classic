@@ -35,8 +35,8 @@ struct RADScriptTrigger;
 
 struct RADScriptParameter
 {
-    RADScriptParameter() {};
-    virtual ~RADScriptParameter() {};
+    RADScriptParameter(){};
+    virtual ~RADScriptParameter(){};
 };
 
 struct ScriptWeaponParameter : public RADScriptParameter

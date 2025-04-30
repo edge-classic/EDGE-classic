@@ -47,6 +47,7 @@
 #include "r_draw.h"
 #include "r_gldefs.h"
 #include "r_modes.h"
+#include "r_shader.h"
 #include "r_units.h"
 
 EDGE_DEFINE_CONSOLE_VARIABLE(field_of_view, "90", kConsoleVariableFlagArchive)
@@ -204,6 +205,7 @@ void RendererShutdown(void)
 {
     FreeBSP();
     DeleteAllImages();
+    DeleteAllLightImages();
 }
 
 Subsector *PointInSubsector(float x, float y)

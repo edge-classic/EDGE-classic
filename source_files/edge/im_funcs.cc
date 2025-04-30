@@ -28,7 +28,7 @@
 ImageAtlas::ImageAtlas(int w, int h)
 {
     data_ = new ImageData(w, h, 4);
-    EPI_CLEAR_MEMORY(data_->pixels_, uint8_t, w *h * 4);
+    EPI_CLEAR_MEMORY(data_->pixels_, uint8_t, w * h * 4);
 }
 
 ImageAtlas::~ImageAtlas()

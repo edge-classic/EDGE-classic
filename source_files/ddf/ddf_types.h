@@ -50,7 +50,7 @@ class MobjStringReference
     MobjStringReference(const MobjStringReference &rhs) : name_(rhs.name_), def_(nullptr)
     {
     }
-    ~MobjStringReference() {};
+    ~MobjStringReference(){};
 
   private:
     std::string name_;

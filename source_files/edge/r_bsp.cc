@@ -126,29 +126,6 @@ ViewHeightZone view_height_zone;
 
 static Subsector *bsp_current_subsector;
 
-static void UpdateSectorInterpolation(Sector *sector)
-{
-    if (!time_stop_active && !paused && !erraticism_active && !menu_active && !rts_menu_active)
-    {
-        // Interpolate between current and last floor/ceiling position.
-        if (!AlmostEquals(sector->floor_height, sector->old_floor_height))
-            sector->interpolated_floor_height =
-                HMM_Lerp(sector->old_floor_height, fractional_tic, sector->floor_height);
-        else
-            sector->interpolated_floor_height = sector->floor_height;
-        if (!AlmostEquals(sector->ceiling_height, sector->old_ceiling_height))
-            sector->interpolated_ceiling_height =
-                HMM_Lerp(sector->old_ceiling_height, fractional_tic, sector->ceiling_height);
-        else
-            sector->interpolated_ceiling_height = sector->ceiling_height;
-    }
-    else
-    {
-        sector->interpolated_floor_height   = sector->floor_height;
-        sector->interpolated_ceiling_height = sector->ceiling_height;
-    }
-}
-
 static void BSPWalkMirror(DrawSubsector *dsub, Seg *seg, BAMAngle left, BAMAngle right, bool is_portal)
 {
     DrawMirror *mir = GetDrawMirror();
@@ -175,7 +152,7 @@ static void BSPWalkMirror(DrawSubsector *dsub, Seg *seg, BAMAngle left, BAMAngle
     clip_scope = left - right;
 
     // perform another BSP walk
-    BspWalkNode(root_node);
+    BSPWalkNode(root_node);
 
     bsp_current_subsector = save_sub;
 
@@ -352,9 +329,6 @@ static void BSPWalkSeg(DrawSubsector *dsub, Seg *seg)
 
     if (seg->linedef->blocked)
         OcclusionSet(angle_R, angle_L);
-
-    if (bsector)
-        UpdateSectorInterpolation(bsector);
 
     // --- handle sky (using the depth buffer) ---
     float             f_fh    = 0;
@@ -694,8 +668,6 @@ static void BSPWalkSubsector(int num)
     K->segs.clear();
     K->mirrors.clear();
 
-    UpdateSectorInterpolation(sector);
-
     // --- handle sky (using the depth buffer) ---
 
     if (!sector->height_sector)
@@ -901,12 +873,12 @@ static void BSPWalkSubsector(int num)
 }
 
 //
-// BspWalkNode
+// BSPWalkNode
 //
 // Walks all subsectors below a given node, traversing subtree
 // recursively, collecting information.  Just call with BSP root.
 //
-void BspWalkNode(unsigned int bspnum)
+void BSPWalkNode(unsigned int bspnum)
 {
     EDGE_ZoneScoped;
 
@@ -951,18 +923,18 @@ void BspWalkNode(unsigned int bspnum)
 
     // Recursively divide front space.
     if (BSPCheckBBox(node->bounding_boxes[side]))
-        BspWalkNode(node->children[side]);
+        BSPWalkNode(node->children[side]);
 
     // Recursively divide back space.
     if (BSPCheckBBox(node->bounding_boxes[side ^ 1]))
-        BspWalkNode(node->children[side ^ 1]);
+        BSPWalkNode(node->children[side ^ 1]);
 }
 
 #ifdef EDGE_SOKOL
 
 #ifdef BSP_MULTITHREAD
 
-static int32_t BspTraverseProc(void *thread_data)
+static int32_t BSPTraverseProc(void *thread_data)
 {
     EPI_UNUSED(thread_data);
 
@@ -978,7 +950,7 @@ static int32_t BspTraverseProc(void *thread_data)
             current_batch = nullptr;
 
             // walk the bsp tree
-            BspWalkNode(root_node);
+            BSPWalkNode(root_node);
 
             if (current_batch && current_batch->num_items_)
             {
@@ -1087,7 +1059,7 @@ void BSPStartThread()
     thread_atomic_int_store(&bsp_thread.traverse_finished_, 1);
     thread_signal_init(&bsp_thread.signal_start_);
     thread_queue_init(&bsp_thread.queue_, kMaxRenderBatch, (void **)bsp_thread.render_queue_, 0);
-    bsp_thread.thread_ = thread_create(BspTraverseProc, nullptr, THREAD_STACK_SIZE_DEFAULT);
+    bsp_thread.thread_ = thread_create(BSPTraverseProc, nullptr, THREAD_STACK_SIZE_DEFAULT);
 }
 void BSPStopThread()
 {
@@ -1177,7 +1149,7 @@ void BSPTraverse()
     EPI_CLEAR_MEMORY(render_batches, RenderBatch, kRenderBatchMax);
 
     // walk the bsp tree
-    BspWalkNode(root_node);
+    BSPWalkNode(root_node);
 }
 
 bool BSPTraversing()

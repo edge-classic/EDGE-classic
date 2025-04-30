@@ -129,8 +129,9 @@ static void DrawPortalPolygon(DrawMirror *mir)
 
 void RenderMirror(DrawMirror *mir)
 {
-    // mark the segment on the automap
-    mir->seg->linedef->flags |= kLineFlagMapped;
+    // mark the line on the automap
+    if (!(mir->seg->linedef->flags & kLineFlagMapped))
+        newly_seen_lines.emplace(mir->seg->linedef);
 
     FinishUnitBatch();
 

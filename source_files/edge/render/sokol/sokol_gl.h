@@ -1269,8 +1269,9 @@ static const uint8_t _sgl_fs_source_glsl300es[253] = {
 };
 #elif defined(SOKOL_METAL)
 /*
-    #include <metal_stdlib>
     #include <simd/simd.h>
+
+    #include <metal_stdlib>
 
     using namespace metal;
 
@@ -1487,8 +1488,9 @@ static const uint8_t _sgl_vs_bytecode_metal_macos[3381] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 /*
-    #include <metal_stdlib>
     #include <simd/simd.h>
+
+    #include <metal_stdlib>
 
     using namespace metal;
 
@@ -1673,8 +1675,9 @@ static const uint8_t _sgl_fs_bytecode_metal_macos[3033] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 /*
-    #include <metal_stdlib>
     #include <simd/simd.h>
+
+    #include <metal_stdlib>
 
     using namespace metal;
 
@@ -1897,8 +1900,9 @@ static const uint8_t _sgl_vs_bytecode_metal_ios[3493] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 /*
-    #include <metal_stdlib>
     #include <simd/simd.h>
+
+    #include <metal_stdlib>
 
     using namespace metal;
 
@@ -2082,8 +2086,9 @@ static const uint8_t _sgl_fs_bytecode_metal_ios[3017] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 /*
-    #include <metal_stdlib>
     #include <simd/simd.h>
+
+    #include <metal_stdlib>
 
     using namespace metal;
 
@@ -2162,8 +2167,9 @@ static const uint8_t _sgl_vs_source_metal_sim[756] = {
     0x65, 0x74, 0x75, 0x72, 0x6e, 0x20, 0x6f, 0x75, 0x74, 0x3b, 0x0a, 0x7d, 0x0a, 0x0a, 0x00,
 };
 /*
-    #include <metal_stdlib>
     #include <simd/simd.h>
+
+    #include <metal_stdlib>
 
     using namespace metal;
 

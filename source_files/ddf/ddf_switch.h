@@ -31,7 +31,7 @@ class SwitchDefinition
 {
   public:
     SwitchDefinition();
-    ~SwitchDefinition() {};
+    ~SwitchDefinition(){};
 
   public:
     void Default(void);

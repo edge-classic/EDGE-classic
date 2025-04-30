@@ -2,3 +2,4 @@
 DisableFormat: true
 
 # to format EDGE source files on windows run this in source_files: for /r %t in (*.cpp *.h *.cc *.hpp) do clang-format -i -style=file "%t"
+# for linux, something like this should work: find -iname *.cc -or -iname *.h -or -iname *.cpp -or -iname *.hpp | xargs clang-format -i -style=file

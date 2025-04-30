@@ -25,7 +25,7 @@ leak:Font::CharImage
 leak:HD_draw_image
 
 # need to investigate
-leak:BspTraverseProc
+leak:BSPTraverseProc
 
 ##################################################
 # Ignore

@@ -225,6 +225,8 @@ Colormap::Colormap() : name_()
 //
 Colormap::~Colormap()
 {
+    if (cache_.data)
+        delete[] cache_.data;
 }
 
 //
@@ -243,6 +245,8 @@ void Colormap::CopyDetail(const Colormap &src)
     gl_color_    = src.gl_color_;
     font_colour_ = src.font_colour_;
 
+    if (cache_.data)
+        delete[] cache_.data;
     cache_.data = nullptr;
     analysis_   = nullptr;
 }
@@ -263,6 +267,8 @@ void Colormap::Default()
     gl_color_    = kRGBANoValue;
     font_colour_ = kRGBANoValue;
 
+    if (cache_.data)
+        delete[] cache_.data;
     cache_.data = nullptr;
     analysis_   = nullptr;
 }

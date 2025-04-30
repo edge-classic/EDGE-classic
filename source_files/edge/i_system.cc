@@ -18,6 +18,10 @@
 
 #include "i_system.h"
 
+#ifdef _WIN32
+#include <combaseapi.h>
+#endif
+
 #include <chrono>
 #include <thread>
 
@@ -52,11 +56,6 @@ void SystemStartup(void)
     StartupGraphics(); // SDL requires this to be called first
     StartupControl();
     StartupAudio();
-}
-
-void CloseProgram(int exitnum)
-{
-    exit(exitnum);
 }
 
 void LogWarning(const char *warning, ...)
@@ -94,11 +93,16 @@ void LogWarning(const char *warning, ...)
 
     ShowMessageBox(message_buffer, "EDGE-Classic Error");
 
+#ifdef _WIN32
+    // To match CoInitializeEx in main
+    CoUninitialize();
+#endif
+
 #ifndef NDEBUG
     // trigger debugger
     abort();
 #else
-    CloseProgram(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 #endif
 }
 

@@ -90,6 +90,8 @@ struct DrawThing
 
     // translated coords
     float translated_z;
+    float floor_z;
+    float mir_scale;
 
     // colourmap/lighting
     RegionProperties *properties;
@@ -97,7 +99,8 @@ struct DrawThing
     // world offsets for GL
     float left_delta_x, left_delta_y;
     float right_delta_x, right_delta_y;
-    float original_top, original_bottom;
+    float hover_dz;
+    float sink_mult;
 
     // Rendering order
     DrawThing *render_left, *render_right, *render_previous, *render_next;

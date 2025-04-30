@@ -244,6 +244,71 @@ void ShutdownSound(void)
     ma_engine_uninit(&sound_engine);
 }
 
+// These are mostly the same as the existing vtable functions for an audio buffer in miniaudio, with the exception
+// of the "onSeek" callback disabling looping once we seek back to the initial frame at the start of a new loop.
+// This is the only way I could find to do the "looping Doom sounds loop once then quit" paradigm in a thread-safe way
+// and without altering miniaudio itself - Dasho
+static ma_result SFXOnRead(ma_data_source *pDataSource, void *pFramesOut, ma_uint64 frameCount, ma_uint64 *pFramesRead)
+{
+    ma_audio_buffer_ref *pAudioBufferRef = (ma_audio_buffer_ref *)pDataSource;
+    ma_uint64 framesRead = ma_audio_buffer_ref_read_pcm_frames(pAudioBufferRef, pFramesOut, frameCount, MA_FALSE);
+
+    if (pFramesRead != NULL)
+    {
+        *pFramesRead = framesRead;
+    }
+
+    if (framesRead < frameCount || framesRead == 0)
+    {
+        return MA_AT_END;
+    }
+
+    return MA_SUCCESS;
+}
+
+static ma_result SFXOnSeek(ma_data_source *pDataSource, ma_uint64 frameIndex)
+{
+    if (frameIndex == 0) // looped
+        ma_data_source_set_looping(pDataSource, MA_FALSE);
+    return ma_audio_buffer_ref_seek_to_pcm_frame((ma_audio_buffer_ref *)pDataSource, frameIndex);
+}
+
+static ma_result SFXOnGetFormat(ma_data_source *pDataSource, ma_format *pFormat, ma_uint32 *pChannels,
+                                ma_uint32 *pSampleRate, ma_channel *pChannelMap, size_t channelMapCap)
+{
+    ma_audio_buffer_ref *pAudioBufferRef = (ma_audio_buffer_ref *)pDataSource;
+
+    *pFormat     = pAudioBufferRef->format;
+    *pChannels   = pAudioBufferRef->channels;
+    *pSampleRate = pAudioBufferRef->sampleRate;
+    ma_channel_map_init_standard(ma_standard_channel_map_default, pChannelMap, channelMapCap,
+                                 pAudioBufferRef->channels);
+
+    return MA_SUCCESS;
+}
+
+static ma_result SFXOnGetCursor(ma_data_source *pDataSource, ma_uint64 *pCursor)
+{
+    ma_audio_buffer_ref *pAudioBufferRef = (ma_audio_buffer_ref *)pDataSource;
+
+    *pCursor = pAudioBufferRef->cursor;
+
+    return MA_SUCCESS;
+}
+
+static ma_result SFXOnGetLength(ma_data_source *pDataSource, ma_uint64 *pLength)
+{
+    ma_audio_buffer_ref *pAudioBufferRef = (ma_audio_buffer_ref *)pDataSource;
+
+    *pLength = pAudioBufferRef->sizeInFrames;
+
+    return MA_SUCCESS;
+}
+
+static const ma_data_source_vtable SFXVTable = {SFXOnRead, SFXOnSeek, SFXOnGetFormat, SFXOnGetCursor, SFXOnGetLength,
+                                                NULL, /* onSetLooping */
+                                                0};
+
 // Not-rejigged-yet stuff..
 SoundEffectDefinition *LookupEffectDef(const SoundEffect *s)
 {
@@ -275,15 +340,14 @@ static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category,
     chan->position_   = pos;
     chan->category_   = category;
 
-    chan->loop_ = false;
     chan->boss_ = (flags & kSoundEffectBoss) ? true : false;
-    chan->pos_  = 0;
 
     bool attenuate = (pos && category != kCategoryWeapon && category != kCategoryPlayer && category != kCategoryUi);
 
     chan->ref_config_            = ma_audio_buffer_config_init(ma_format_f32, 2, buf->length_, buf->data_, NULL);
     chan->ref_config_.sampleRate = buf->frequency_;
     ma_audio_buffer_init(&chan->ref_config_, &chan->ref_);
+    chan->ref_.ref.ds.vtable = &SFXVTable;
     ma_sound_init_from_data_source(&sound_engine, &chan->ref_,
                                    attenuate ? MA_SOUND_FLAG_NO_PITCH
                                              : (MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_NO_SPATIALIZATION),
@@ -301,15 +365,8 @@ static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category,
             ma_node_attach_output_bus(&chan->channel_sound_, 0, &vacuum_node, 0);
         else if (submerged_sound_effects)
             ma_node_attach_output_bus(&chan->channel_sound_, 0, &underwater_node, 0);
-        else if (sector_reverb)
+        else if (sector_reverb || dynamic_reverb.d_)
             ma_node_attach_output_bus(&chan->channel_sound_, 0, &reverb_node, 0);
-        else if (dynamic_reverb.d_)
-        {
-            if (outdoor_reverb)
-                ma_node_attach_output_bus(&chan->channel_sound_, 0, &reverb_delay_node, 0);
-            else
-                ma_node_attach_output_bus(&chan->channel_sound_, 0, &reverb_node, 0);
-        }
         else
             ma_node_attach_output_bus(&chan->channel_sound_, 0, &sfx_node, 0);
     }
@@ -324,15 +381,8 @@ static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category,
                 ma_node_attach_output_bus(&chan->channel_sound_, 0, &vacuum_node, 0);
             else if (submerged_sound_effects)
                 ma_node_attach_output_bus(&chan->channel_sound_, 0, &underwater_node, 0);
-            else if (sector_reverb)
+            else if (sector_reverb || dynamic_reverb.d_)
                 ma_node_attach_output_bus(&chan->channel_sound_, 0, &reverb_node, 0);
-            else if (dynamic_reverb.d_)
-            {
-                if (outdoor_reverb)
-                    ma_node_attach_output_bus(&chan->channel_sound_, 0, &reverb_delay_node, 0);
-                else
-                    ma_node_attach_output_bus(&chan->channel_sound_, 0, &reverb_node, 0);
-            }
             else
                 ma_node_attach_output_bus(&chan->channel_sound_, 0, &sfx_node, 0);
         }
@@ -343,7 +393,7 @@ static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category,
         ma_sound_set_volume(&chan->channel_sound_, 1.0f);
     else
         ma_sound_set_volume(&chan->channel_sound_, def->volume_);
-    ma_sound_set_looping(&chan->channel_sound_, MA_FALSE);
+    ma_sound_set_looping(&chan->channel_sound_, def->looping_ ? MA_TRUE : MA_FALSE);
     ma_sound_start(&chan->channel_sound_);
 }
 
@@ -359,9 +409,7 @@ static void DoStartFX(const SoundEffectDefinition *def, int category, const Posi
 
         if (def->looping_ && def == chan->definition_)
         {
-            chan->loop_ = true;
             ma_sound_set_looping(&chan->channel_sound_, MA_TRUE);
-            chan->pos_ = 0;
             return;
         }
         else if (flags & kSoundEffectSingle)

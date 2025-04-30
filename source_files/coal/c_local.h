@@ -197,11 +197,11 @@ enum OperationType
 
 struct Function
 {
-    const char *name;
+    char *name = nullptr;
 
     // where it was defined (last)
-    const char *source_file;
-    int         source_line;
+    char *source_file = nullptr;
+    int   source_line;
 
     int return_size;
 
@@ -234,7 +234,7 @@ constexpr uint8_t kDefaultOffset = 4;
 
 struct RegisteredNativeFunction
 {
-    const char    *name;
+    char          *name = nullptr;
     NativeFunction func;
 };
 
@@ -264,8 +264,8 @@ struct Type
 
 struct Definition
 {
-    Type       *type;
-    const char *name;
+    Type *type;
+    char *name = nullptr;
 
     // offset in global data block (if > 0)
     // when < 0, it is offset into local stack frame
@@ -281,8 +281,7 @@ struct Definition
 enum DefinitionFlag
 {
     DF_Constant  = (1 << 1),
-    DF_Temporary = (1 << 2),
-    DF_FreeTemp  = (1 << 3), // temporary can be re-used
+    DF_Temporary = (1 << 2)
 };
 
 class Scope

@@ -145,7 +145,10 @@ class PackFile
     ~PackFile()
     {
         if (archive_ != nullptr)
-            delete archive_;
+        {
+            mz_zip_end(archive_);
+            free(archive_);
+        }
     }
 
     size_t AddDirectory(const std::string &name)
@@ -229,6 +232,13 @@ class PackFile
     epi::File *OpenFolderEntryByName(const std::string &name);
     epi::File *OpenZipEntryByName(const std::string &name);
 };
+
+void ClosePackFile(DataFile *df)
+{
+    EPI_ASSERT(df->pack_);
+    delete df->pack_;
+    df->pack_ = nullptr;
+}
 
 int FindStemInPack(PackFile *pack, epi::StringHash name_hash)
 {
@@ -393,10 +403,9 @@ static PackFile *ProcessZip(DataFile *df)
 {
     PackFile *pack = new PackFile(df, false);
 
-    pack->archive_ = new mz_zip_archive;
+    pack->archive_ = (mz_zip_archive *)malloc(sizeof(mz_zip_archive));
 
-    // this is necessary (but stupid)
-    EPI_CLEAR_MEMORY(pack->archive_, mz_zip_archive, 1);
+    mz_zip_zero_struct(pack->archive_);
 
     if (!mz_zip_reader_init_file(pack->archive_, df->name_.c_str(), 0))
     {

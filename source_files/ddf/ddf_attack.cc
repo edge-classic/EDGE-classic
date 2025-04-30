@@ -126,6 +126,8 @@ static MapObjectDefinition *CreateAtkMobj(const char *atk_name)
     mobj->name_   = mobj_name; // copies it
     mobj->number_ = -7777;
 
+    mobjtypes.dynamic_atk_mobjtypes.push_back(mobj);
+
     return mobj;
 }
 

@@ -164,6 +164,13 @@ class WadFile
     bool HasLevel(const char *name) const;
 };
 
+void CloseWADFile(DataFile *df)
+{
+    EPI_ASSERT(df->wad_);
+    delete df->wad_;
+    df->wad_ = nullptr;
+}
+
 enum LumpKind
 {
     kLumpNormal   = 0,  // fallback value

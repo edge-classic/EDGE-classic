@@ -41,8 +41,7 @@
 bool no_sound = false;
 
 int  sound_device_frequency;
-bool outdoor_reverb = false;
-bool sector_reverb  = false;
+bool sector_reverb = false;
 
 std::set<std::string>  available_soundfonts;
 extern std::string     game_directory;
@@ -58,7 +57,6 @@ ma_lpf_node vacuum_node;
 static ma_lpf_node underwater_lpf_node;
 ma_delay_node      underwater_node;
 // Dynamic reverb
-ma_delay_node    reverb_delay_node;
 ma_freeverb_node reverb_node;
 
 EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(dynamic_reverb, "0", kConsoleVariableFlagArchive, 0, 2)
@@ -111,13 +109,9 @@ void StartupAudio(void)
         ma_node_attach_output_bus(&vacuum_node, 0, &sfx_node, 0);
 
         // Dynamic Reverb
-        delay_node_config = ma_delay_node_config_init(channels, sound_device_frequency,
-                                                      (ma_uint32)(sound_device_frequency * 0.25f), 0.20f);
-        ma_delay_node_init(ma_engine_get_node_graph(&sound_engine), &delay_node_config, NULL, &reverb_delay_node);
         ma_freeverb_node_config reverb_node_config = ma_freeverb_node_config_init(2, sound_device_frequency);
         ma_freeverb_node_init(ma_engine_get_node_graph(&sound_engine), &reverb_node_config, NULL, &reverb_node);
         ma_node_attach_output_bus(&reverb_node, 0, &sfx_node, 0);
-        ma_node_attach_output_bus(&reverb_delay_node, 0, &reverb_node, 0);
     }
 
     // display some useful stuff

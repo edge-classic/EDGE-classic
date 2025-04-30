@@ -6,7 +6,7 @@
 #define MA_USE_STDINT
 #ifdef _WIN32
 // If using Sokol or Mimalloc we already require
-// Windows 7+ so default to WASAPI in that case
+// Windows 7+ so build only for WASAPI in that case
 #if defined (EDGE_SOKOL) || defined (EDGE_MIMALLOC)
 #define MA_NO_WINMM
 #define MA_NO_DSOUND

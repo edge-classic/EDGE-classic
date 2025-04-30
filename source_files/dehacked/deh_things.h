@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "deh_mobj.h"
 
 namespace dehacked
@@ -39,7 +41,7 @@ int                          GetMobjMBF21Flags(int mt_num);
 bool IsSpawnable(int mt_num);
 
 void        SetPlayerHealth(int new_value);
-const char *AddScratchAttack(int damage, const char *sfx);
+const char *AddScratchAttack(int damage, const std::string &sfx);
 
 void ConvertTHING();
 void ConvertATK();

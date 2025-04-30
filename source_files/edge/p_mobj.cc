@@ -1703,9 +1703,6 @@ static void DeleteMobj(MapObject *mo)
 
     StopSoundEffect(mo);
 
-    if (mo->dynamic_light_.shader)
-        delete mo->dynamic_light_.shader;
-
     mo->next_     = (MapObject *)-1;
     mo->previous_ = (MapObject *)-1;
 

@@ -19,6 +19,9 @@
 #ifdef EDGE_MIMALLOC
 #include <mimalloc.h>
 #endif
+#ifdef _WIN32
+#include <combaseapi.h>
+#endif
 
 #include "dm_defs.h"
 #include "e_main.h"
@@ -35,20 +38,27 @@ extern "C"
 {
     int main(int argc, char *argv[])
     {
+#ifdef _WIN32
+        // We must set this prior to SDL_Init to prevent conflicts
+        // with miniaudio startup when using WASAPI on Windows
+        CoInitializeEx(NULL, COINIT_MULTITHREADED);
+#endif
 #ifdef EDGE_MIMALLOC
         if (SDL_SetMemoryFunctions(mi_malloc, mi_calloc, mi_realloc, mi_free) != 0)
             FatalError("Couldn't init SDL memory functions!!\n%s\n", SDL_GetError());
 #endif
-
         if (SDL_Init(0) < 0)
             FatalError("Couldn't init SDL!!\n%s\n", SDL_GetError());
 
         executable_path = SDL_GetBasePath();
 
-        // Run EDGE. it never returns
         EdgeMain(argc, (const char **)argv);
-
-        return 0;
+        EdgeShutdown();
+        SystemShutdown();
+#ifdef _WIN32
+        CoUninitialize();
+#endif
+        return EXIT_SUCCESS;
     }
 
 } // extern "C"

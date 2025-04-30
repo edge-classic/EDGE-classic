@@ -30,6 +30,7 @@
 #include "dm_defs.h"
 #include "epi_file.h"
 
+class DataFile;
 struct WadTextureResource
 {
     // lump numbers, or -1 if nonexistent
@@ -106,6 +107,8 @@ void ReadUMAPINFOLumps(void);
 #endif
 
 int GetKindForLump(int lump);
+
+void CloseWADFile(DataFile *df);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

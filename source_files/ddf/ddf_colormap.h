@@ -64,7 +64,7 @@ class Colormap
 
     RGBAColor font_colour_; // (computed only, not in DDF)
 
-    ColormapCache cache_;
+    ColormapCache cache_ = {nullptr, 0};
 
     void *analysis_;
 

@@ -54,5 +54,7 @@ int CheckPackForIWADs(DataFile *df);
 // Populate pack directory and process appropriate files (COAL, DDF, etc)
 void ProcessAllInPack(DataFile *df, size_t file_index);
 
+void ClosePackFile(DataFile *df);
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

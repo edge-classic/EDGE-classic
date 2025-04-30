@@ -731,9 +731,11 @@ static void ScriptParseStartMap(std::vector<const char *> &pars)
 
     // -AJA- 1999/08/02: New scripts replace old ones.
     // Dasho 2023/12/07: Commented out in lieu of the new
-    // #CLEAR_MAP directive when the modders actually wants this
+    // #CLEAR_MAP directive when the modders actually want this
     // ClearPreviousScripts(pars[1]);
 
+    if (this_map)
+        epi::CStringFree(this_map);
     this_map = epi::CStringDuplicate(pars[1]);
     for (size_t i = 0; i < strlen(this_map); i++)
     {
@@ -957,9 +959,11 @@ static void ScriptParseEndMap(std::vector<const char *> &pars)
     if (current_script_level == 0)
         ScriptError("%s found, but without any START_MAP !\n", pars[0]);
 
-    this_map = nullptr;
-
-    current_script_level--;
+    if (--current_script_level == 0)
+    {
+        epi::CStringFree(this_map);
+        this_map = nullptr;
+    }
 }
 
 static void ScriptParseName(std::vector<const char *> &pars)

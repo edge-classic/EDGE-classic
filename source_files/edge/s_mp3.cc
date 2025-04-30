@@ -163,7 +163,6 @@ void MP3Player::Stop()
     if (status_ != kPlaying && status_ != kPaused)
         return;
 
-    ma_sound_set_volume(&mp3_stream, 0);
     ma_sound_stop(&mp3_stream);
 
     status_ = kStopped;

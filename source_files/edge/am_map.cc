@@ -206,7 +206,7 @@ static std::vector<AutomapLine *> map_line_pointers[4];
 static AutomapLine *GetMapLine()
 {
     if (automap_line_position == automap_lines.size())
-        automap_lines.push_back(new (malloc(sizeof(AutomapLine))) AutomapLine());
+        automap_lines.push_back(new AutomapLine());
 
     return automap_lines[automap_line_position++];
 }

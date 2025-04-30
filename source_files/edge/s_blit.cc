@@ -107,7 +107,6 @@ void KillSoundChannel(int k)
     {
         chan->data_  = nullptr;
         chan->state_ = kChannelEmpty;
-        ma_sound_set_volume(&chan->channel_sound_, 0);
         ma_sound_stop(&chan->channel_sound_);
         ma_sound_uninit(&chan->channel_sound_);
         ma_audio_buffer_uninit(&chan->ref_);

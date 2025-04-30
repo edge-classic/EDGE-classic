@@ -165,7 +165,6 @@ void FLACPlayer::Stop()
     if (status_ != kPlaying && status_ != kPaused)
         return;
 
-    ma_sound_set_volume(&flac_stream, 0);
     ma_sound_stop(&flac_stream);
 
     status_ = kStopped;

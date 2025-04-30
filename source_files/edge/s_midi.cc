@@ -853,7 +853,6 @@ class MIDIPlayer : public AbstractMusicPlayer
         if (status_ != kPlaying && status_ != kPaused)
             return;
 
-        ma_sound_set_volume(&midi_stream, 0);
         ma_sound_stop(&midi_stream);
 
         status_ = kStopped;
@@ -865,7 +864,6 @@ class MIDIPlayer : public AbstractMusicPlayer
             return;
 
         ma_sound_stop(&midi_stream);
-        fluid_synth_all_voices_pause(edge_fluid);
 
         status_ = kPaused;
     }

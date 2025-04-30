@@ -17,15 +17,9 @@
 # ignore anything cached images, though should be investigated
 leak:ImageCacheOGL
 
-# should be once per font, needs investigation
+# cached per font, lifetime should be process
 leak:Font::LoadFontTTF
 leak:Font::LoadPatches
-leak:Font::CharImage
-# assuming cached, should be investigated
-leak:HD_draw_image
-
-# need to investigate
-leak:BSPTraverseProc
 
 ##################################################
 # Ignore
@@ -33,3 +27,6 @@ leak:BSPTraverseProc
 
 # anything that leaks in E_Startup, assuming lifetime is process
 leak:EdgeStartup
+
+# Unix: Can't do anything about SDL internal leaks
+leak:SDL.c

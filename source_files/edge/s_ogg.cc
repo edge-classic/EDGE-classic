@@ -668,7 +668,6 @@ void OGGPlayer::Stop()
     if (status_ != kPlaying && status_ != kPaused)
         return;
 
-    ma_sound_set_volume(&ogg_stream, 0);
     ma_sound_stop(&ogg_stream);
 
     status_ = kStopped;

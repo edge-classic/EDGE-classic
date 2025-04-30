@@ -558,7 +558,6 @@ void M4PPlayer::Stop()
     if (status_ != kPlaying && status_ != kPaused)
         return;
 
-    ma_sound_set_volume(&m4p_stream, 0);
     ma_sound_stop(&m4p_stream);
 
     status_ = kStopped;

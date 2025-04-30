@@ -84,7 +84,7 @@ static bool MovieSetupAudioStream(int rate)
     ma_sound_set_looping(&movie_sound_buffer, MA_TRUE);
     ma_sound_start(&movie_sound_buffer);
     PauseMusic();
-    ma_sound_set_volume(&movie_sound_buffer, music_volume.f_);
+    ma_sound_group_set_volume(&music_node, music_volume.f_);
     return true;
 }
 

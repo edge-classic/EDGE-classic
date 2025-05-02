@@ -40,6 +40,7 @@ MenuGameplay="Gameplay Options";
 MenuPerformance="Performance Options";
 MenuAccessibility="Accessibility Options";
 MenuBinding="Key Bindings";
+MenuBrowseHome="Browse Home Directory";
 
 MenuLanguage="Language";
 MenuMessages="Messages";

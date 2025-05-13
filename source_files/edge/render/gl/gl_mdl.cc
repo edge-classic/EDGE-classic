@@ -168,13 +168,6 @@ struct MDLPoint
     int vert_idx;
 };
 
-struct MDLTriangle
-{
-    // index to the first point (within MDLModel::points).
-    // All points for the strip are contiguous in that array.
-    int first;
-};
-
 class MDLModel
 {
   public:
@@ -184,9 +177,9 @@ class MDLModel
     int skin_width_;
     int skin_height_;
 
-    MDLFrame    *frames_;
-    MDLPoint    *points_;
-    MDLTriangle *triangles_;
+    MDLFrame *frames_;
+    MDLPoint *points_;
+    int      *triangle_indices_;
 
     int vertices_per_frame_;
 
@@ -197,16 +190,16 @@ class MDLModel
         : total_frames_(nframes), total_points_(npoints), total_triangles_(ntris), skin_width_(swidth),
           skin_height_(sheight), vertices_per_frame_(0)
     {
-        frames_    = new MDLFrame[total_frames_];
-        points_    = new MDLPoint[total_points_];
-        triangles_ = new MDLTriangle[total_triangles_];
+        frames_           = new MDLFrame[total_frames_];
+        points_           = new MDLPoint[total_points_];
+        triangle_indices_ = new int[total_triangles_];
     }
 
     ~MDLModel()
     {
         delete[] frames_;
         delete[] points_;
-        delete[] triangles_;
+        delete[] triangle_indices_;
     }
 };
 
@@ -341,15 +334,15 @@ MDLModel *MDLLoad(epi::File *f, float &radius)
     LogDebug("  vertices_per_frame_:%d\n", md->vertices_per_frame_);
 
     // convert glcmds into tris and points
-    MDLTriangle *tri   = md->triangles_;
-    MDLPoint    *point = md->points_;
+    int      *tri   = md->triangle_indices_;
+    MDLPoint *point = md->points_;
 
     for (int i = 0; i < num_tris; i++)
     {
-        EPI_ASSERT(tri < md->triangles_ + md->total_triangles_);
+        EPI_ASSERT(tri < md->triangle_indices_ + md->total_triangles_);
         EPI_ASSERT(point < md->points_ + md->total_points_);
 
-        tri->first = point - md->points_;
+        *tri = point - md->points_;
 
         tri++;
 
@@ -369,7 +362,7 @@ MDLModel *MDLLoad(epi::File *f, float &radius)
         }
     }
 
-    EPI_ASSERT(tri == md->triangles_ + md->total_triangles_);
+    EPI_ASSERT(tri == md->triangle_indices_ + md->total_triangles_);
     EPI_ASSERT(point == md->points_ + md->total_points_);
 
     /* PARSE FRAMES */
@@ -475,9 +468,9 @@ class MDLCoordinateData
 
     MDLModel *model_;
 
-    const MDLFrame    *frame1_;
-    const MDLFrame    *frame2_;
-    const MDLTriangle *strip_;
+    const MDLFrame *frame1_;
+    const MDLFrame *frame2_;
+    const int      *triangle_indices_;
 
     float lerp_;
     float x_, y_, z_;
@@ -618,14 +611,14 @@ static inline void ModelCoordFunc(MDLCoordinateData *data, int v_idx)
 {
     const MDLModel *md = data->model_;
 
-    const MDLFrame    *frame1 = data->frame1_;
-    const MDLFrame    *frame2 = data->frame2_;
-    const MDLTriangle *strip  = data->strip_;
+    const MDLFrame *frame1 = data->frame1_;
+    const MDLFrame *frame2 = data->frame2_;
+    const int      *tri    = data->triangle_indices_;
 
-    EPI_ASSERT(strip->first + v_idx >= 0);
-    EPI_ASSERT(strip->first + v_idx < md->total_points_);
+    EPI_ASSERT(*tri + v_idx >= 0);
+    EPI_ASSERT(*tri + v_idx < md->total_points_);
 
-    const MDLPoint *point = &md->points_[strip->first + v_idx];
+    const MDLPoint *point = &md->points_[*tri + v_idx];
 
     const MDLVertex *vert1 = &frame1->vertices[point->vert_idx];
     const MDLVertex *vert2 = &frame2->vertices[point->vert_idx];
@@ -986,7 +979,7 @@ void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float 
 
         for (int i = 0; i < md->total_triangles_; i++)
         {
-            data.strip_ = &md->triangles_[i];
+            data.triangle_indices_ = &md->triangle_indices_[i];
 
             for (int v_idx = 0; v_idx < 3; v_idx++)
             {
@@ -1041,7 +1034,7 @@ void MDLRenderModel2D(MDLModel *md, int frame, float x, float y, float xscale, f
 
     for (int i = 0; i < md->total_triangles_; i++)
     {
-        const MDLTriangle *strip = &md->triangles_[i];
+        const int *tri = &md->triangle_indices_[i];
 
         glBegin(GL_TRIANGLES);
 
@@ -1049,10 +1042,10 @@ void MDLRenderModel2D(MDLModel *md, int frame, float x, float y, float xscale, f
         {
             const MDLFrame *frame_ptr = &md->frames_[frame];
 
-            EPI_ASSERT(strip->first + v_idx >= 0);
-            EPI_ASSERT(strip->first + v_idx < md->total_points_);
+            EPI_ASSERT(*tri + v_idx >= 0);
+            EPI_ASSERT(*tri + v_idx < md->total_points_);
 
-            const MDLPoint  *point = &md->points_[strip->first + v_idx];
+            const MDLPoint  *point = &md->points_[*tri + v_idx];
             const MDLVertex *vert  = &frame_ptr->vertices[point->vert_idx];
             const HMM_Vec2   texc  = {{point->skin_s, point->skin_t}};
 

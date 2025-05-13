@@ -890,7 +890,7 @@ static void ShadeNormals(AbstractShader *shader, MD2CoordinateData *data, bool s
     }
 }
 
-static void DLIT_Model(MapObject *mo, void *dataptr)
+static void MD2DynamicLightCallback(MapObject *mo, void *dataptr)
 {
     MD2CoordinateData *data = (MD2CoordinateData *)dataptr;
 
@@ -1128,11 +1128,11 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
         {
             float r = mo->radius_;
 
-            DynamicLightIterator(mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r, mo->z + mo->height_, DLIT_Model,
-                                 &data);
+            DynamicLightIterator(mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r, mo->z + mo->height_,
+                                 MD2DynamicLightCallback, &data);
 
             SectorGlowIterator(mo->subsector_->sector, mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r,
-                               mo->z + mo->height_, DLIT_Model, &data);
+                               mo->z + mo->height_, MD2DynamicLightCallback, &data);
         }
     }
 

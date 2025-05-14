@@ -204,8 +204,7 @@ void RendererStartup(void)
 void RendererShutdown(void)
 {
     FreeBSP();
-    DeleteAllImages();
-    DeleteAllLightImages();
+    DeleteAllImages(true);
 }
 
 Subsector *PointInSubsector(float x, float y)

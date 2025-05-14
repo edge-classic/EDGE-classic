@@ -241,10 +241,31 @@ FontDefinition::FontDefinition() : name_()
     Default();
 }
 
+FontDefinition::~FontDefinition()
+{
+    while (patches_)
+    {
+        FontPatch *patch = patches_;
+        patches_         = patches_->next;
+        delete patch;
+    }
+}
+
 void FontDefinition::CopyDetail(const FontDefinition &src)
 {
-    type_                      = src.type_;
-    patches_                   = src.patches_; // FIXME: copy list
+    type_    = src.type_;
+    patches_ = nullptr;
+    if (src.patches_)
+    {
+        FontPatch *src_pat = src.patches_;
+        while (src_pat)
+        {
+            patches_       = new FontPatch(*src_pat);
+            src_pat        = src_pat->next;
+            patches_->next = nullptr;
+            patches_       = patches_->next;
+        }
+    }
     image_name_                = src.image_name_;
     missing_patch_             = src.missing_patch_;
     spacing_                   = src.spacing_;
@@ -259,8 +280,13 @@ void FontDefinition::CopyDetail(const FontDefinition &src)
 //
 void FontDefinition::Default()
 {
-    type_               = kFontTypePatch;
-    patches_            = nullptr;
+    type_ = kFontTypePatch;
+    while (patches_)
+    {
+        FontPatch *patch = patches_;
+        patches_         = patches_->next;
+        delete patch;
+    }
     default_size_       = 0.0;
     spacing_            = 0.0;
     truetype_smoothing_ = kTrueTypeSmoothOnDemand;

@@ -92,6 +92,7 @@
 #ifdef EDGE_CLASSIC
 #include "vm_coal.h"
 #endif
+#include "w_epk.h"
 #include "w_files.h"
 #include "w_model.h"
 #include "w_sprite.h"
@@ -1235,7 +1236,15 @@ static void InitializeDirectories(void)
     // Get the App Directory from parameter.
 
     // Note: This might need adjusting for Apple
-    std::string s = SDL_GetBasePath();
+    char *path = SDL_GetBasePath();
+
+    if (!path)
+        FatalError("Failed to get base path!\n");
+
+    std::string s = path;
+
+    SDL_free(path);
+    path = NULL;
 
     game_directory = s;
     s              = ArgumentValue("game");
@@ -1277,13 +1286,20 @@ static void InitializeDirectories(void)
             home_directory = s;
     }
 
+    if (home_directory.empty())
+    {
 #ifdef _WIN32
-    if (home_directory.empty())
-        home_directory = SDL_GetPrefPath(nullptr, application_name.c_str());
+        path = SDL_GetPrefPath(nullptr, application_name.c_str());
 #else
-    if (home_directory.empty())
-        home_directory = SDL_GetPrefPath(team_name.c_str(), application_name.c_str());
+        path = SDL_GetPrefPath(team_name.c_str(), application_name.c_str());
 #endif
+        if (!path)
+            FatalError("Could not determine home directory!\n");
+
+        home_directory = path;
+        SDL_free(path);
+        path = NULL;
+    }
 
     if (!epi::IsDirectory(home_directory))
     {
@@ -1364,12 +1380,14 @@ static int CheckPackForGameFiles(std::string_view check_pack, FileKind check_kin
     PopulatePackOnly(check_pack_df);
     if (FindStemInPack(check_pack_df->pack_, epi::StringHash::Create("EDGEGAME")))
     {
+        ClosePackFile(check_pack_df);
         delete check_pack_df;
         return 0; // Custom game index value in game_checker vector
     }
     else
     {
         int check_base = CheckPackForIWADs(check_pack_df);
+        ClosePackFile(check_pack_df);
         delete check_pack_df;
         return check_base;
     }
@@ -2229,6 +2247,20 @@ void EdgeShutdown(void)
     AudioShutdown();
     RendererShutdown();
     NetworkShutdown();
+    for (DataFile *df : data_files)
+    {
+        if (df->file_)
+            delete df->file_;
+        if (df->wad_)
+            CloseWADFile(df);
+        if (df->pack_)
+            ClosePackFile(df);
+        delete df;
+    }
+#ifdef EDGE_CLASSIC
+    if (GetCOALDetected())
+        ShutdownCOAL();
+#endif
 }
 
 #ifdef EDGE_MEMORY_CHECK
@@ -2236,7 +2268,7 @@ static void MemoryCheckOutput(const char *msg, void *arg)
 {
     EPI_UNUSED(arg);
 
-    int    i   = 0;
+    size_t i   = 0;
     size_t len = strlen(msg);
     for (i = 0; i < len; i++)
     {

@@ -811,7 +811,7 @@ static void RendererClipSpriteVertically(DrawSubsector *dsub, DrawThing *dthing)
     // find the thing's nominal region.  This section is equivalent to
     // the PointInVertRegion() code (but using drawfloors).
 
-    float z = (dthing->top + dthing->bottom) / 2.0f;
+    float z = dthing->map_z + (dthing->map_object->height_ * 0.5f);
 
     std::vector<DrawFloor *>::iterator DFI;
 
@@ -911,7 +911,7 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
     float   sink_mult = 0;
     float   bob_mult  = 0;
     Sector *cur_sec   = mo->subsector_->sector;
-    if (!cur_sec->extrafloor_used && !cur_sec->height_sector && abs(mz - cur_sec->floor_height) < 1)
+    if (!cur_sec->extrafloor_used && !cur_sec->height_sector && AlmostEquals(mz, cur_sec->floor_height))
     {
         if (!(mo->flags_ & kMapObjectFlagNoGravity))
         {
@@ -932,98 +932,17 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
     bool         spr_flip = false;
     const Image *image    = nullptr;
 
-    float gzt = 0, gzb = 0;
-    float pos1 = 0, pos2 = 0;
-
     if (!is_model)
     {
         image = RendererGetThingSprite2(mo, mx, my, &spr_flip);
 
         if (!image)
             return;
-
-        // calculate edges of the shape
-        float sprite_width  = image->ScaledWidthActual();
-        float sprite_height = image->ScaledHeightActual();
-        float side_offset   = image->ScaledOffsetX();
-        float top_offset    = image->ScaledOffsetY();
-
-        if (spr_flip)
-            side_offset = -side_offset;
-
-        float xscale = mo->scale_ * mo->aspect_;
-
-        pos1 = (sprite_width / -2.0f - side_offset) * xscale;
-        pos2 = (sprite_width / +2.0f - side_offset) * xscale;
-
-        switch (mo->info_->yalign_)
-        {
-        case SpriteYAlignmentTopDown:
-            gzt = mz + mo->height_ + top_offset * mo->scale_;
-            gzb = gzt - sprite_height * mo->scale_;
-            break;
-
-        case SpriteYAlignmentMiddle: {
-            float _mz = mz + mo->height_ * 0.5 + top_offset * mo->scale_;
-            float dz  = sprite_height * 0.5 * mo->scale_;
-
-            gzt = _mz + dz;
-            gzb = _mz - dz;
-            break;
-        }
-
-        case SpriteYAlignmentBottomUp:
-        default:
-            gzb = mz + top_offset * mo->scale_;
-            gzt = gzb + sprite_height * mo->scale_;
-            break;
-        }
-
-        if (mo->hyper_flags_ & kHyperFlagHover || (sink_mult > 0 || bob_mult > 0))
-        {
-            gzt += hover_dz;
-            gzb += hover_dz;
-        }
-    } // if (! is_model)
-
-    if (is_model || (mo->flags_ & kMapObjectFlagFuzzy) ||
-        ((mo->hyper_flags_ & kHyperFlagHover) && AlmostEquals(sink_mult, 0.0f)))
-    {
-        /* nothing, don't adjust clipping */
-    }
-    // Lobo: new FLOOR_CLIP flag
-    else if (mo->hyper_flags_ & kHyperFlagFloorClip || sink_mult > 0)
-    {
-        /* nothing, don't adjust clipping */
-    }
-    else if (sprite_kludge == 0 && gzb < fz)
-    {
-        // explosion ?
-        if (mo->info_->flags_ & kMapObjectFlagMissile)
-        {
-            /* nothing, don't adjust clipping */
-        }
-        else
-        {
-            // Dasho - The sprite boundaries are clipped by the floor; this checks
-            // the actual visible portion of the image to see if we need to do any adjustments.
-            float diff = (float)image->real_bottom_ * image->scale_y_ * mo->scale_;
-            if (gzb + diff < fz)
-            {
-                gzt += fz - (gzb + diff);
-                gzb = fz - diff;
-            }
-        }
     }
 
-    if (!is_model)
-    {
-        if (gzb >= gzt)
-            return;
-
-        bsp_mirror_set.Height(gzb);
-        bsp_mirror_set.Height(gzt);
-    }
+    // Dasho: feels like we can figure this out up above
+    if (!(mo->hyper_flags_ & kHyperFlagHover || (sink_mult > 0 || bob_mult > 0)))
+        hover_dz = 0;
 
     // create new draw thing
 
@@ -1031,7 +950,6 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
     dthing->next            = nullptr;
     dthing->previous        = nullptr;
     dthing->map_object      = nullptr;
-    dthing->image           = nullptr;
     dthing->properties      = nullptr;
     dthing->render_left     = nullptr;
     dthing->render_next     = nullptr;
@@ -1050,16 +968,11 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
     dthing->flip  = spr_flip;
 
     dthing->translated_z = tz;
+    dthing->floor_z      = fz;
+    dthing->hover_dz     = hover_dz;
+    dthing->sink_mult    = sink_mult;
 
-    dthing->top = dthing->original_top = gzt;
-    dthing->bottom = dthing->original_bottom = gzb;
-
-    float mir_scale = bsp_mirror_set.XYScale();
-
-    dthing->left_delta_x  = pos1 * view_sine * mir_scale;
-    dthing->left_delta_y  = pos1 * -view_cosine * mir_scale;
-    dthing->right_delta_x = pos2 * view_sine * mir_scale;
-    dthing->right_delta_y = pos2 * -view_cosine * mir_scale;
+    dthing->mir_scale = bsp_mirror_set.XYScale();
 
     RendererClipSpriteVertically(dsub, dthing);
 }
@@ -1080,28 +993,9 @@ static void RenderModel(DrawThing *dthing)
         skin_img = ImageForDummySkin();
     }
 
-    float z = dthing->map_z;
+    float z = dthing->map_z + dthing->hover_dz;
 
     render_mirror_set.Height(z);
-
-    float   sink_mult = 0;
-    float   bob_mult  = 0;
-    Sector *cur_sec   = mo->subsector_->sector;
-    if (!cur_sec->extrafloor_used && !cur_sec->height_sector && abs(mo->z - cur_sec->floor_height) < 1)
-    {
-        if (!(mo->flags_ & kMapObjectFlagNoGravity))
-        {
-            sink_mult = cur_sec->sink_depth;
-            bob_mult  = cur_sec->bob_depth;
-        }
-    }
-
-    if (sink_mult > 0)
-        z -= mo->height_ * 0.5 * sink_mult;
-
-    if (mo->hyper_flags_ & kHyperFlagHover ||
-        ((mo->flags_ & kMapObjectFlagSpecial || mo->flags_ & kMapObjectFlagCorpse) && bob_mult > 0))
-        z += GetHoverDeltaZ(mo, bob_mult);
 
     int   last_frame = mo->state_->frame;
     float lerp       = 0.0;
@@ -1198,6 +1092,97 @@ static bool RenderThing(DrawThing *dthing, bool solid)
     GLuint tex_id = ImageCache(
         image, false, render_view_effect_colormap ? render_view_effect_colormap : dthing->map_object->info_->palremap_);
 
+    // calculate edges of the shape
+    float sprite_width  = image->ScaledWidthActual();
+    float sprite_height = image->ScaledHeightActual();
+    float side_offset   = image->ScaledOffsetX();
+    float top_offset    = image->ScaledOffsetY();
+
+    if (dthing->flip)
+        side_offset = -side_offset;
+
+    float xscale = mo->scale_ * mo->aspect_;
+
+    float pos1 = (sprite_width / -2.0f - side_offset) * xscale;
+    float pos2 = (sprite_width / +2.0f - side_offset) * xscale;
+
+    float gzt = 0;
+    float gzb = 0;
+    float fz  = dthing->floor_z;
+
+    switch (mo->info_->yalign_)
+    {
+    case SpriteYAlignmentTopDown:
+        gzt = dthing->map_z + mo->height_ + top_offset * mo->scale_;
+        gzb = gzt - sprite_height * mo->scale_;
+        break;
+
+    case SpriteYAlignmentMiddle: {
+        float _mz = dthing->map_z + mo->height_ * 0.5 + top_offset * mo->scale_;
+        float dz  = sprite_height * 0.5 * mo->scale_;
+
+        gzt = _mz + dz;
+        gzb = _mz - dz;
+        break;
+    }
+
+    case SpriteYAlignmentBottomUp:
+    default:
+        gzb = dthing->map_z + top_offset * mo->scale_;
+        gzt = gzb + sprite_height * mo->scale_;
+        break;
+    }
+
+    gzt += dthing->hover_dz;
+    gzb += dthing->hover_dz;
+
+    if (dthing->is_model || (mo->flags_ & kMapObjectFlagFuzzy) ||
+        ((mo->hyper_flags_ & kHyperFlagHover) && AlmostEquals(dthing->sink_mult, 0.0f)))
+    {
+        /* nothing, don't adjust clipping */
+    }
+    // Lobo: new FLOOR_CLIP flag
+    else if (mo->hyper_flags_ & kHyperFlagFloorClip || dthing->sink_mult > 0)
+    {
+        /* nothing, don't adjust clipping */
+    }
+    else if (sprite_kludge == 0 && gzb < fz)
+    {
+        // explosion ?
+        if (mo->info_->flags_ & kMapObjectFlagMissile)
+        {
+            /* nothing, don't adjust clipping */
+        }
+        else
+        {
+            // Dasho - The sprite boundaries are clipped by the floor; this checks
+            // the actual visible portion of the image to see if we need to do any adjustments.
+            float diff = (float)image->real_bottom_ * image->scale_y_ * mo->scale_;
+            if (gzb + diff < fz)
+            {
+                gzt += fz - (gzb + diff);
+                gzb = fz - diff;
+            }
+        }
+    }
+
+    if (!dthing->is_model)
+    {
+        if (gzb >= gzt)
+            return false;
+
+        bsp_mirror_set.Height(gzb);
+        bsp_mirror_set.Height(gzt);
+    }
+
+    dthing->top    = gzt;
+    dthing->bottom = gzb;
+
+    dthing->left_delta_x  = pos1 * view_sine * dthing->mir_scale;
+    dthing->left_delta_y  = pos1 * -view_cosine * dthing->mir_scale;
+    dthing->right_delta_x = pos2 * view_sine * dthing->mir_scale;
+    dthing->right_delta_y = pos2 * -view_cosine * dthing->mir_scale;
+
     BlendingMode blending = GetThingBlending(trans, (ImageOpacity)image->opacity_, mo->hyper_flags_);
 
     if (is_fuzzy)
@@ -1238,7 +1223,7 @@ static bool RenderThing(DrawThing *dthing, bool solid)
     // MLook: tilt sprites so they look better
     if (render_mirror_set.XYScale() >= 0.99)
     {
-        float _h    = dthing->original_top - dthing->original_bottom;
+        float _h    = dthing->top - dthing->bottom;
         float skew2 = _h;
 
         if (mo->radius_ >= 1.0f && h > mo->radius_)
@@ -1247,8 +1232,8 @@ static bool RenderThing(DrawThing *dthing, bool solid)
         float _dx = view_cosine * sprite_skew * skew2;
         float _dy = view_sine * sprite_skew * skew2;
 
-        float top_q    = ((dthing->top - dthing->original_bottom) / _h) - 0.5f;
-        float bottom_q = ((dthing->original_top - dthing->bottom) / _h) - 0.5f;
+        float top_q    = 0.5f;
+        float bottom_q = 0.5f;
 
         x1t += top_q * _dx;
         y1t += top_q * _dy;
@@ -1264,7 +1249,7 @@ static bool RenderThing(DrawThing *dthing, bool solid)
     float tex_x1 = 0.001f;
     float tex_x2 = right - 0.001f;
 
-    float tex_y1 = dthing->bottom - dthing->original_bottom;
+    float tex_y1 = 0;
     float tex_y2 = tex_y1 + (z1t - z1b);
 
     float yscale = mo->scale_ * render_mirror_set.ZScale();

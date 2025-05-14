@@ -814,7 +814,7 @@ void ImageData::FillMarginY(int actual_h)
     }
 }
 
-void ImageData::SetHsv(int rotation, int saturation, int value)
+void ImageData::SetHSV(int rotation, int saturation, int value)
 {
     EPI_ASSERT(depth_ >= 3);
 

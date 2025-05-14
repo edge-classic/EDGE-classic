@@ -48,10 +48,6 @@
 #include "w_texture.h"
 #include "w_wad.h"
 
-EDGE_DEFINE_CONSOLE_VARIABLE(precache_textures, "1", kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(precache_sprites, "1", kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(precache_models, "1", kConsoleVariableFlagArchive)
-
 static void AddTXAnimation(AnimationDefinition *anim, ImageNamespace NStype)
 {
     int start_offset = -1;
@@ -468,15 +464,9 @@ static void PrecacheTextures(void)
 //
 void PrecacheLevelGraphics(void)
 {
-    if (precache_sprites.d_)
-        PrecacheSprites();
-
-    if (precache_textures.d_)
-        PrecacheTextures();
-
-    if (precache_models.d_)
-        PrecacheModels();
-
+    PrecacheSprites();
+    PrecacheTextures();
+    PrecacheModels();
     PrecacheSky();
 }
 

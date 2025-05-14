@@ -208,9 +208,9 @@ class DamageClass
     // Apply to all players
     bool all_players_;
     // Apply damage unless one of these benefits is in effect
-    Benefit *damage_unless_;
+    Benefit *damage_unless_ = nullptr;
     // Apply damage if one of these benefits is in effect
-    Benefit *damage_if_;
+    Benefit *damage_if_ = nullptr;
     // What (broad) class of things this damage affects; introduced
     // to help integrate MBF21 instakill sector damage. Only considered
     // if non-zero for backwards compatability. "P" indicates players,

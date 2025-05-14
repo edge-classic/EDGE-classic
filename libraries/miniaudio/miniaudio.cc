@@ -5,8 +5,11 @@
 #define MA_NO_VORBIS
 #define MA_USE_STDINT
 #ifdef _WIN32
+// We want to use the apartment model in order
+// to prevent conflicts with SDL
+#define MA_COINIT_VALUE COINIT_APARTMENTTHREADED
 // If using Sokol or Mimalloc we already require
-// Windows 7+ so default to WASAPI in that case
+// Windows 7+ so build only for WASAPI in that case
 #if defined (EDGE_SOKOL) || defined (EDGE_MIMALLOC)
 #define MA_NO_WINMM
 #define MA_NO_DSOUND

@@ -342,7 +342,6 @@ bool SetScreenSize(DisplayMode *mode)
     }
     else if (mode->window_mode == kWindowModeBorderless)
     {
-        SDL_GetWindowSize(program_window, &borderless_mode.width, &borderless_mode.height);
         SDL_SetWindowFullscreen(program_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
         SDL_GetWindowSize(program_window, &borderless_mode.width, &borderless_mode.height);
 
@@ -514,6 +513,11 @@ void ShutdownGraphics(void)
     {
         SDL_DestroyWindow(program_window);
         program_window = nullptr;
+    }
+
+    for (DisplayMode *mode : screen_modes)
+    {
+        delete mode;
     }
 
     SDL_QuitSubSystem(SDL_INIT_VIDEO);

@@ -61,7 +61,7 @@ static Type type_null     = {ev_null, nullptr, 0, {nullptr}};
 static constexpr int type_size[10] = {1, 1, 1, 3, 1, 1, 1, 1, 1, 1};
 
 // definition used for void return functions
-static Definition def_void = {&type_void, "VOID_SPACE", 0, nullptr, 0, nullptr};
+static Definition def_void = {&type_void, strdup("VOID_SPACE"), 0, nullptr, 0, nullptr};
 
 //
 //  OPERATOR TABLE
@@ -607,33 +607,9 @@ Definition *RealVM::NewLocal(Type *type)
 
 Definition *RealVM::NewTemporary(Type *type)
 {
-    Definition *var;
-
-    std::vector<Definition *>::iterator TI;
-
-    for (TI = comp_.temporaries.begin(); TI != comp_.temporaries.end(); TI++)
-    {
-        var = *TI;
-
-        // make sure it fits
-        if (type_size[var->type->type] < type_size[type->type])
-            continue;
-
-        if (!(var->flags & DF_FreeTemp))
-            continue;
-
-        // found a match, so re-use it!
-        var->flags &= ~DF_FreeTemp;
-        var->type = type;
-
-        return var;
-    }
-
-    var = NewLocal(type);
-
+    Definition *var = NewLocal(type);
     var->flags |= DF_Temporary;
     comp_.temporaries.push_back(var);
-
     return var;
 }
 
@@ -644,9 +620,17 @@ void RealVM::FreeTemporaries()
     for (TI = comp_.temporaries.begin(); TI != comp_.temporaries.end(); TI++)
     {
         Definition *tvar = *TI;
-
-        tvar->flags |= DF_FreeTemp;
+        while (tvar)
+        {
+            Definition *def = tvar;
+            tvar            = def->next;
+            if (def->name)
+                free(def->name);
+            delete def;
+        }
     }
+
+    comp_.temporaries.clear();
 }
 
 Definition *RealVM::FindLiteral()
@@ -713,7 +697,7 @@ Definition *RealVM::EXPLiteral()
         // Allocate a new one
         cn = NewGlobal(comp_.literal_type);
 
-        cn->name = "CONSTANT VALUE";
+        cn->name = strdup("CONSTANT VALUE");
 
         cn->flags |= DF_Constant;
         cn->scope = nullptr; // literals are "scope-less"
@@ -1214,6 +1198,8 @@ void RealVM::STATForLoop()
     if (!var || (var->flags & DF_Constant))
         CompileError("unknown variable in for loop: %s\n", var_name);
 
+    free(var_name);
+
     LexExpect("=");
 
     Definition *e1 = EXPExpression(kTopPriority);
@@ -1242,7 +1228,14 @@ void RealVM::STATForLoop()
 
     STATStatement(false);
     FreeTemporaries();
-
+    while (target)
+    {
+        Definition *def = target;
+        target          = target->next;
+        if (def->name)
+            free(def->name);
+        delete def;
+    }
     // increment the variable
     EmitCode(OP_INC, var->ofs, 0, var->ofs);
     EmitCode(OP_GOTO, 0, begin);
@@ -1531,6 +1524,18 @@ void RealVM::GLOBFunction()
     df->first_statement = GLOBFunctionBody(def, func_type, func_name);
     df->last_statement  = comp_.last_statement;
     //  }
+
+    while (comp_.scope->names_)
+    {
+        Definition *name    = comp_.scope->names_;
+        comp_.scope->names_ = comp_.scope->names_->next;
+        if (name->name)
+            free(name->name);
+        delete name;
+    }
+
+    delete comp_.scope;
+
     comp_.scope = OLD_scope;
 
     df->locals_size = comp_.locals_end - df->locals_ofs;
@@ -1591,6 +1596,8 @@ void RealVM::GLOBVariable()
             EmitMove(type, kDefaultOffset * 8, def->ofs);
     }
 
+    free(var_name);
+
     // -AJA- optional semicolons
     if (!(comp_.token_is_first || comp_.token_buf[0] == '}'))
         LexExpect(";");
@@ -1606,6 +1613,8 @@ void RealVM::GLOBConstant()
         CompileError("expected value for constant, got %s\n", comp_.token_buf);
 
     Definition *cn = DeclareDef(comp_.literal_type, const_name, comp_.scope);
+
+    free(const_name);
 
     cn->flags |= DF_Constant;
 
@@ -1776,7 +1785,66 @@ RealVM::RealVM()
 
 RealVM::~RealVM()
 {
-    // FIXME !!!!
+    for (Function *func : functions_)
+    {
+        if (func->name)
+            free(func->name);
+        if (func->source_file)
+            free(func->source_file);
+        delete func;
+    }
+    for (RegisteredNativeFunction *func : native_funcs_)
+    {
+        if (func->name)
+            free(func->name);
+        delete func;
+    }
+    while (comp_.global_scope.names_)
+    {
+        Definition *name          = comp_.global_scope.names_;
+        comp_.global_scope.names_ = comp_.global_scope.names_->next;
+        if (name->name)
+            free(name->name);
+        delete name;
+    }
+    for (Scope *scope : comp_.all_modules)
+    {
+        while (scope->names_)
+        {
+            Definition *name = scope->names_;
+            scope->names_    = scope->names_->next;
+            if (name->name)
+                free(name->name);
+            delete name;
+        }
+        delete scope;
+    }
+    for (Type *type : comp_.all_types)
+    {
+        delete type;
+    }
+    for (Definition *def : comp_.all_literals)
+    {
+        while (def)
+        {
+            Definition *lit = def;
+            def             = def->next;
+            if (lit->name)
+                free(lit->name);
+            delete lit;
+        }
+    }
+    for (Definition *def : comp_.temporaries)
+    {
+        while (def)
+        {
+            Definition *temp = def;
+            def              = def->next;
+            if (temp->name)
+                free(temp->name);
+            delete temp;
+        }
+    }
 }
 
 void RealVM::SetPrinter(PrintFunction func)
@@ -2148,6 +2216,13 @@ VM *CreateVM()
     EPI_ASSERT(sizeof(double) == 8);
 
     return new RealVM;
+}
+
+void DeleteVM(VM *vm)
+{
+    EPI_ASSERT(vm);
+
+    delete vm;
 }
 
 } // namespace coal

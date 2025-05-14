@@ -204,11 +204,12 @@ void music::FinishLump()
 
 void music::WriteEntry(int num)
 {
-    const MusicInfo *mod = S_music[num];
-
+    const MusicInfo *mod   = S_music[num];
+    std::string      upper = mod->name;
+    epi::StringUpperASCII(upper);
     wad::Printf("\n");
     wad::Printf("[%02d] ", mod->ddf_num);
-    wad::Printf("MUSICINFO = MUS:LUMP:\"D_%s\";\n", epi::CStringUpper(mod->name));
+    wad::Printf("MUSICINFO = MUS:LUMP:\"D_%s\";\n", upper.c_str());
 }
 
 void music::ConvertMUS()

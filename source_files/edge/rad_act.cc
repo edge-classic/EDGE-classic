@@ -47,6 +47,7 @@
 #include "r_image.h"
 #include "r_misc.h"
 #include "r_modes.h"
+#include "r_render.h"
 #include "r_sky.h"
 #include "rad_trig.h"
 #include "s_music.h"
@@ -872,6 +873,8 @@ static void MoveOneSector(Sector *sec, ScriptMoveSectorParameter *t)
         return;
 
     SolidSectorMove(sec, t->is_ceiling, dh);
+
+    UpdateSectorInterpolation(sec);
 
     if (t->is_ceiling)
         sec->old_ceiling_height = sec->ceiling_height;

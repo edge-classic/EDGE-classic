@@ -96,7 +96,11 @@ static void CaptureScreenAsTexture(bool speckly, bool spooky)
             }
         }
     }
-
+    if (current_wipe_texture != 0)
+    {
+        render_state->DeleteTexture(&current_wipe_texture);
+        current_wipe_texture = 0;
+    }
     current_wipe_texture = UploadTexture(&img);
 }
 
@@ -119,7 +123,11 @@ void BlackoutWipeTexture(void)
         dest[0] = dest[1] = dest[2] = 0;
         dest[3]                     = 1;
     }
-
+    if (current_wipe_texture != 0)
+    {
+        render_state->DeleteTexture(&current_wipe_texture);
+        current_wipe_texture = 0;
+    }
     current_wipe_texture = UploadTexture(&img);
 }
 

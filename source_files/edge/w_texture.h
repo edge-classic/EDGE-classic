@@ -35,6 +35,7 @@
 void        InitializeTextures(void);
 int         FindTextureSequence(const char *start, const char *end, int *s_offset, int *e_offset);
 const char *TextureNameInSet(int set, int offset);
+void        ShutdownTextureSets(void);
 
 //
 // Graphics:

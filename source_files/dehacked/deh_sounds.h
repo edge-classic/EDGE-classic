@@ -178,7 +178,7 @@ void AlterBexSound(const char *new_val);
 void MarkSound(int s_num);
 void AlterSound(int new_val);
 
-const char *GetSound(int sound_id);
+std::string GetSound(int sound_id);
 
 void ConvertSFX(void);
 } // namespace sounds

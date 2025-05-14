@@ -250,7 +250,7 @@ void FinishLump();
 
 void                   MarkSound(int s_num);
 const SoundEffectInfo *GetOriginalSFX(int num);
-const char            *GetEdgeSfxName(int sound_id);
+std::string            GetEdgeSfxName(int sound_id);
 void                   WriteSound(int s_num);
 } // namespace sounds
 
@@ -357,54 +357,70 @@ void sounds::AlterSound(int new_val)
     LogDebug("Dehacked: Warning - UNKNOWN SOUND FIELD: %s\n", deh_field);
 }
 
-const char *sounds::GetEdgeSfxName(int sound_id)
+std::string sounds::GetEdgeSfxName(int sound_id)
 {
+    std::string name;
+
     if (sound_id == ksfx_None)
-        return nullptr;
+        return name;
 
     switch (sound_id)
     {
     // EDGE uses different names for the DOG sounds
     case ksfx_dgsit:
-        return "DOG_SIGHT";
+        name = "DOG_SIGHT";
+        break;
     case ksfx_dgatk:
-        return "DOG_BITE";
+        name = "DOG_BITE";
+        break;
     case ksfx_dgact:
-        return "DOG_LOOK";
+        name = "DOG_LOOK";
+        break;
     case ksfx_dgdth:
-        return "DOG_DIE";
+        name = "DOG_DIE";
+        break;
     case ksfx_dgpain:
-        return "DOG_PAIN";
+        name = "DOG_PAIN";
+        break;
 
     default:
         break;
     }
 
+    if (!name.empty())
+        return name;
+
     const SoundEffectInfo *orig = GetOriginalSFX(sound_id);
 
     if (orig->name[0] != 0)
-        return epi::CStringUpper(orig->name);
+    {
+        name = orig->name;
+        epi::StringUpperASCII(name);
+        return name;
+    }
 
     // we get here for sounds with no original name (only possible
     // for DSDehacked / MBF21).  check if modified name is empty too.
 
     if (sound_id >= (int)S_sfx.size())
-        return nullptr;
+        return name;
 
     const SoundEffectInfo *mod = S_sfx[sound_id];
     if (mod == nullptr || mod->name[0] == 0)
-        return nullptr;
+        return name;
 
     // create a suitable name
-    static char name_buf[64];
-    stbsp_snprintf(name_buf, sizeof(name_buf), "BEX_%d", sound_id);
-    return name_buf;
+    name = epi::StringFormat("BEX_%d", sound_id);
+    epi::StringUpperASCII(name);
+    return name;
 }
 
-const char *sounds::GetSound(int sound_id)
+std::string sounds::GetSound(int sound_id)
 {
+    std::string name;
+
     if (sound_id == ksfx_None)
-        return "NULL";
+        name = "NULL";
 
     // handle random sounds
     switch (sound_id)
@@ -412,24 +428,31 @@ const char *sounds::GetSound(int sound_id)
     case ksfx_podth1:
     case ksfx_podth2:
     case ksfx_podth3:
-        return "PODTH?";
+        name = "PODTH?";
+        break;
 
     case ksfx_posit1:
     case ksfx_posit2:
     case ksfx_posit3:
-        return "POSIT?";
+        name = "POSIT?";
+        break;
 
     case ksfx_bgdth1:
     case ksfx_bgdth2:
-        return "BGDTH?";
+        name = "BGDTH?";
+        break;
 
     case ksfx_bgsit1:
     case ksfx_bgsit2:
-        return "BGSIT?";
+        name = "BGSIT?";
+        break;
 
     default:
         break;
     }
+
+    if (!name.empty())
+        return name;
 
     // if something uses DEHEXTRA sounds (+ a few others), ensure we
     // generate DDFSFX entries for them.
@@ -438,9 +461,9 @@ const char *sounds::GetSound(int sound_id)
         MarkSound(sound_id);
     }
 
-    const char *name = GetEdgeSfxName(sound_id);
-    if (name == nullptr)
-        return "NULL";
+    name = GetEdgeSfxName(sound_id);
+    if (name.empty())
+        name = "NULL";
 
     return name;
 }
@@ -456,11 +479,11 @@ void sounds::WriteSound(int sound_id)
     if (lump[0] == 0)
         return;
 
-    const char *ddf_name = GetEdgeSfxName(sound_id);
-    if (ddf_name == nullptr)
+    std::string ddf_name = GetEdgeSfxName(sound_id);
+    if (ddf_name.empty())
         FatalError("Dehacked: Error - No DDF name for sound %d ??\n", sound_id);
 
-    wad::Printf("[%s]\n", ddf_name);
+    wad::Printf("[%s]\n", ddf_name.c_str());
 
     // only one sound has a `link` field in standard DOOM.
     // we emulate that here.
@@ -475,7 +498,10 @@ void sounds::WriteSound(int sound_id)
             lump = link->name;
     }
 
-    wad::Printf("LUMP_NAME = \"DS%s\";\n", epi::CStringUpper(lump));
+    ddf_name = lump;
+    epi::StringUpperASCII(ddf_name);
+
+    wad::Printf("LUMP_NAME = \"DS%s\";\n", ddf_name.c_str());
     wad::Printf("DEH_SOUND_ID = %d;\n", sound_id);
     wad::Printf("PRIORITY = %d;\n", sound->priority);
 

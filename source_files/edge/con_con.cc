@@ -65,14 +65,14 @@ EDGE_DEFINE_CONSOLE_VARIABLE(debug_position, "0", kConsoleVariableFlagArchive)
 static ConsoleVisibility console_visible;
 
 // stores the console toggle effect
-static int   console_wipe_active       = 0;
-static int   console_wipe_position     = 0;
-static int   old_console_wipe_position = 0;
-static Font *console_font;
-Font        *endoom_font;
+static int         console_wipe_active       = 0;
+static int         console_wipe_position     = 0;
+static int         old_console_wipe_position = 0;
+static const Font *console_font;
+const Font        *endoom_font;
 
 // the console's background
-static Style *console_style;
+static const Style *console_style;
 
 static RGBAColor current_color;
 
@@ -334,8 +334,11 @@ static void CalcSizes()
 
     FNSZ_ratio = FNSZ / console_font->definition_->default_size_;
     if (console_font->definition_->type_ == kFontTypeImage)
-        XMUL = RoundToInteger((console_font->image_monospace_width_ + console_font->spacing_) *
-                              (FNSZ / console_font->image_character_height_));
+    {
+        const ImageFont *confont = (const ImageFont *)console_font;
+        XMUL                     = RoundToInteger((confont->image_monospace_width_ + confont->spacing_) *
+                                                  (FNSZ / confont->image_character_height_));
+    }
 }
 
 static void SolidBox(float x, float y, float w, float h, RGBAColor col, float alpha)
@@ -367,17 +370,19 @@ static RendererVertex *StartText()
     if (console_font->definition_->type_ == kFontTypeImage)
     {
         // Always whiten the font when used with console output
-        tex_id = ImageCache(console_font->font_image_, true, (const Colormap *)0, true);
-        blend  = kBlendingMasked;
+        const ImageFont *con_font = (ImageFont *)console_font;
+        tex_id                    = ImageCache(con_font->font_image_, true, (const Colormap *)0, true);
+        blend                     = kBlendingMasked;
     }
     else if (console_font->definition_->type_ == kFontTypeTrueType)
     {
+        const TTFFont *con_font = (TTFFont *)console_font;
         if ((image_smoothing &&
-             console_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothOnDemand) ||
-            console_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothAlways)
-            tex_id = console_font->truetype_smoothed_texture_id_[current_font_size];
+             con_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothOnDemand) ||
+            con_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothAlways)
+            tex_id = con_font->truetype_smoothed_texture_id_[current_font_size];
         else
-            tex_id = console_font->truetype_texture_id_[current_font_size];
+            tex_id = con_font->truetype_texture_id_[current_font_size];
 
         blend = kBlendingAlpha;
     }
@@ -390,13 +395,14 @@ static void AddChar(float x, float y, char ch, RendererVertex *&glvert, RGBAColo
 {
     if (console_font->definition_->type_ == kFontTypeTrueType)
     {
-        float chwidth  = console_font->CharWidth(ch);
-        XMUL           = RoundToInteger(chwidth * FNSZ_ratio / pixel_aspect_ratio.f_);
-        float width    = (chwidth - console_font->spacing_) * FNSZ_ratio / pixel_aspect_ratio.f_;
-        float x_adjust = (XMUL - width) / 2;
-        float y_adjust = console_font->truetype_glyph_map_.at((uint8_t)ch).y_shift[current_font_size] * FNSZ_ratio;
-        float height   = console_font->truetype_glyph_map_.at((uint8_t)ch).height[current_font_size] * FNSZ_ratio;
-        stbtt_aligned_quad *q = &console_font->truetype_glyph_map_.at((uint8_t)ch).character_quad[current_font_size];
+        TTFFont *con_font     = (TTFFont *)console_font;
+        float    chwidth      = con_font->CharWidth(ch);
+        XMUL                  = RoundToInteger(chwidth * FNSZ_ratio / pixel_aspect_ratio.f_);
+        float width           = (chwidth - con_font->spacing_) * FNSZ_ratio / pixel_aspect_ratio.f_;
+        float x_adjust        = (XMUL - width) / 2;
+        float y_adjust        = con_font->truetype_glyph_map_.at((uint8_t)ch).y_shift[current_font_size] * FNSZ_ratio;
+        float height          = con_font->truetype_glyph_map_.at((uint8_t)ch).height[current_font_size] * FNSZ_ratio;
+        stbtt_aligned_quad *q = &con_font->truetype_glyph_map_.at((uint8_t)ch).character_quad[current_font_size];
         glvert->rgba          = col;
         glvert->position      = {{x + x_adjust, y - y_adjust, 0}};
         glvert++->texture_coordinates[0] = {{q->s0, q->t0}};
@@ -412,13 +418,14 @@ static void AddChar(float x, float y, char ch, RendererVertex *&glvert, RGBAColo
     }
     else // spritesheet font
     {
-        uint8_t px = (uint8_t)ch % 16;
-        uint8_t py = 15 - (uint8_t)ch / 16;
+        ImageFont *con_font = (ImageFont *)console_font;
+        uint8_t    px       = (uint8_t)ch % 16;
+        uint8_t    py       = 15 - (uint8_t)ch / 16;
 
-        float tx1 = (px)*console_font->font_image_->width_ratio_;
-        float tx2 = (px + 1) * console_font->font_image_->width_ratio_;
-        float ty1 = (py)*console_font->font_image_->height_ratio_;
-        float ty2 = (py + 1) * console_font->font_image_->height_ratio_;
+        float tx1 = (px)*con_font->font_image_->width_ratio_;
+        float tx2 = (px + 1) * con_font->font_image_->width_ratio_;
+        float ty1 = (py)*con_font->font_image_->height_ratio_;
+        float ty2 = (py + 1) * con_font->font_image_->height_ratio_;
 
         glvert->rgba                     = col;
         glvert->position                 = {{x, y, 0}};
@@ -441,6 +448,7 @@ static uint16_t AddText(float x, float y, const char *s, RGBAColor col, Renderer
     bool     draw_cursor = (s == input_line && console_cursor < 16);
     uint16_t verts_added = 0;
     int      pos         = 0;
+    TTFFont *ttf         = console_font->definition_->type_ == kFontTypeTrueType ? (TTFFont *)console_font : nullptr;
     for (; *s; s++, pos++)
     {
         AddChar(x, y, *s, runit, col);
@@ -450,9 +458,9 @@ static uint16_t AddText(float x, float y, const char *s, RGBAColor col, Renderer
         {
             if (*(s + 1))
             {
-                x += (float)stbtt_GetGlyphKernAdvance(console_font->truetype_info_, console_font->GetGlyphIndex(*s),
-                                                      console_font->GetGlyphIndex(*(s + 1))) *
-                     console_font->truetype_kerning_scale_[current_font_size] * FNSZ_ratio / pixel_aspect_ratio.f_;
+                x += (float)stbtt_GetGlyphKernAdvance(ttf->truetype_info_, ttf->GetGlyphIndex(*s),
+                                                      ttf->GetGlyphIndex(*(s + 1))) *
+                     ttf->truetype_kerning_scale_[current_font_size] * FNSZ_ratio / pixel_aspect_ratio.f_;
             }
         }
 
@@ -487,7 +495,6 @@ void ConsoleSetupFont(void)
             FatalError("CON_FONT_2 definition missing from DDFFONT!\n");
         console_font = hud_fonts.Lookup(DEF);
         EPI_ASSERT(console_font);
-        console_font->Load();
     }
 
     if (!endoom_font)
@@ -497,7 +504,8 @@ void ConsoleSetupFont(void)
             FatalError("ENDFONT definition missing from DDFFONT!\n");
         endoom_font = hud_fonts.Lookup(DEF);
         EPI_ASSERT(endoom_font);
-        endoom_font->Load();
+        if (endoom_font->definition_->type_ != kFontTypeImage)
+            FatalError("ENDFONT needs to be a spritesheet!\n");
     }
 
     if (!console_style)
@@ -578,9 +586,10 @@ void ConsoleDrawer(void)
                 draw_endoom    = true;
             }
 
-            int x       = 0;
-            int enwidth = RoundToInteger((float)endoom_font->image_monospace_width_ *
-                                         ((float)FNSZ / endoom_font->image_monospace_width_) / 2) /
+            const ImageFont *en_font = (const ImageFont *)endoom_font;
+            int              x       = 0;
+            int              enwidth = RoundToInteger((float)en_font->image_monospace_width_ *
+                                                      ((float)FNSZ / en_font->image_monospace_width_) / 2) /
                           2;
             for (int j = 1; j < kENDOOMBytesPerLine; j += 2)
             {
@@ -615,12 +624,13 @@ void ConsoleDrawer(void)
     {
         // Finish previous unit
         EndRenderUnit(console_verts);
-        console_verts  = 0;
-        console_glvert = BeginRenderUnit(GL_QUADS, kENDOOMTotalVerts, GL_MODULATE,
-                                         ImageCache(endoom_font->font_image_, true, (const Colormap *)0, true),
-                                         (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingMasked);
-        int enwidth    = RoundToInteger((float)endoom_font->image_monospace_width_ *
-                                        ((float)FNSZ / endoom_font->image_monospace_width_) / 2);
+        console_verts            = 0;
+        const ImageFont *en_font = (const ImageFont *)endoom_font;
+        console_glvert           = BeginRenderUnit(GL_QUADS, kENDOOMTotalVerts, GL_MODULATE,
+                                                   ImageCache(en_font->font_image_, true, (const Colormap *)0, true),
+                                                   (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingMasked);
+        int enwidth              = RoundToInteger((float)en_font->image_monospace_width_ *
+                                                  ((float)FNSZ / en_font->image_monospace_width_) / 2);
 
         for (int i = HMM_MAX(0, bottom_row); i < kMaximumConsoleLines; i++)
         {
@@ -648,11 +658,11 @@ void ConsoleDrawer(void)
                     uint8_t px = ch % 16;
                     uint8_t py = 15 - ch / 16;
 
-                    float tx1 = (px)*endoom_font->font_image_->width_ratio_;
-                    float tx2 = (px + 1) * endoom_font->font_image_->width_ratio_;
+                    float tx1 = (px)*en_font->font_image_->width_ratio_;
+                    float tx2 = (px + 1) * en_font->font_image_->width_ratio_;
 
-                    float ty1 = (py)*endoom_font->font_image_->height_ratio_;
-                    float ty2 = (py + 1) * endoom_font->font_image_->height_ratio_;
+                    float ty1 = (py)*en_font->font_image_->height_ratio_;
+                    float ty2 = (py + 1) * en_font->font_image_->height_ratio_;
 
                     console_glvert->rgba                   = col;
                     console_glvert->texture_coordinates[0] = {{tx1, ty1}};

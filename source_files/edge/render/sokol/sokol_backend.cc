@@ -132,6 +132,7 @@ class SokolRenderBackend : public RenderBackend
         pass_.swapchain.color_format   = SG_PIXELFORMAT_RGBA8;
         pass_.swapchain.depth_format   = SG_PIXELFORMAT_DEPTH;
         pass_.swapchain.gl.framebuffer = 0;
+        pass_.swapchain.sample_count   = 1;
 
 #ifdef SOKOL_D3D11
         pass_.swapchain.d3d11.render_view        = sapp_d3d11_get_render_view();

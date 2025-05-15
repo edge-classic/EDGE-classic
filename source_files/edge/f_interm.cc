@@ -483,8 +483,7 @@ static void DrawLevelFinished(void)
     if (!style->fonts_[t_type])
         t_type = StyleDefinition::kTextSectionText;
 
-    // truetype_reference_yshift_ is important for TTF fonts.
-    float y_shift = style->fonts_[t_type]->truetype_reference_yshift_[current_font_size]; // * txtscale;
+    float y_shift = style->fonts_[t_type]->GetYShift(); // * txtscale;
 
     y = y + h1;
     y += y_shift;
@@ -608,8 +607,7 @@ static void DrawEnteringLevel(void)
             DrawOnLnode(&world_intermission.map_positions_[i], you_are_here);
     }
 
-    // truetype_reference_yshift_ is important for TTF fonts.
-    float y_shift = style->fonts_[t_type]->truetype_reference_yshift_[current_font_size]; // * txtscale;
+    float y_shift = style->fonts_[t_type]->GetYShift(); // * txtscale;
 
     y = y + h1;
     y += y_shift;

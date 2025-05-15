@@ -848,22 +848,10 @@ void MenuDrawLoad(void)
 
         if (fontType == StyleDefinition::kTextSectionSelected)
         {
-            if (style->fonts_[StyleDefinition::kTextSectionSelected]->definition_->type_ == kFontTypeTrueType)
-            {
-                // truetype_reference_yshift_ is important for TTF fonts.
-                float y_shift = style->fonts_[StyleDefinition::kTextSectionSelected]
-                                    ->truetype_reference_yshift_[current_font_size]; // * txtscale;
-
-                HUDSetAlpha(0.33f);
-                HUDSolidBox(TempX - 3, TempY - 2 + (y_shift / 2), TempX + 173, TempY + LineHeight + 2 + y_shift, col);
-                HUDSetAlpha(old_alpha);
-            }
-            else
-            {
-                HUDSetAlpha(0.33f);
-                HUDSolidBox(TempX - 3, TempY - 2, TempX + 173, TempY + LineHeight + 2, col);
-                HUDSetAlpha(old_alpha);
-            }
+            float y_shift = style->fonts_[StyleDefinition::kTextSectionSelected]->GetYShift();
+            HUDSetAlpha(0.33f);
+            HUDSolidBox(TempX - 3, TempY - 2 + (y_shift / 2), TempX + 173, TempY + LineHeight + 2 + y_shift, col);
+            HUDSetAlpha(old_alpha);
         }
         if (style->fonts_[fontType]->definition_->type_ == kFontTypeTrueType)
             HUDWriteText(style, fontType, TempX, TempY - (LineHeight / 2),
@@ -972,21 +960,11 @@ void MenuDrawSave(void)
 
         if (fontType == StyleDefinition::kTextSectionSelected)
         {
-            if (style->fonts_[fontType]->definition_->type_ == kFontTypeTrueType)
-            {
-                // truetype_reference_yshift_ is important for TTF fonts.
-                float y_shift = style->fonts_[fontType]->truetype_reference_yshift_[current_font_size]; // * txtscale;
+            float y_shift = style->fonts_[fontType]->GetYShift(); // * txtscale;
 
-                HUDSetAlpha(0.33f);
-                HUDSolidBox(TempX - 3, TempY - 2 + (y_shift / 2), TempX + 173, TempY + LineHeight + 2 + y_shift, col);
-                HUDSetAlpha(old_alpha);
-            }
-            else
-            {
-                HUDSetAlpha(0.33f);
-                HUDSolidBox(TempX - 3, TempY - 2, TempX + 173, TempY + LineHeight + 2, col);
-                HUDSetAlpha(old_alpha);
-            }
+            HUDSetAlpha(0.33f);
+            HUDSolidBox(TempX - 3, TempY - 2 + (y_shift / 2), TempX + 173, TempY + LineHeight + 2 + y_shift, col);
+            HUDSetAlpha(old_alpha);
         }
 
         int  len           = 0;
@@ -1737,34 +1715,14 @@ void DrawMenuSlider(int x, int y, float slider_position, float increment, int di
         if (colmap)
             slider_color = GetFontColor(colmap);
 
-        HUDThinBox(
-            x,
-            y + (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType
-                     ? opt_style->fonts_[StyleDefinition::kTextSectionAlternate]
-                           ->truetype_reference_yshift_[current_font_size]
-                     : 0),
-            x + 50.0f,
-            y + opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->NominalHeight() +
-                (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType
-                     ? opt_style->fonts_[StyleDefinition::kTextSectionAlternate]
-                               ->truetype_reference_yshift_[current_font_size] /
-                           2
-                     : 0),
-            slider_color);
-        HUDSolidBox(
-            x,
-            y + (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType
-                     ? opt_style->fonts_[StyleDefinition::kTextSectionAlternate]
-                           ->truetype_reference_yshift_[current_font_size]
-                     : 0),
-            x + (((slider_position - min) / increment) * scale_step),
-            y + opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->NominalHeight() +
-                (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType
-                     ? opt_style->fonts_[StyleDefinition::kTextSectionAlternate]
-                               ->truetype_reference_yshift_[current_font_size] /
-                           2
-                     : 0),
-            slider_color);
+        float y_shift = opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->GetYShift();
+
+        HUDThinBox(x, y + y_shift, x + 50.0f,
+                   y + opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->NominalHeight() + (y_shift / 2),
+                   slider_color);
+        HUDSolidBox(x, y + y_shift, x + (((slider_position - min) / increment) * scale_step),
+                    y + opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->NominalHeight() + (y_shift / 2),
+                    slider_color);
         if (!actual_val.empty())
             HUDWriteText(opt_style, StyleDefinition::kTextSectionAlternate, x + 50.0f + step, y, actual_val.c_str());
     }
@@ -2544,12 +2502,9 @@ void MenuDrawCursor(Style *style, bool graphical_item)
         {
             if (style->fonts_[StyleDefinition::kTextSectionText]->definition_->type_ == kFontTypeTrueType)
             {
-                ShortestLine =
-                    style->fonts_[StyleDefinition::kTextSectionText]->truetype_reference_height_[current_font_size] *
-                    txtscale;
-                y_shift =
-                    style->fonts_[StyleDefinition::kTextSectionText]->truetype_reference_yshift_[current_font_size] *
-                    txtscale;
+                // Nominal Height?
+                ShortestLine = style->fonts_[StyleDefinition::kTextSectionText]->NominalHeight() * txtscale;
+                y_shift      = style->fonts_[StyleDefinition::kTextSectionText]->GetYShift() * txtscale;
             }
         }
         TempScale = ShortestLine / cursor->ScaledHeightActual();
@@ -2866,7 +2821,7 @@ void MenuDrawItems(Style *style, bool graphical_item)
                         x + (image->offset_x_ * txtscale) + style->definition_->x_offset_ +
                         style->definition_->text_[StyleDefinition::kTextSectionText].x_offset_;
 
-                current_menu->menu_items[i].y = y - image->offset_y_ + style->definition_->y_offset_ +
+                current_menu->menu_items[i].y = y + (image->offset_y_ * txtscale) + style->definition_->y_offset_ +
                                                 style->definition_->text_[StyleDefinition::kTextSectionText].y_offset_;
                 y += current_menu->menu_items[i].height + style->definition_->entry_spacing_;
             }
@@ -2896,12 +2851,6 @@ void MenuDrawItems(Style *style, bool graphical_item)
     //---------------------------------------------------
     for (j = 0; j < max; j++)
     {
-        // int textstyle = i == item_on ?
-        // (style->definition_->text[StyleDefinition::kTextSectionSelected].font
-        // ? StyleDefinition::kTextSectionSelected :
-        // StyleDefinition::kTextSectionText) :
-        // StyleDefinition::kTextSectionText;
-
         textstyle = StyleDefinition::kTextSectionText;
         txtscale  = style->definition_->text_[textstyle].scale_;
         if (j == item_on)
@@ -2926,11 +2875,6 @@ void MenuDrawItems(Style *style, bool graphical_item)
         }
         else // We're going graphical menu items
         {
-            // const colourmap_c *colmap = i == item_on ?
-            // style->definition_->text[StyleDefinition::kTextSectionSelected].colmap
-            // :
-            //		style->definition_->text[StyleDefinition::kTextSectionText].colmap;
-
             textstyle = StyleDefinition::kTextSectionText;
             txtscale  = style->definition_->text_[textstyle].scale_;
             if (j == item_on)
@@ -3021,25 +2965,17 @@ void MenuDrawer(void)
     if (current_menu->draw_function)
         (*current_menu->draw_function)();
 
-    // custom_menu==false //We're going text-based menu items
-    // custom_menu==true //We're going graphic-based menu items
     MenuDrawItems(style, custom_menu);
 
     if (!(current_menu->draw_function == MenuDrawLoad || current_menu->draw_function == MenuDrawSave))
-    {
-        // custom_menu==false //We're going text-based menu items
-        // custom_menu==true //We're going graphic-based menu items
         MenuDrawCursor(style, custom_menu);
-    }
 }
 
 void MenuClear(void)
 {
     // -AJA- 2007/12/24: save user changes ASAP (in case of crash)
     if (menu_active)
-    {
         SaveDefaults();
-    }
 
     menu_active    = false;
     option_menu_on = 0;

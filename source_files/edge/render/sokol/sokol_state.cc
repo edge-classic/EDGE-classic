@@ -613,6 +613,14 @@ class SokolRenderState : public RenderState
     {
 #if defined(SOKOL_GLCORE) || defined(SOKOL_GLES3)
         sg_gl_read_pixels(x, y, width, height, format, type, pixels);
+#else
+        EPI_UNUSED(x);
+        EPI_UNUSED(y);
+        EPI_UNUSED(width);
+        EPI_UNUSED(height);
+        EPI_UNUSED(format);
+        EPI_UNUSED(type);
+        EPI_UNUSED(pixels);
 #endif
     }
 

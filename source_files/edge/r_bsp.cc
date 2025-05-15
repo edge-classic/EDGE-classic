@@ -71,6 +71,7 @@ static RenderBatch *current_batch = nullptr;
 #endif
 
 #ifdef BSP_MULTITHREAD
+#define THREAD_U64 uint64_t
 #include "thread.h"
 
 constexpr int32_t kMaxRenderBatch = 65536 / 4;

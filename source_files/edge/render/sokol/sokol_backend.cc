@@ -139,14 +139,6 @@ class SokolRenderBackend : public RenderBackend
         pass_.swapchain.d3d11.depth_stencil_view = sapp_d3d11_get_depth_stencil_view();
 #endif
 
-        /*
-        imgui_frame_desc_            = {0};
-        imgui_frame_desc_.width      = width;
-        imgui_frame_desc_.height     = height;
-        imgui_frame_desc_.delta_time = 100;
-        imgui_frame_desc_.dpi_scale  = 1;
-        */
-
         EPI_CLEAR_MEMORY(world_state_, WorldState, kRenderWorldMax);
 
         EPI_CLEAR_MEMORY(&render_state_, RenderState, 1);
@@ -195,23 +187,6 @@ class SokolRenderBackend : public RenderBackend
         {
             sgl_context_draw(context_pool_[current_context_]);
         }
-
-        /*
-        {
-            EDGE_ZoneNamedN(ZoneDrawImGui, "DrawImGui", true);
-            sg_imgui_.caps_window.open        = false;
-            sg_imgui_.buffer_window.open      = false;
-            sg_imgui_.pipeline_window.open    = false;
-            sg_imgui_.attachments_window.open = false;
-            // NOTE: debug_fps controls stat gathering
-            sg_imgui_.frame_stats_window.open = false;
-
-            simgui_new_frame(&imgui_frame_desc_);
-            sgimgui_draw(&sg_imgui_);
-
-            simgui_render();
-        }
-            */
 
         {
             EDGE_ZoneNamedN(ZoneDrawEndPass, "DrawEndPass", true);
@@ -341,16 +316,6 @@ class SokolRenderBackend : public RenderBackend
         }
 
         sgl_set_context(context_pool_[0]);
-
-        // IMGUI
-        /*
-        simgui_desc_t imgui_desc = {0};
-        imgui_desc.logger.func   = slog_func;
-        simgui_setup(&imgui_desc);
-
-        const sgimgui_desc_t sg_imgui_desc = {0};
-        sgimgui_init(&sg_imgui_, &sg_imgui_desc);
-        */
 
         InitPipelines();
         InitImages();
@@ -507,11 +472,6 @@ class SokolRenderBackend : public RenderBackend
         RenderLayer layer_;
         int32_t     world_state_;
     };
-
-    /*
-    simgui_frame_desc_t imgui_frame_desc_;
-    sgimgui_t           sg_imgui_;
-    */
 
     RGBAColor clear_color_ = kRGBABlack;
 

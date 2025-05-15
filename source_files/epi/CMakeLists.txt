@@ -19,7 +19,7 @@ add_library(
 set (EPI_LIBRARIES almostequals HandmadeMath stb)
 
 if (NOT EMSCRIPTEN AND EDGE_MIMALLOC)
-  list(APPEND EPI_LIBRARIES mimalloc)
+  list(APPEND EPI_LIBRARIES mimalloc-static)
 endif()
 
 target_link_libraries(epi PUBLIC ${EPI_LIBRARIES})

@@ -29,7 +29,7 @@
 #ifdef EDGE_SOKOL
 #include "render/sokol/sokol_gl_defines.h"
 #else
-#include <glad/glad.h>
+#include <glad/gl.h>
 #endif
 
 //--- editor settings ---

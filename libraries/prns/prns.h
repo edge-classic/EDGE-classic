@@ -1,4 +1,4 @@
-// Marc B. Reynolds, 2013-2024
+// Marc B. Reynolds, 2013-2025
 // Public Domain under http://unlicense.org, see link for details.
 //
 // Documentation: http://marc-b-reynolds.github.io/shf/2016/04/19/prns.html
@@ -22,11 +22,6 @@
 // PRNS_WEYL:
 // PRNS_WEYL_D:
 
-#include <stdint.h>
-
-#ifndef PRNS_SMALLCRUSH
-#define PRNS_SMALLCRUSH
-#endif
 
 typedef struct { uint64_t i;  } prns_t;
 typedef struct { uint64_t i,k;} prns_down_t;

@@ -1,4 +1,10 @@
 ===========================================================================================
+Apache License 2.0
+===========================================================================================
+
+glad2 Loader Generator (generated output) - Copyright (c) 2013-2020 The Khronos Group Inc. 
+
+===========================================================================================
 BSD 3-Clause License
 ===========================================================================================
 
@@ -97,8 +103,6 @@ BW_Midi_Sequencer library - Copyright (c) 2015-2022 Vitaly Novichkov
 Dear ImGUI - Copyright (c) 2014-2023 Omar Cornut
 
 debugger.lua -Copyright (c) 2023 Scott Lembcke and Howling Moon Software
-
-glad library - Copyright (c) 2013-2022 David Herberth
 
 json.lua - Copyright (c) 2020 rxi
 

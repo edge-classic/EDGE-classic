@@ -314,11 +314,11 @@ static bool InitializeWindow(DisplayMode *mode)
     }
 
 #ifndef EDGE_SOKOL
-    gladLoadGL();
+    int version = gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
 
-    if (GLVersion.major == 1 && GLVersion.minor < 3)
-        FatalError("System only supports GL %d.%d. Minimum GL version 1.3 required!\n", GLVersion.major,
-                   GLVersion.minor);
+    if (!version || (GLAD_VERSION_MAJOR(version) && GLAD_VERSION_MINOR(version) < 3))
+        FatalError("System only supports GL %d.%d. Minimum GL version 1.3 required!\n", GLAD_VERSION_MAJOR(version),
+                   GLAD_VERSION_MINOR(version));
 #endif
 
     return true;

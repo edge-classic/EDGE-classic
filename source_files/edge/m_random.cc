@@ -28,6 +28,7 @@
 #include <stdint.h>
 
 #include "i_system.h"
+#define PRNS_SMALLCRUSH
 #include "prns.h"
 
 prns_t      stateful_rng;

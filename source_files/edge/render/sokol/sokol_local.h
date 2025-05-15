@@ -6,5 +6,6 @@
 #include "r_modes.h"
 #include "r_state.h"
 #include "sokol_gfx.h"
+#include "sokol_gfx_ec.h"
 #include "sokol_gl.h"
 #include "sokol_log.h"

@@ -370,7 +370,8 @@ static OptionMenuItem mainoptions[] = {
     {kOptionMenuItemTypeFunction, "MenuStartBotmatch", nullptr, 0, nullptr, OptionMenuHostNetGame, nullptr, nullptr, 0,
      0, 0, ""},
 #ifndef EDGE_WEB
-    {kOptionMenuItemTypeFunction, "MenuBrowseHome", nullptr, 0, nullptr, OptionMenuBrowseHome, nullptr, nullptr, 0, 0, 0, ""},
+    {kOptionMenuItemTypeFunction, "MenuBrowseHome", nullptr, 0, nullptr, OptionMenuBrowseHome, nullptr, nullptr, 0, 0,
+     0, ""},
 #else
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
 #endif
@@ -2254,7 +2255,7 @@ void OptionMenuBrowseHome(int key_pressed, ConsoleVariable *console_variable)
 {
     EPI_UNUSED(key_pressed);
     EPI_UNUSED(console_variable);
-    
+
     epi::OpenDirectory(home_directory);
 }
 #endif

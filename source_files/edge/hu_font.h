@@ -59,62 +59,133 @@ class Font
     friend class FontContainer;
 
   public:
-    Font(FontDefinition *definition);
-    ~Font();
-
-  private:
-  public:
-    void Load();
-
-    float NominalWidth() const;
-    float NominalHeight() const;
-
-    float CharRatio(char ch);
-    float CharWidth(char ch);
-    float StringWidth(const char *str);
-    int   MaxFit(int pixel_w, const char *str);
-    int   GetGlyphIndex(char ch);
-
-    const Image *CharImage(char ch) const;
-
-    PatchFontCache patch_font_cache_;
+    Font(){};
+    virtual ~Font(){};
 
     FontDefinition *definition_;
 
     float spacing_;
 
-    // For IMAGE type
+  public:
+    virtual float NominalWidth() const  = 0;
+    virtual float NominalHeight() const = 0;
+
+    virtual float CharRatio(char ch)                = 0;
+    virtual float CharWidth(char ch)                = 0;
+    virtual float StringWidth(std::string_view str) = 0;
+    virtual float GetYShift()                       = 0;
+
+    virtual bool HasChar(char ch) const = 0;
+};
+
+class ImageFont final : public Font
+{
+  public:
+    ImageFont(FontDefinition *definition);
+    ~ImageFont() override;
+
+    float NominalWidth() const override;
+    float NominalHeight() const override;
+
+    float CharRatio(char ch) override;
+    float CharWidth(char ch) override;
+    float StringWidth(std::string_view str) override;
+    float GetYShift() override
+    {
+        return 0;
+    }
+
+    bool HasChar(char ch) const override
+    {
+        EPI_UNUSED(ch);
+        return true;
+    };
+
+  public:
     const Image *font_image_;
+    float        image_monospace_width_;
     float        image_character_width_;
     float        image_character_height_;
-    float       *individual_char_widths_;
-    float       *individual_char_ratios_;
-    float        image_monospace_width_;
 
-    // For TRUETYPE type, 3 sizes
-    float             truetype_kerning_scale_[3];
-    float             truetype_reference_yshift_[3];
-    float             truetype_reference_height_[3];
-    stbtt_pack_range *truetype_atlas_[3];
-    unsigned int      truetype_texture_id_[3];
-    unsigned int      truetype_smoothed_texture_id_[3];
-    int               truetype_character_width_[3];
-    int               truetype_character_height_[3];
-    // Only need one of these
-    stbtt_fontinfo                            *truetype_info_;
-    uint8_t                                   *truetype_buffer_;
-    std::unordered_map<int, TrueTypeCharacter> truetype_glyph_map_;
+  private:
+    float *individual_char_widths_;
+    float *individual_char_ratios_;
+};
+
+class PatchFont final : public Font
+{
+  public:
+    PatchFont(FontDefinition *definition);
+    ~PatchFont() override{};
+
+    float NominalWidth() const override;
+    float NominalHeight() const override;
+
+    float CharRatio(char ch) override
+    {
+        EPI_UNUSED(ch);
+        return 0;
+    };
+    float CharWidth(char ch) override;
+    float StringWidth(std::string_view str) override;
+    float GetYShift() override
+    {
+        return 0;
+    }
+    float GetCharXOffset(char ch);
+    float GetCharYOffset(char ch);
+
+    bool HasChar(char ch) const override;
+
+  public:
+    PatchFontCache patch_font_cache_;
 
   private:
     void BumpPatchName(char *name);
-    void LoadPatches();
-    void LoadFontImage();
-    void LoadFontTTF();
+};
+
+class TTFFont final : public Font
+{
+  public:
+    TTFFont(FontDefinition *definition);
+    ~TTFFont() override;
+
+    float NominalWidth() const override;
+    float NominalHeight() const override;
+
+    float CharRatio(char ch) override
+    {
+        EPI_UNUSED(ch);
+        return 0;
+    };
+    float CharWidth(char ch) override;
+    float StringWidth(std::string_view str) override;
+    int   GetGlyphIndex(char ch);
+    float GetYShift() override;
+
+    bool HasChar(char ch) const override;
+
+  public:
+    float                                      truetype_kerning_scale_[3];
+    unsigned int                               truetype_texture_id_[3];
+    unsigned int                               truetype_smoothed_texture_id_[3];
+    std::unordered_map<int, TrueTypeCharacter> truetype_glyph_map_;
+    stbtt_fontinfo                            *truetype_info_;
+
+  private:
+    float             truetype_reference_yshift_[3];
+    stbtt_pack_range *truetype_atlas_[3];
+    int               truetype_character_width_[3];
+    int               truetype_character_height_[3];
+    uint8_t          *truetype_buffer_;
 };
 
 class FontContainer : public std::vector<Font *>
 {
     friend class Font;
+    friend class ImageFont;
+    friend class PatchFont;
+    friend class TTFFont;
 
   public:
     FontContainer()
@@ -155,7 +226,6 @@ extern FontContainer hud_fonts;
 
 extern int current_font_size;
 
-// Temporary measure since all of our text routines are Unicode-unaware
 constexpr int kCP437UnicodeValues[256] = {
     0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0008, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d,
     0x000e, 0x000f, 0x0010, 0x0011, 0x0012, 0x0013, 0x0014, 0x0015, 0x0016, 0x0017, 0x0018, 0x0019, 0x001a, 0x001b,

@@ -38,6 +38,7 @@
 #include <list>
 
 #include "ddf_flat.h"
+#include "ddf_font.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "e_main.h"
@@ -1996,25 +1997,33 @@ void DeleteAllImages(bool shutdown)
         DeleteAllLightImages();
         for (Font *font : hud_fonts)
         {
-            for (int i = 0; i < 3; ++i)
+            if (font->definition_->type_ == kFontTypeTrueType)
             {
-                if (font->truetype_texture_id_[i])
+                TTFFont *ttf = (TTFFont *)font;
+                for (int i = 0; i < 3; ++i)
                 {
-                    render_state->DeleteTexture(&font->truetype_texture_id_[i]);
-                }
-                if (font->truetype_smoothed_texture_id_[i])
-                {
-                    render_state->DeleteTexture(&font->truetype_smoothed_texture_id_[i]);
+                    if (ttf->truetype_texture_id_[i])
+                    {
+                        render_state->DeleteTexture(&ttf->truetype_texture_id_[i]);
+                    }
+                    if (ttf->truetype_smoothed_texture_id_[i])
+                    {
+                        render_state->DeleteTexture(&ttf->truetype_smoothed_texture_id_[i]);
+                    }
                 }
             }
-            if (font->patch_font_cache_.atlas_texture_id)
-                render_state->DeleteTexture(&font->patch_font_cache_.atlas_texture_id);
-            if (font->patch_font_cache_.atlas_smoothed_texture_id)
-                render_state->DeleteTexture(&font->patch_font_cache_.atlas_smoothed_texture_id);
-            if (font->patch_font_cache_.atlas_whitened_texture_id)
-                render_state->DeleteTexture(&font->patch_font_cache_.atlas_whitened_texture_id);
-            if (font->patch_font_cache_.atlas_whitened_smoothed_texture_id)
-                render_state->DeleteTexture(&font->patch_font_cache_.atlas_whitened_smoothed_texture_id);
+            else if (font->definition_->type_ == kFontTypePatch)
+            {
+                PatchFont *pat = (PatchFont *)font;
+                if (pat->patch_font_cache_.atlas_texture_id)
+                    render_state->DeleteTexture(&pat->patch_font_cache_.atlas_texture_id);
+                if (pat->patch_font_cache_.atlas_smoothed_texture_id)
+                    render_state->DeleteTexture(&pat->patch_font_cache_.atlas_smoothed_texture_id);
+                if (pat->patch_font_cache_.atlas_whitened_texture_id)
+                    render_state->DeleteTexture(&pat->patch_font_cache_.atlas_whitened_texture_id);
+                if (pat->patch_font_cache_.atlas_whitened_smoothed_texture_id)
+                    render_state->DeleteTexture(&pat->patch_font_cache_.atlas_whitened_smoothed_texture_id);
+            }
         }
         ImageMap::iterator iter;
         ImageMap::iterator iter_end;

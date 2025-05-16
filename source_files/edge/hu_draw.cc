@@ -39,7 +39,7 @@ static constexpr float kVerticalSpacing = 1.0f;
 
 extern ConsoleLine    *quit_lines[kENDOOMLines];
 extern int             console_cursor;
-extern Font           *endoom_font;
+extern const Font     *endoom_font;
 extern ConsoleVariable video_overlay;
 
 static Font *default_font;
@@ -361,7 +361,7 @@ void HUDCalcTurbulentTexCoords(float *tx, float *ty, float x, float y)
 //----------------------------------------------------------------------------
 
 void HUDRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image, float tx1, float ty1, float tx2,
-                 float ty2, float alpha, RGBAColor text_col, float sx, float sy)
+                 float ty2, float alpha, RGBAColor text_col, float sx, float sy, bool font_draw)
 {
     if (hx1 >= hx2 || hy1 >= hy2)
         return;
@@ -383,40 +383,47 @@ void HUDRawImage(float hx1, float hy1, float hx2, float hy2, const Image *image,
         do_whiten = true;
     }
 
-    if (epi::StringCaseCompareASCII(image->name_, "FONT_DUMMY_IMAGE") == 0)
+    if (!image)
     {
+        EPI_ASSERT(font_draw &&
+                   (current_font->definition_->type_ == kFontTypeTrueType ||
+                    current_font->definition_->type_ ==
+                        kFontTypePatch)); // The only time we should be legitimately sending a null Image pointer
+
         if (current_font->definition_->type_ == kFontTypeTrueType)
         {
-            blend = kBlendingAlpha;
+            const TTFFont *cur_font = (const TTFFont *)current_font;
+            blend                   = kBlendingAlpha;
             if ((image_smoothing &&
-                 current_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothOnDemand) ||
-                current_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothAlways)
-                tex_id = current_font->truetype_smoothed_texture_id_[current_font_size];
+                 cur_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothOnDemand) ||
+                cur_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothAlways)
+                tex_id = cur_font->truetype_smoothed_texture_id_[current_font_size];
             else
-                tex_id = current_font->truetype_texture_id_[current_font_size];
+                tex_id = cur_font->truetype_texture_id_[current_font_size];
         }
         else // patch font
         {
-            if (!(alpha < 0.11f || image->opacity_ == kOpacityComplex))
+            const PatchFont *cur_font = (const PatchFont *)current_font;
+            if (alpha >= 0.11f)
                 blend = kBlendingLess;
             else
                 blend = kBlendingMasked;
             blend = (BlendingMode)(blend | kBlendingAlpha);
             if ((image_smoothing &&
-                 current_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothOnDemand) ||
-                current_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothAlways)
+                 cur_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothOnDemand) ||
+                cur_font->definition_->truetype_smoothing_ == FontDefinition::kTrueTypeSmoothAlways)
             {
                 if (do_whiten)
-                    tex_id = current_font->patch_font_cache_.atlas_whitened_smoothed_texture_id;
+                    tex_id = cur_font->patch_font_cache_.atlas_whitened_smoothed_texture_id;
                 else
-                    tex_id = current_font->patch_font_cache_.atlas_smoothed_texture_id;
+                    tex_id = cur_font->patch_font_cache_.atlas_smoothed_texture_id;
             }
             else
             {
                 if (do_whiten)
-                    tex_id = current_font->patch_font_cache_.atlas_whitened_texture_id;
+                    tex_id = cur_font->patch_font_cache_.atlas_whitened_texture_id;
                 else
-                    tex_id = current_font->patch_font_cache_.atlas_texture_id;
+                    tex_id = cur_font->patch_font_cache_.atlas_texture_id;
             }
         }
 
@@ -982,7 +989,8 @@ float HUDFontWidthNew(float size)
     {
         if (size > 0)
         {
-            factor = size * current_font->patch_font_cache_.ratio + current_font->spacing_;
+            const PatchFont *pfont = (const PatchFont *)current_font;
+            factor                 = size * pfont->patch_font_cache_.ratio + pfont->spacing_;
         }
         else
         {
@@ -1023,7 +1031,8 @@ float HUDStringWidthNew(const char *str, float size)
         factor = current_font->CharWidth('W');
         if (size > 0)
         {
-            factor = size * current_font->patch_font_cache_.ratio + current_font->spacing_;
+            const PatchFont *pfont = (const PatchFont *)current_font;
+            factor                 = size * pfont->patch_font_cache_.ratio + pfont->spacing_;
         }
     }
     // get the length of the line
@@ -1042,75 +1051,80 @@ float HUDStringHeight(const char *str)
     return slines * HUDFontHeight() + (slines - 1) * kVerticalSpacing;
 }
 
-void HUDDrawChar(float left_x, float top_y, const Image *img, char ch, float size)
+void HUDDrawChar(float left_x, float top_y, char ch, float size)
 {
+    const Image *img = nullptr;
+
     float sc_x = current_scale; // TODO * aspect;
     float sc_y = current_scale;
 
-    float x = left_x - img->ScaledOffsetX() * sc_x;
-    float y = top_y - img->ScaledOffsetY() * sc_y;
+    float x = left_x;
+    float y = top_y;
 
     float w, h;
     float tx1, tx2, ty1, ty2;
 
-    if (epi::StringCaseCompareASCII(img->name_, "FONT_DUMMY_IMAGE") == 0)
+    if (current_font->definition_->type_ == kFontTypeTrueType)
     {
-        if (current_font->definition_->type_ == kFontTypeTrueType)
-        {
-            stbtt_aligned_quad *q =
-                &current_font->truetype_glyph_map_.at((uint8_t)ch).character_quad[current_font_size];
-            y = top_y + (current_font->truetype_glyph_map_.at((uint8_t)ch).y_shift[current_font_size] *
-                         (size > 0 ? (size / current_font->definition_->default_size_) : 1.0) * sc_y);
-            w = ((size > 0 ? (current_font->CharWidth(ch) * (size / current_font->definition_->default_size_))
-                           : current_font->CharWidth(ch)) -
-                 current_font->spacing_) *
-                sc_x;
-            h = (current_font->truetype_glyph_map_.at((uint8_t)ch).height[current_font_size] *
-                 (size > 0 ? (size / current_font->definition_->default_size_) : 1.0)) *
-                sc_y;
-            tx1 = q->s0;
-            ty1 = q->t0;
-            tx2 = q->s1;
-            ty2 = q->t1;
-        }
-        else // Patch font atlas
-        {
-            w = (size > 0 ? (size * current_font->patch_font_cache_.ratio) : current_font->CharWidth(ch)) * sc_x;
-            h = (size > 0 ? size
-                          : (current_font->definition_->default_size_ > 0.0
-                                 ? current_font->definition_->default_size_
-                                 : current_font->patch_font_cache_.atlas_rectangles.at(kCP437UnicodeValues[(uint8_t)ch])
-                                       .image_height)) *
-                sc_y;
-            x -=
-                (current_font->patch_font_cache_.atlas_rectangles.at(kCP437UnicodeValues[(uint8_t)ch]).offset_x * sc_x);
-            y -=
-                (current_font->patch_font_cache_.atlas_rectangles.at(kCP437UnicodeValues[(uint8_t)ch]).offset_y * sc_y);
-            tx1 = current_font->patch_font_cache_.atlas_rectangles.at(kCP437UnicodeValues[(uint8_t)ch])
-                      .texture_coordinate_x;
-            ty2 = current_font->patch_font_cache_.atlas_rectangles.at(kCP437UnicodeValues[(uint8_t)ch])
-                      .texture_coordinate_y;
-            tx2 = tx1 + current_font->patch_font_cache_.atlas_rectangles.at(kCP437UnicodeValues[(uint8_t)ch])
-                            .texture_coordinate_width;
-            ty1 = ty2 + current_font->patch_font_cache_.atlas_rectangles.at(kCP437UnicodeValues[(uint8_t)ch])
-                            .texture_coordinate_height;
-        }
+        TTFFont            *cur_font = (TTFFont *)current_font;
+        stbtt_aligned_quad *q        = &cur_font->truetype_glyph_map_.at((uint8_t)ch).character_quad[current_font_size];
+        y = top_y + (cur_font->truetype_glyph_map_.at((uint8_t)ch).y_shift[current_font_size] *
+                     (size > 0 ? (size / cur_font->definition_->default_size_) : 1.0) * sc_y);
+        w = ((size > 0 ? (cur_font->CharWidth(ch) * (size / cur_font->definition_->default_size_))
+                       : cur_font->CharWidth(ch)) -
+             cur_font->spacing_) *
+            sc_x;
+        h = (cur_font->truetype_glyph_map_.at((uint8_t)ch).height[current_font_size] *
+             (size > 0 ? (size / cur_font->definition_->default_size_) : 1.0)) *
+            sc_y;
+        tx1 = q->s0;
+        ty1 = q->t0;
+        tx2 = q->s1;
+        ty2 = q->t1;
+    }
+    else if (current_font->definition_->type_ == kFontTypePatch)
+    {
+        PatchFont *cur_font = (PatchFont *)current_font;
+        w                   = (size > 0 ? (size * cur_font->patch_font_cache_.ratio) : cur_font->CharWidth(ch)) * sc_x;
+        h                   = (size > 0 ? size
+                                        : (cur_font->definition_->default_size_ > 0.0
+                                               ? cur_font->definition_->default_size_
+                                               : cur_font->patch_font_cache_.atlas_rectangles.at(kCP437UnicodeValues[(uint8_t)ch])
+                                   .image_height)) *
+            sc_y;
+        x -= (cur_font->patch_font_cache_.atlas_rectangles.at(kCP437UnicodeValues[(uint8_t)ch]).offset_x * sc_x);
+        y -= (cur_font->patch_font_cache_.atlas_rectangles.at(kCP437UnicodeValues[(uint8_t)ch]).offset_y * sc_y);
+        tx1 = cur_font->patch_font_cache_.atlas_rectangles.at(kCP437UnicodeValues[(uint8_t)ch]).texture_coordinate_x;
+        ty2 = cur_font->patch_font_cache_.atlas_rectangles.at(kCP437UnicodeValues[(uint8_t)ch]).texture_coordinate_y;
+        tx2 =
+            tx1 +
+            cur_font->patch_font_cache_.atlas_rectangles.at(kCP437UnicodeValues[(uint8_t)ch]).texture_coordinate_width;
+        ty1 =
+            ty2 +
+            cur_font->patch_font_cache_.atlas_rectangles.at(kCP437UnicodeValues[(uint8_t)ch]).texture_coordinate_height;
     }
     else // spritesheet font
     {
-        w = ((size > 0 ? (size * current_font->CharRatio(ch)) : current_font->CharWidth(ch)) - current_font->spacing_) *
-            sc_x;
-        h      = (size > 0 ? size : current_font->image_character_height_) * sc_y;
+        ImageFont *cur_font = (ImageFont *)current_font;
+        img                 = cur_font->font_image_;
+
+        EPI_ASSERT(img);
+
+        x -= img->ScaledOffsetX() * sc_x;
+        y -= img->ScaledOffsetY() * sc_y;
+
+        w      = ((size > 0 ? (size * cur_font->CharRatio(ch)) : cur_font->CharWidth(ch)) - cur_font->spacing_) * sc_x;
+        h      = (size > 0 ? size : cur_font->image_character_height_) * sc_y;
         int px = (uint8_t)ch % 16;
         int py = 15 - (uint8_t)ch / 16;
-        tx1    = (px)*current_font->font_image_->width_ratio_;
-        tx2    = (px + 1) * current_font->font_image_->width_ratio_;
+        tx1    = (px)*cur_font->font_image_->width_ratio_;
+        tx2    = (px + 1) * cur_font->font_image_->width_ratio_;
         float char_texcoord_adjust =
-            ((tx2 - tx1) - ((tx2 - tx1) * (current_font->CharWidth(ch) / current_font->image_character_width_))) / 2;
+            ((tx2 - tx1) - ((tx2 - tx1) * (cur_font->CharWidth(ch) / cur_font->image_character_width_))) / 2;
         tx1 += char_texcoord_adjust;
         tx2 -= char_texcoord_adjust;
-        ty1 = (py)*current_font->font_image_->height_ratio_;
-        ty2 = (py + 1) * current_font->font_image_->height_ratio_;
+        ty1 = (py)*cur_font->font_image_->height_ratio_;
+        ty2 = (py + 1) * cur_font->font_image_->height_ratio_;
     }
 
     float x1 = HUDToRealCoordinatesX(x);
@@ -1119,7 +1133,7 @@ void HUDDrawChar(float left_x, float top_y, const Image *img, char ch, float siz
     float y1 = HUDToRealCoordinatesY(y + h);
     float y2 = HUDToRealCoordinatesY(y);
 
-    HUDRawImage(x1, y1, x2, y2, img, tx1, ty1, tx2, ty2, current_alpha, current_color, 0.0, 0.0);
+    HUDRawImage(x1, y1, x2, y2, img, tx1, ty1, tx2, ty2, current_alpha, current_color, 0.0, 0.0, true);
 }
 
 //
@@ -1128,18 +1142,6 @@ void HUDDrawChar(float left_x, float top_y, const Image *img, char ch, float siz
 void HUDDrawText(float x, float y, const char *str, float size)
 {
     EPI_ASSERT(current_font);
-
-    float cy = y;
-
-    if (current_y_alignment >= 0)
-    {
-        float total_h = size > 0 ? size : HUDStringHeight(str);
-
-        if (current_y_alignment == 0)
-            total_h /= 2.0f;
-
-        cy -= total_h;
-    }
 
     // handle each line
 
@@ -1154,31 +1156,56 @@ void HUDDrawText(float x, float y, const char *str, float size)
             len++;
 
         float cx      = x;
+        float cy      = y;
+        float total_h = (size > 0 ? size : HUDStringHeight(str)) * current_scale;
         float total_w = 0;
+        float yoff    = 0;
 
-        for (int i = 0; i < len; i++)
+        if (current_font->definition_->type_ == kFontTypeTrueType)
         {
-            if (current_font->definition_->type_ == kFontTypeTrueType)
+            TTFFont *cur_font = (TTFFont *)current_font;
+            for (int i = 0; i < len; i++)
             {
-                float factor = size > 0 ? (size / current_font->definition_->default_size_) : 1;
-                total_w += current_font->CharWidth(str[i]) * factor * current_scale;
+                float factor = size > 0 ? (size / cur_font->definition_->default_size_) : 1;
+                total_w += cur_font->CharWidth(str[i]) * factor * current_scale;
                 if (str[i + 1])
                 {
-                    total_w +=
-                        stbtt_GetGlyphKernAdvance(current_font->truetype_info_, current_font->GetGlyphIndex(str[i]),
-                                                  current_font->GetGlyphIndex(str[i + 1])) *
-                        current_font->truetype_kerning_scale_[current_font_size] * factor * current_scale;
+                    total_w += stbtt_GetGlyphKernAdvance(cur_font->truetype_info_, cur_font->GetGlyphIndex(str[i]),
+                                                         cur_font->GetGlyphIndex(str[i + 1])) *
+                               cur_font->truetype_kerning_scale_[current_font_size] * factor * current_scale;
                 }
             }
-            else if (current_font->definition_->type_ == kFontTypeImage)
+        }
+        else if (current_font->definition_->type_ == kFontTypeImage)
+        {
+            for (int i = 0; i < len; i++)
+            {
                 total_w += (size > 0 ? size * current_font->CharRatio(str[i]) + current_font->spacing_
                                      : current_font->CharWidth(str[i])) *
                            current_scale;
-            else
-                total_w += (size > 0 ? size * current_font->patch_font_cache_.ratio + current_font->spacing_
-                                     : current_font->CharWidth(str[i])) *
-                           current_scale;
+            }
         }
+        else
+        {
+            PatchFont *cur_font = (PatchFont *)current_font;
+            for (int i = 0; i < len; i++)
+            {
+                float xoff = 0;
+                if (cur_font->HasChar(str[i]))
+                {
+                    xoff            = cur_font->GetCharXOffset(str[i]);
+                    float off_check = cur_font->GetCharYOffset(str[i]);
+                    if (HMM_ABS(off_check) > HMM_ABS(yoff))
+                        yoff = off_check;
+                }
+                total_w += ((size > 0 ? size * cur_font->patch_font_cache_.ratio + cur_font->spacing_
+                                      : cur_font->CharWidth(str[i])) -
+                            xoff) *
+                           current_scale;
+            }
+        }
+
+        total_h += HMM_ABS(yoff) * current_scale;
 
         if (current_x_alignment >= 0)
         {
@@ -1188,41 +1215,74 @@ void HUDDrawText(float x, float y, const char *str, float size)
             cx -= total_w;
         }
 
-        for (int k = 0; k < len; k++)
+        if (current_y_alignment >= 0)
         {
-            char ch = str[k];
+            if (current_y_alignment == 0)
+                total_h /= 2.0f;
 
-            const Image *img = current_font->CharImage(ch);
+            cy -= total_h;
+        }
 
-            if (img)
-                HUDDrawChar(cx, cy, img, ch, size);
-
-            if (current_font->definition_->type_ == kFontTypeTrueType)
+        if (current_font->definition_->type_ == kFontTypeTrueType)
+        {
+            TTFFont *cur_font = (TTFFont *)current_font;
+            for (int k = 0; k < len; k++)
             {
-                float factor = size > 0 ? (size / current_font->definition_->default_size_) : 1;
-                cx += current_font->CharWidth(ch) * factor * current_scale;
+                char ch = str[k];
+
+                if (cur_font->HasChar(ch))
+                    HUDDrawChar(cx, cy, ch, size);
+
+                float factor = size > 0 ? (size / cur_font->definition_->default_size_) : 1;
+                cx += cur_font->CharWidth(ch) * factor * current_scale;
                 if (str[k + 1])
                 {
-                    cx += stbtt_GetGlyphKernAdvance(current_font->truetype_info_, current_font->GetGlyphIndex(str[k]),
-                                                    current_font->GetGlyphIndex(str[k + 1])) *
-                          current_font->truetype_kerning_scale_[current_font_size] * factor * current_scale;
+                    cx += stbtt_GetGlyphKernAdvance(cur_font->truetype_info_, cur_font->GetGlyphIndex(str[k]),
+                                                    cur_font->GetGlyphIndex(str[k + 1])) *
+                          cur_font->truetype_kerning_scale_[current_font_size] * factor * current_scale;
                 }
             }
-            else if (current_font->definition_->type_ == kFontTypeImage)
+        }
+        else if (current_font->definition_->type_ == kFontTypeImage)
+        {
+            for (int k = 0; k < len; k++)
+            {
+                char ch = str[k];
+
+                if (current_font->HasChar(ch))
+                    HUDDrawChar(cx, cy, ch, size);
+
                 cx += (size > 0 ? size * current_font->CharRatio(ch) + current_font->spacing_
                                 : current_font->CharWidth(ch)) *
                       current_scale;
-            else
-                cx += (size > 0 ? size * current_font->patch_font_cache_.ratio + current_font->spacing_
-                                : current_font->CharWidth(ch)) *
+            }
+        }
+        else
+        {
+            PatchFont *cur_font = (PatchFont *)current_font;
+            for (int k = 0; k < len; k++)
+            {
+                char  ch   = str[k];
+                float xoff = 0;
+
+                if (cur_font->HasChar(ch))
+                {
+                    HUDDrawChar(cx, cy, ch, size);
+                    xoff = cur_font->GetCharXOffset(ch);
+                }
+
+                cx += ((size > 0 ? size * cur_font->patch_font_cache_.ratio + cur_font->spacing_
+                                 : cur_font->CharWidth(ch)) -
+                       xoff) *
                       current_scale;
+            }
         }
 
         if (str[len] == 0)
             break;
 
         str += (len + 1);
-        cy += (size > 0 ? size : HUDFontHeight()) + kVerticalSpacing;
+        cy += total_h + kVerticalSpacing;
     }
 }
 
@@ -1267,7 +1327,8 @@ void HUDDrawQuitScreen()
         }
         EndRenderUnit(endoom_vert_count);
         // Second pass, draw characters
-        const Image *img = endoom_font->font_image_;
+        ImageFont   *en_font = (ImageFont *)endoom_font;
+        const Image *img     = en_font->font_image_;
         EPI_ASSERT(img);
         GLuint       tex_id = ImageCache(img, true, (const Colormap *)0, true);
         BlendingMode blend  = kBlendingNone;
@@ -1303,10 +1364,10 @@ void HUDDrawQuitScreen()
 
                 uint8_t px = character % 16;
                 uint8_t py = 15 - character / 16;
-                tx1        = (px)*endoom_font->font_image_->width_ratio_;
-                tx2        = (px + 1) * endoom_font->font_image_->width_ratio_;
-                ty1        = (py)*endoom_font->font_image_->height_ratio_;
-                ty2        = (py + 1) * endoom_font->font_image_->height_ratio_;
+                tx1        = (px)*en_font->font_image_->width_ratio_;
+                tx2        = (px + 1) * en_font->font_image_->width_ratio_;
+                ty1        = (py)*en_font->font_image_->height_ratio_;
+                ty2        = (py + 1) * en_font->font_image_->height_ratio_;
 
                 float width_adjust = FNX / 2 + .5;
 

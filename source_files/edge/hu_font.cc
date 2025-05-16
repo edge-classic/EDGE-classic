@@ -50,77 +50,60 @@ int current_font_size;
 static constexpr int truetype_scaling_font_sizes[3]   = {12, 24, 48};
 static constexpr int truetype_scaling_bitmap_sizes[3] = {512, 1024, 2048};
 
-Font::Font(FontDefinition *definition) : definition_(definition)
+ImageFont::ImageFont(FontDefinition *definition)
 {
+    definition_             = definition;
     font_image_             = nullptr;
-    truetype_info_          = nullptr;
-    truetype_buffer_        = nullptr;
-    individual_char_widths_ = nullptr;
     individual_char_ratios_ = nullptr;
-    EPI_CLEAR_MEMORY(truetype_atlas_, stbtt_pack_range *, 3);
-    EPI_CLEAR_MEMORY(truetype_kerning_scale_, float, 3);
-    EPI_CLEAR_MEMORY(truetype_reference_yshift_, float, 3);
-    EPI_CLEAR_MEMORY(truetype_reference_height_, float, 3);
-    EPI_CLEAR_MEMORY(truetype_texture_id_, unsigned int, 3);
-    EPI_CLEAR_MEMORY(truetype_smoothed_texture_id_, unsigned int, 3);
+    individual_char_widths_ = nullptr;
+
+    if (!definition_->image_name_.empty())
+        font_image_ =
+            ImageLookup(definition_->image_name_.c_str(), kImageNamespaceGraphic, kImageLookupExact | kImageLookupNull);
+    else
+        FatalError("LoadFontImage: No image name provided for font %s!", definition_->name_.c_str());
+    if (!font_image_)
+        FatalError("LoadFontImage: Image %s not found for font %s!", definition_->image_name_.c_str(),
+                   definition_->name_.c_str());
+
+    int char_height = font_image_->actual_height_ / 16;
+    int char_width  = font_image_->actual_width_ / 16;
+    image_character_height_ =
+        (definition_->default_size_ == 0.0 ? char_height : definition_->default_size_) * font_image_->scale_y_;
+    image_character_width_ =
+        (definition_->default_size_ == 0.0 ? char_width : definition_->default_size_) * font_image_->scale_x_;
+    image_monospace_width_ = 0;
+    spacing_               = definition_->spacing_;
+    // Determine individual character widths and ratios
+    individual_char_widths_ = new float[256];
+    individual_char_ratios_ = new float[256];
+    ImageData *char_data    = ReadAsEpiBlock((Image *)font_image_);
+    uint16_t   real_left    = 0;
+    uint16_t   real_right   = 0;
+    RGBAColor  background   = kRGBATransparent;
+    // Assumes that first pixel is part of the background; for a spritesheet font this is almost certainly
+    // the case
+    if (char_data->depth_ == 3)
+        background = epi::MakeRGBA(char_data->pixels_[0], char_data->pixels_[1], char_data->pixels_[2]);
+    for (int i = 0; i < 256; i++)
+    {
+        int px = i % 16;
+        int py = 15 - i / 16;
+        char_data->DetermineRealBounds(nullptr, &real_left, &real_right, nullptr, background, px * char_width,
+                                       px * char_width + char_width, py * char_height, py * char_height + char_height);
+        individual_char_widths_[i] = font_image_->scale_x_ * (real_right - real_left);
+        if (definition_->default_size_ > 0.0)
+            individual_char_widths_[i] *= (definition_->default_size_ / char_width);
+        if (individual_char_widths_[i] > image_monospace_width_)
+            image_monospace_width_ = individual_char_widths_[i];
+        individual_char_ratios_[i] = individual_char_widths_[i] / image_character_height_;
+    }
+    delete char_data;
 }
 
-Font::~Font()
+PatchFont::PatchFont(FontDefinition *definition)
 {
-    if (individual_char_widths_)
-    {
-        delete[] individual_char_widths_;
-        individual_char_widths_ = nullptr;
-    }
-    if (individual_char_ratios_)
-    {
-        delete[] individual_char_ratios_;
-        individual_char_ratios_ = nullptr;
-    }
-    for (int i = 0; i < 3; ++i)
-    {
-        if (truetype_atlas_[i])
-        {
-            if (truetype_atlas_[i]->chardata_for_range)
-                delete[] truetype_atlas_[i]->chardata_for_range;
-            delete truetype_atlas_[i];
-            truetype_atlas_[i] = nullptr;
-        }
-    }
-}
-
-void Font::BumpPatchName(char *name)
-{
-    // loops to increment the 10s (100s, etc) digit
-    for (char *s = name + strlen(name) - 1; s >= name; s--)
-    {
-        // only handle digits and letters
-        if (!epi::IsAlphanumericASCII(*s))
-            break;
-
-        if (*s == '9')
-        {
-            *s = '0';
-            continue;
-        }
-        if (*s == 'Z')
-        {
-            *s = 'A';
-            continue;
-        }
-        if (*s == 'z')
-        {
-            *s = 'a';
-            continue;
-        }
-
-        (*s) += 1;
-        break;
-    }
-}
-
-void Font::LoadPatches()
-{
+    definition_ = definition;
     // range of characters
     int              first = 9999;
     int              last  = 0;
@@ -319,293 +302,273 @@ void Font::LoadPatches()
     spacing_ = definition_->spacing_;
 }
 
-void Font::LoadFontImage()
+TTFFont::TTFFont(FontDefinition *definition)
 {
-    if (!font_image_)
-    {
-        if (!definition_->image_name_.empty())
-            font_image_ = ImageLookup(definition_->image_name_.c_str(), kImageNamespaceGraphic,
-                                      kImageLookupExact | kImageLookupNull);
-        else
-            FatalError("LoadFontImage: No image name provided for font %s!", definition_->name_.c_str());
-        if (!font_image_)
-            FatalError("LoadFontImage: Image %s not found for font %s!", definition_->image_name_.c_str(),
-                       definition_->name_.c_str());
-        int char_height = font_image_->actual_height_ / 16;
-        int char_width  = font_image_->actual_width_ / 16;
-        image_character_height_ =
-            (definition_->default_size_ == 0.0 ? char_height : definition_->default_size_) * font_image_->scale_y_;
-        image_character_width_ =
-            (definition_->default_size_ == 0.0 ? char_width : definition_->default_size_) * font_image_->scale_x_;
-        image_monospace_width_ = 0;
-        spacing_               = definition_->spacing_;
-        // Determine individual character widths and ratios
-        individual_char_widths_ = new float[256];
-        individual_char_ratios_ = new float[256];
-        ImageData *char_data    = ReadAsEpiBlock((Image *)font_image_);
-        uint16_t   real_left    = 0;
-        uint16_t   real_right   = 0;
-        RGBAColor  background   = kRGBATransparent;
-        // Assumes that first pixel is part of the background; for a spritesheet font this is almost certainly
-        // the case
-        if (char_data->depth_ == 3)
-            background = epi::MakeRGBA(char_data->pixels_[0], char_data->pixels_[1], char_data->pixels_[2]);
-        for (int i = 0; i < 256; i++)
-        {
-            int px = i % 16;
-            int py = 15 - i / 16;
-            char_data->DetermineRealBounds(nullptr, &real_left, &real_right, nullptr, background, px * char_width,
-                                           px * char_width + char_width, py * char_height,
-                                           py * char_height + char_height);
-            individual_char_widths_[i] = font_image_->scale_x_ * (real_right - real_left);
-            if (definition_->default_size_ > 0.0)
-                individual_char_widths_[i] *= (definition_->default_size_ / char_width);
-            if (individual_char_widths_[i] > image_monospace_width_)
-                image_monospace_width_ = individual_char_widths_[i];
-            individual_char_ratios_[i] = individual_char_widths_[i] / image_character_height_;
-        }
-        delete char_data;
-    }
-}
+    definition_      = definition;
+    truetype_info_   = nullptr;
+    truetype_buffer_ = nullptr;
+    EPI_CLEAR_MEMORY(truetype_atlas_, stbtt_pack_range *, 3);
+    EPI_CLEAR_MEMORY(truetype_kerning_scale_, float, 3);
+    EPI_CLEAR_MEMORY(truetype_reference_yshift_, float, 3);
+    EPI_CLEAR_MEMORY(truetype_texture_id_, unsigned int, 3);
+    EPI_CLEAR_MEMORY(truetype_smoothed_texture_id_, unsigned int, 3);
 
-void Font::LoadFontTTF()
-{
+    if (definition_->truetype_name_.empty())
+    {
+        FatalError("LoadFontTTF: No TTF file/lump name provided for font %s!", definition_->name_.c_str());
+    }
+
+    if (hud_fonts.ttf_buffers.count(definition_->truetype_name_))
+        truetype_buffer_ = hud_fonts.ttf_buffers[definition_->truetype_name_];
+
+    if (hud_fonts.ttf_infos.count(definition_->truetype_name_))
+        truetype_info_ = hud_fonts.ttf_infos[definition_->truetype_name_];
+
     if (!truetype_buffer_)
     {
-        if (definition_->truetype_name_.empty())
-        {
-            FatalError("LoadFontTTF: No TTF file/lump name provided for font %s!", definition_->name_.c_str());
-        }
+        epi::File *F;
 
-        if (hud_fonts.ttf_buffers.count(definition_->truetype_name_))
-            truetype_buffer_ = hud_fonts.ttf_buffers[definition_->truetype_name_];
-
-        if (hud_fonts.ttf_infos.count(definition_->truetype_name_))
-            truetype_info_ = hud_fonts.ttf_infos[definition_->truetype_name_];
-
-        if (!truetype_buffer_)
-        {
-            epi::File *F;
-
-            if (!epi::GetExtension(definition_->truetype_name_).empty()) // check for pack file
-                F = OpenFileFromPack(definition_->truetype_name_);
-            else
-                F = LoadLumpAsFile(CheckLumpNumberForName(definition_->truetype_name_.c_str()));
-
-            if (!F)
-                FatalError("LoadFontTTF: '%s' not found for font %s.\n", definition_->truetype_name_.c_str(),
-                           definition_->name_.c_str());
-
-            truetype_buffer_ = F->LoadIntoMemory();
-
-            hud_fonts.ttf_buffers.try_emplace(definition_->truetype_name_, truetype_buffer_);
-
-            delete F;
-        }
-
-        if (!truetype_info_)
-        {
-            truetype_info_ = new stbtt_fontinfo;
-            if (!stbtt_InitFont(truetype_info_, truetype_buffer_, 0))
-                FatalError("LoadFontTTF: Could not initialize font %s.\n", definition_->name_.c_str());
-            hud_fonts.ttf_infos.try_emplace(definition_->truetype_name_, truetype_info_);
-        }
-
-        TrueTypeCharacter ref;
-
-        ref.glyph_index = 0;
-
-        char ch = 0;
-
-        if (stbtt_FindGlyphIndex(truetype_info_, kCP437UnicodeValues[(uint8_t)('M')]) > 0)
-        {
-            ch              = 'M';
-            ref.glyph_index = stbtt_FindGlyphIndex(truetype_info_, kCP437UnicodeValues[(uint8_t)ch]);
-        }
-        else if (stbtt_FindGlyphIndex(truetype_info_, kCP437UnicodeValues[(uint8_t)('O')]) > 0)
-        {
-            ch              = 'O';
-            ref.glyph_index = stbtt_FindGlyphIndex(truetype_info_, kCP437UnicodeValues[(uint8_t)ch]);
-        }
-        else if (stbtt_FindGlyphIndex(truetype_info_, kCP437UnicodeValues[(uint8_t)('W')]) > 0)
-        {
-            ch              = 'W';
-            ref.glyph_index = stbtt_FindGlyphIndex(truetype_info_, kCP437UnicodeValues[(uint8_t)ch]);
-        }
+        if (!epi::GetExtension(definition_->truetype_name_).empty()) // check for pack file
+            F = OpenFileFromPack(definition_->truetype_name_);
         else
-        {
-            for (char c = 32; c < 127; c++)
-            {
-                if (stbtt_FindGlyphIndex(truetype_info_, kCP437UnicodeValues[(uint8_t)(c)]) > 0)
-                {
-                    ch              = c;
-                    ref.glyph_index = stbtt_FindGlyphIndex(truetype_info_, kCP437UnicodeValues[(uint8_t)ch]);
-                    break;
-                }
-            }
-        }
+            F = LoadLumpAsFile(CheckLumpNumberForName(definition_->truetype_name_.c_str()));
 
-        if (ref.glyph_index == 0)
-            FatalError("LoadFontTTF: No suitable characters in font %s.\n", definition_->name_.c_str());
+        if (!F)
+            FatalError("LoadFontTTF: '%s' not found for font %s.\n", definition_->truetype_name_.c_str(),
+                       definition_->name_.c_str());
 
-        for (int i = 0; i < 3; i++)
-        {
-            truetype_atlas_[i]                                   = new stbtt_pack_range;
-            truetype_atlas_[i]->first_unicode_codepoint_in_range = 0;
-            truetype_atlas_[i]->array_of_unicode_codepoints      = (int *)kCP437UnicodeValues;
-            truetype_atlas_[i]->font_size                        = truetype_scaling_font_sizes[i];
-            truetype_atlas_[i]->num_chars                        = 256;
-            truetype_atlas_[i]->chardata_for_range               = new stbtt_packedchar[256];
+        truetype_buffer_ = F->LoadIntoMemory();
 
-            if (definition_->default_size_ == 0.0)
-                definition_->default_size_ = 7.0f;
+        hud_fonts.ttf_buffers.try_emplace(definition_->truetype_name_, truetype_buffer_);
 
-            truetype_kerning_scale_[i] = stbtt_ScaleForPixelHeight(truetype_info_, definition_->default_size_);
-
-            const int32_t bitmap_size = truetype_scaling_bitmap_sizes[i];
-
-            uint8_t *temp_bitmap = new uint8_t[bitmap_size * bitmap_size];
-
-            stbtt_pack_context spc;
-            stbtt_PackBegin(&spc, temp_bitmap, bitmap_size, bitmap_size, 0, 1, nullptr);
-            stbtt_PackSetOversampling(&spc, 2, 2);
-            stbtt_PackFontRanges(&spc, truetype_buffer_, 0, truetype_atlas_[i], 1);
-            stbtt_PackEnd(&spc);
-
-            // Convert to RGBA, couldn't get the pack stride to work properly above
-            uint8_t *font_bitmap = new uint8_t[bitmap_size * bitmap_size * 4];
-            memset(font_bitmap, 255, bitmap_size * bitmap_size * 4);
-
-            uint8_t *src  = temp_bitmap;
-            uint8_t *dest = &font_bitmap[3];
-            for (int32_t j = 0; j < bitmap_size * bitmap_size; j++, src++, dest += 4)
-            {
-                *dest = *src;
-            }
-
-            render_state->GenTextures(1, &truetype_texture_id_[i]);
-            render_state->BindTexture(truetype_texture_id_[i]);
-            render_state->TextureMinFilter(GL_NEAREST);
-            render_state->TextureMagFilter(GL_NEAREST);
-            render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap_size, bitmap_size, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                                     font_bitmap);
-            render_state->FinishTextures(1, &truetype_texture_id_[i]);
-
-            render_state->GenTextures(1, &truetype_smoothed_texture_id_[i]);
-            render_state->BindTexture(truetype_smoothed_texture_id_[i]);
-            render_state->TextureMinFilter(GL_LINEAR);
-            render_state->TextureMagFilter(GL_LINEAR);
-            render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap_size, bitmap_size, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                                     font_bitmap);
-            render_state->FinishTextures(1, &truetype_smoothed_texture_id_[i]);
-
-            delete[] temp_bitmap;
-            delete[] font_bitmap;
-            float x       = 0.0f;
-            float y       = 0.0f;
-            float ascent  = 0.0f;
-            float descent = 0.0f;
-            float linegap = 0.0f;
-            stbtt_GetPackedQuad(truetype_atlas_[i]->chardata_for_range, bitmap_size, bitmap_size, (uint8_t)ch, &x, &y,
-                                &ref.character_quad[i], 0);
-            stbtt_GetScaledFontVMetrics(truetype_buffer_, 0, truetype_scaling_font_sizes[i], &ascent, &descent,
-                                        &linegap);
-            ref.width[i] = (ref.character_quad[i].x1 - ref.character_quad[i].x0) *
-                           (definition_->default_size_ / truetype_scaling_font_sizes[i]);
-            ref.height[i] = (ref.character_quad[i].y1 - ref.character_quad[i].y0) *
-                            (definition_->default_size_ / truetype_scaling_font_sizes[i]);
-            truetype_character_width_[i] = ref.width[i];
-            truetype_character_height_[i] =
-                (ascent - descent) * (definition_->default_size_ / truetype_scaling_font_sizes[i]);
-            ref.y_shift[i] = (truetype_character_height_[i] - ref.height[i]) +
-                             (ref.character_quad[i].y1 * (definition_->default_size_ / truetype_scaling_font_sizes[i]));
-            truetype_reference_yshift_[i] = ref.y_shift[i];
-            truetype_reference_height_[i] = ref.height[i];
-        }
-        truetype_glyph_map_.try_emplace((uint8_t)ch, ref);
-        spacing_ = definition_->spacing_ + 0.5; // + 0.5 for at least a minimal buffer
-                                                // between letters by default
+        delete F;
     }
-}
 
-void Font::Load()
-{
-    switch (definition_->type_)
+    if (!truetype_info_)
     {
-    case kFontTypePatch:
-        LoadPatches();
-        break;
-
-    case kFontTypeImage:
-        LoadFontImage();
-        break;
-
-    case kFontTypeTrueType:
-        LoadFontTTF();
-        break;
-
-    default:
-        FatalError("Coding error, unknown font type %d\n", definition_->type_);
+        truetype_info_ = new stbtt_fontinfo;
+        if (!stbtt_InitFont(truetype_info_, truetype_buffer_, 0))
+            FatalError("LoadFontTTF: Could not initialize font %s.\n", definition_->name_.c_str());
+        hud_fonts.ttf_infos.try_emplace(definition_->truetype_name_, truetype_info_);
     }
-}
 
-float Font::NominalWidth() const
-{
-    if (definition_->type_ == kFontTypeImage)
-        return image_character_width_ + spacing_;
+    TrueTypeCharacter ref;
 
-    if (definition_->type_ == kFontTypePatch)
-        return patch_font_cache_.width + spacing_;
+    ref.glyph_index = 0;
 
-    if (definition_->type_ == kFontTypeTrueType)
-        return truetype_character_width_[current_font_size] + spacing_;
+    char ch = 0;
 
-    FatalError("font_c::NominalWidth : unknown FONT type %d\n", definition_->type_);
-}
-
-float Font::NominalHeight() const
-{
-    if (definition_->type_ == kFontTypeImage)
-        return image_character_height_;
-
-    if (definition_->type_ == kFontTypePatch)
-        return patch_font_cache_.height;
-
-    if (definition_->type_ == kFontTypeTrueType)
-        return truetype_character_height_[current_font_size];
-
-    FatalError("font_c::NominalHeight : unknown FONT type %d\n", definition_->type_);
-}
-
-const Image *Font::CharImage(char ch) const
-{
-    if (definition_->type_ == kFontTypeImage)
-        return font_image_;
-
-    if (definition_->type_ == kFontTypeTrueType)
+    if (stbtt_FindGlyphIndex(truetype_info_, kCP437UnicodeValues[(uint8_t)('M')]) > 0)
     {
-        if (truetype_glyph_map_.find((uint8_t)ch) != truetype_glyph_map_.end())
-            // Create or return dummy image
-            return ImageLookup("FONT_DUMMY_IMAGE", kImageNamespaceGraphic, kImageLookupFont);
-        else
-            return nullptr;
+        ch              = 'M';
+        ref.glyph_index = stbtt_FindGlyphIndex(truetype_info_, kCP437UnicodeValues[(uint8_t)ch]);
     }
-
-    EPI_ASSERT(definition_->type_ == kFontTypePatch);
-
-    if (ch == ' ')
-        return nullptr;
-
-    if (patch_font_cache_.atlas_rectangles.count(kCP437UnicodeValues[(uint8_t)ch]))
-        return ImageLookup("FONT_DUMMY_IMAGE", kImageNamespaceGraphic, kImageLookupFont);
+    else if (stbtt_FindGlyphIndex(truetype_info_, kCP437UnicodeValues[(uint8_t)('O')]) > 0)
+    {
+        ch              = 'O';
+        ref.glyph_index = stbtt_FindGlyphIndex(truetype_info_, kCP437UnicodeValues[(uint8_t)ch]);
+    }
+    else if (stbtt_FindGlyphIndex(truetype_info_, kCP437UnicodeValues[(uint8_t)('W')]) > 0)
+    {
+        ch              = 'W';
+        ref.glyph_index = stbtt_FindGlyphIndex(truetype_info_, kCP437UnicodeValues[(uint8_t)ch]);
+    }
     else
-        return nullptr;
+    {
+        for (char c = 32; c < 127; c++)
+        {
+            if (stbtt_FindGlyphIndex(truetype_info_, kCP437UnicodeValues[(uint8_t)(c)]) > 0)
+            {
+                ch              = c;
+                ref.glyph_index = stbtt_FindGlyphIndex(truetype_info_, kCP437UnicodeValues[(uint8_t)ch]);
+                break;
+            }
+        }
+    }
+
+    if (ref.glyph_index == 0)
+        FatalError("LoadFontTTF: No suitable characters in font %s.\n", definition_->name_.c_str());
+
+    for (int i = 0; i < 3; i++)
+    {
+        truetype_atlas_[i]                                   = new stbtt_pack_range;
+        truetype_atlas_[i]->first_unicode_codepoint_in_range = 0;
+        truetype_atlas_[i]->array_of_unicode_codepoints      = (int *)kCP437UnicodeValues;
+        truetype_atlas_[i]->font_size                        = truetype_scaling_font_sizes[i];
+        truetype_atlas_[i]->num_chars                        = 256;
+        truetype_atlas_[i]->chardata_for_range               = new stbtt_packedchar[256];
+
+        if (definition_->default_size_ == 0.0)
+            definition_->default_size_ = 7.0f;
+
+        truetype_kerning_scale_[i] = stbtt_ScaleForPixelHeight(truetype_info_, definition_->default_size_);
+
+        const int32_t bitmap_size = truetype_scaling_bitmap_sizes[i];
+
+        uint8_t *temp_bitmap = new uint8_t[bitmap_size * bitmap_size];
+
+        stbtt_pack_context spc;
+        stbtt_PackBegin(&spc, temp_bitmap, bitmap_size, bitmap_size, 0, 1, nullptr);
+        stbtt_PackSetOversampling(&spc, 2, 2);
+        stbtt_PackFontRanges(&spc, truetype_buffer_, 0, truetype_atlas_[i], 1);
+        stbtt_PackEnd(&spc);
+
+        // Convert to RGBA, couldn't get the pack stride to work properly above
+        uint8_t *font_bitmap = new uint8_t[bitmap_size * bitmap_size * 4];
+        memset(font_bitmap, 255, bitmap_size * bitmap_size * 4);
+
+        uint8_t *src  = temp_bitmap;
+        uint8_t *dest = &font_bitmap[3];
+        for (int32_t j = 0; j < bitmap_size * bitmap_size; j++, src++, dest += 4)
+        {
+            *dest = *src;
+        }
+
+        render_state->GenTextures(1, &truetype_texture_id_[i]);
+        render_state->BindTexture(truetype_texture_id_[i]);
+        render_state->TextureMinFilter(GL_NEAREST);
+        render_state->TextureMagFilter(GL_NEAREST);
+        render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap_size, bitmap_size, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                                 font_bitmap);
+        render_state->FinishTextures(1, &truetype_texture_id_[i]);
+
+        render_state->GenTextures(1, &truetype_smoothed_texture_id_[i]);
+        render_state->BindTexture(truetype_smoothed_texture_id_[i]);
+        render_state->TextureMinFilter(GL_LINEAR);
+        render_state->TextureMagFilter(GL_LINEAR);
+        render_state->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap_size, bitmap_size, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                                 font_bitmap);
+        render_state->FinishTextures(1, &truetype_smoothed_texture_id_[i]);
+
+        delete[] temp_bitmap;
+        delete[] font_bitmap;
+        float x       = 0.0f;
+        float y       = 0.0f;
+        float ascent  = 0.0f;
+        float descent = 0.0f;
+        float linegap = 0.0f;
+        stbtt_GetPackedQuad(truetype_atlas_[i]->chardata_for_range, bitmap_size, bitmap_size, (uint8_t)ch, &x, &y,
+                            &ref.character_quad[i], 0);
+        stbtt_GetScaledFontVMetrics(truetype_buffer_, 0, truetype_scaling_font_sizes[i], &ascent, &descent, &linegap);
+        ref.width[i] = (ref.character_quad[i].x1 - ref.character_quad[i].x0) *
+                       (definition_->default_size_ / truetype_scaling_font_sizes[i]);
+        ref.height[i] = (ref.character_quad[i].y1 - ref.character_quad[i].y0) *
+                        (definition_->default_size_ / truetype_scaling_font_sizes[i]);
+        truetype_character_width_[i] = ref.width[i];
+        truetype_character_height_[i] =
+            (ascent - descent) * (definition_->default_size_ / truetype_scaling_font_sizes[i]);
+        ref.y_shift[i] = (truetype_character_height_[i] - ref.height[i]) +
+                         (ref.character_quad[i].y1 * (definition_->default_size_ / truetype_scaling_font_sizes[i]));
+        truetype_reference_yshift_[i] = ref.y_shift[i];
+    }
+    truetype_glyph_map_.try_emplace((uint8_t)ch, ref);
+    spacing_ = definition_->spacing_ + 0.5; // + 0.5 for at least a minimal buffer
+                                            // between letters by default
 }
 
-float Font::CharRatio(char ch)
+ImageFont::~ImageFont()
 {
-    EPI_ASSERT(definition_->type_ == kFontTypeImage);
+    if (individual_char_widths_)
+    {
+        delete[] individual_char_widths_;
+        individual_char_widths_ = nullptr;
+    }
+    if (individual_char_ratios_)
+    {
+        delete[] individual_char_ratios_;
+        individual_char_ratios_ = nullptr;
+    }
+}
 
+TTFFont::~TTFFont()
+{
+    for (int i = 0; i < 3; ++i)
+    {
+        if (truetype_atlas_[i])
+        {
+            if (truetype_atlas_[i]->chardata_for_range)
+                delete[] truetype_atlas_[i]->chardata_for_range;
+            delete truetype_atlas_[i];
+            truetype_atlas_[i] = nullptr;
+        }
+    }
+}
+
+void PatchFont::BumpPatchName(char *name)
+{
+    // loops to increment the 10s (100s, etc) digit
+    for (char *s = name + strlen(name) - 1; s >= name; s--)
+    {
+        // only handle digits and letters
+        if (!epi::IsAlphanumericASCII(*s))
+            break;
+
+        if (*s == '9')
+        {
+            *s = '0';
+            continue;
+        }
+        if (*s == 'Z')
+        {
+            *s = 'A';
+            continue;
+        }
+        if (*s == 'z')
+        {
+            *s = 'a';
+            continue;
+        }
+
+        (*s) += 1;
+        break;
+    }
+}
+
+float ImageFont::NominalWidth() const
+{
+    return image_character_width_ + spacing_;
+}
+
+float PatchFont::NominalWidth() const
+{
+    return patch_font_cache_.width + spacing_;
+}
+
+float TTFFont::NominalWidth() const
+{
+    return truetype_character_width_[current_font_size] + spacing_;
+}
+
+float ImageFont::NominalHeight() const
+{
+    return image_character_height_;
+}
+
+float PatchFont::NominalHeight() const
+{
+    return patch_font_cache_.height;
+}
+
+float TTFFont::NominalHeight() const
+{
+    return truetype_character_height_[current_font_size];
+}
+
+bool PatchFont::HasChar(char ch) const
+{
+    if (ch == ' ')
+        return false;
+    else
+        return patch_font_cache_.atlas_rectangles.count(kCP437UnicodeValues[(uint8_t)ch]) != 0;
+}
+
+bool TTFFont::HasChar(char ch) const
+{
+    return truetype_glyph_map_.find((uint8_t)ch) != truetype_glyph_map_.end();
+}
+
+float ImageFont::CharRatio(char ch)
+{
     if (ch == ' ')
         return 0.4f;
     else
@@ -615,50 +578,16 @@ float Font::CharRatio(char ch)
 //
 // Returns the width of the IBM cp437 char in the font.
 //
-float Font::CharWidth(char ch)
+float ImageFont::CharWidth(char ch)
 {
-    if (definition_->type_ == kFontTypeImage)
-    {
-        if (ch == ' ')
-            return image_character_width_ * 2 / 5 + spacing_;
-        else
-            return individual_char_widths_[(uint8_t)ch] + spacing_;
-    }
+    if (ch == ' ')
+        return image_character_width_ * 2 / 5 + spacing_;
+    else
+        return individual_char_widths_[(uint8_t)ch] + spacing_;
+}
 
-    if (definition_->type_ == kFontTypeTrueType)
-    {
-        auto find_glyph = truetype_glyph_map_.find((uint8_t)ch);
-        if (find_glyph != truetype_glyph_map_.end())
-            return (find_glyph->second.width[current_font_size] + spacing_) * pixel_aspect_ratio.f_;
-        else
-        {
-            TrueTypeCharacter character;
-            for (int i = 0; i < 3; i++)
-            {
-                float x = 0.0f;
-                float y = 0.0f;
-                stbtt_GetPackedQuad(truetype_atlas_[i]->chardata_for_range, truetype_scaling_bitmap_sizes[i],
-                                    truetype_scaling_bitmap_sizes[i], (uint8_t)ch, &x, &y, &character.character_quad[i],
-                                    0);
-                if (ch == ' ')
-                    character.width[i] = truetype_character_width_[i] * 3 / 5;
-                else
-                    character.width[i] = (character.character_quad[i].x1 - character.character_quad[i].x0) *
-                                         (definition_->default_size_ / truetype_scaling_font_sizes[i]);
-                character.height[i] = (character.character_quad[i].y1 - character.character_quad[i].y0) *
-                                      (definition_->default_size_ / truetype_scaling_font_sizes[i]);
-                character.y_shift[i] =
-                    (truetype_character_height_[i] - character.height[i]) +
-                    (character.character_quad[i].y1 * (definition_->default_size_ / truetype_scaling_font_sizes[i]));
-            }
-            character.glyph_index = stbtt_FindGlyphIndex(truetype_info_, kCP437UnicodeValues[(uint8_t)ch]);
-            truetype_glyph_map_.try_emplace((uint8_t)ch, character);
-            return (character.width[current_font_size] + spacing_) * pixel_aspect_ratio.f_;
-        }
-    }
-
-    EPI_ASSERT(definition_->type_ == kFontTypePatch);
-
+float PatchFont::CharWidth(char ch)
+{
     if (ch == ' ')
         return patch_font_cache_.width * 3 / 5 + spacing_;
 
@@ -673,46 +602,43 @@ float Font::CharWidth(char ch)
         return rect.image_width + spacing_;
 }
 
-//
-// Returns the maximum number of characters which can fit within pixel_w
-// pixels.  The string may not contain any newline characters.
-//
-int Font::MaxFit(int pixel_w, const char *str)
+float TTFFont::CharWidth(char ch)
 {
-    int         w = 0;
-    const char *s;
-
-    // just add one char at a time until it gets too wide or the string ends.
-    for (s = str; *s; s++)
+    auto find_glyph = truetype_glyph_map_.find((uint8_t)ch);
+    if (find_glyph != truetype_glyph_map_.end())
+        return (find_glyph->second.width[current_font_size] + spacing_) * pixel_aspect_ratio.f_;
+    else
     {
-        w += CharWidth(*s);
-
-        if (w > pixel_w)
+        TrueTypeCharacter character;
+        for (int i = 0; i < 3; i++)
         {
-            // if no character could fit, an infinite loop would probably start,
-            // so it's better to just imagine that one character fits.
-            if (s == str)
-                s++;
-
-            break;
+            float x = 0.0f;
+            float y = 0.0f;
+            stbtt_GetPackedQuad(truetype_atlas_[i]->chardata_for_range, truetype_scaling_bitmap_sizes[i],
+                                truetype_scaling_bitmap_sizes[i], (uint8_t)ch, &x, &y, &character.character_quad[i], 0);
+            if (ch == ' ')
+                character.width[i] = truetype_character_width_[i] * 3 / 5;
+            else
+                character.width[i] = (character.character_quad[i].x1 - character.character_quad[i].x0) *
+                                     (definition_->default_size_ / truetype_scaling_font_sizes[i]);
+            character.height[i] = (character.character_quad[i].y1 - character.character_quad[i].y0) *
+                                  (definition_->default_size_ / truetype_scaling_font_sizes[i]);
+            character.y_shift[i] =
+                (truetype_character_height_[i] - character.height[i]) +
+                (character.character_quad[i].y1 * (definition_->default_size_ / truetype_scaling_font_sizes[i]));
         }
+        character.glyph_index = stbtt_FindGlyphIndex(truetype_info_, kCP437UnicodeValues[(uint8_t)ch]);
+        truetype_glyph_map_.try_emplace((uint8_t)ch, character);
+        return (character.width[current_font_size] + spacing_) * pixel_aspect_ratio.f_;
     }
-
-    // extra spaces at the end of the line can always be added
-    while (*s == ' ')
-        s++;
-
-    return s - str;
 }
 
 //
 // Get glyph index for TTF Character. If character hasn't been cached yet, cache
 // it.
 //
-int Font::GetGlyphIndex(char ch)
+int TTFFont::GetGlyphIndex(char ch)
 {
-    EPI_ASSERT(definition_->type_ == kFontTypeTrueType);
-
     auto find_glyph = truetype_glyph_map_.find((uint8_t)ch);
     if (find_glyph != truetype_glyph_map_.end())
         return find_glyph->second.glyph_index;
@@ -742,25 +668,71 @@ int Font::GetGlyphIndex(char ch)
     }
 }
 
+float TTFFont::GetYShift()
+{
+    return truetype_reference_yshift_[current_font_size];
+}
+
 //
 // Find string width from hu_font chars.  The string may not contain
 // any newline characters.
 //
-float Font::StringWidth(const char *str)
+float ImageFont::StringWidth(std::string_view str)
 {
     float w = 0;
 
-    if (!str)
-        return 0;
+    if (str.empty())
+        return w;
 
-    std::string_view width_checker = str;
-
-    for (size_t i = 0; i < width_checker.size(); i++)
+    for (size_t i = 0; i < str.size(); i++)
     {
-        w += CharWidth(width_checker[i]);
-        if (definition_->type_ == kFontTypeTrueType && i + 1 < width_checker.size())
-            w += stbtt_GetGlyphKernAdvance(truetype_info_, GetGlyphIndex(width_checker[i]),
-                                           GetGlyphIndex(width_checker[i + 1])) *
+        w += CharWidth(str[i]);
+    }
+
+    return w;
+}
+
+float PatchFont::StringWidth(std::string_view str)
+{
+    float w = 0;
+
+    if (str.empty())
+        return w;
+
+    for (size_t i = 0; i < str.size(); i++)
+    {
+        w += CharWidth(str[i]);
+    }
+
+    return w;
+}
+
+// The only spots I have used these two functions in have already
+// performed the appropriate HasChar(ch) check; be careful to
+// do this if you need it elsewhere! - Dasho
+
+float PatchFont::GetCharXOffset(char ch)
+{
+    return patch_font_cache_.atlas_rectangles[ch].offset_x;
+}
+
+float PatchFont::GetCharYOffset(char ch)
+{
+    return patch_font_cache_.atlas_rectangles[ch].offset_y;
+}
+
+float TTFFont::StringWidth(std::string_view str)
+{
+    float w = 0;
+
+    if (str.empty())
+        return w;
+
+    for (size_t i = 0; i < str.size(); i++)
+    {
+        w += CharWidth(str[i]);
+        if (i + 1 < str.size())
+            w += stbtt_GetGlyphKernAdvance(truetype_info_, GetGlyphIndex(str[i]), GetGlyphIndex(str[i + 1])) *
                  truetype_kerning_scale_[current_font_size];
     }
 
@@ -807,9 +779,26 @@ Font *FontContainer::Lookup(FontDefinition *definition)
             return f;
     }
 
-    Font *new_f = new Font(definition);
+    Font *new_f = nullptr;
 
-    new_f->Load();
+    switch (definition->type_)
+    {
+    case kFontTypePatch:
+        new_f = new PatchFont(definition);
+        break;
+
+    case kFontTypeImage:
+        new_f = new ImageFont(definition);
+        break;
+
+    case kFontTypeTrueType:
+        new_f = new TTFFont(definition);
+        break;
+
+    default:
+        FatalError("FontContainer::Lookup, unknown font type for %s\n", definition->name_.c_str());
+    }
+
     push_back(new_f);
 
     return new_f;

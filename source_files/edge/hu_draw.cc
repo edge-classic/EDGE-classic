@@ -39,7 +39,7 @@ static constexpr float kVerticalSpacing = 1.0f;
 
 extern ConsoleLine    *quit_lines[kENDOOMLines];
 extern int             console_cursor;
-extern Font           *endoom_font;
+extern const Font     *endoom_font;
 extern ConsoleVariable video_overlay;
 
 static Font *default_font;

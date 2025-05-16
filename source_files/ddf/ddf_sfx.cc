@@ -22,6 +22,7 @@
 #include "ddf_sfx.h"
 
 #include "ddf_local.h"
+#include "epi_str_compare.h"
 #include "epi_str_util.h"
 
 static SoundEffectDefinition *dynamic_sfx;
@@ -115,6 +116,23 @@ static void SoundFinishEntry(void)
     if (dynamic_sfx->lump_name_.empty() && dynamic_sfx->file_name_.empty() && dynamic_sfx->pack_name_.empty())
     {
         DDFError("Missing LUMP_NAME or PACK_NAME for sound.\n");
+    }
+
+    // If modified via Dehacked, see if the lump in use has an equivalent PC Speaker Sound from our stock
+    // definitions, and apply it if found - Dasho
+    if (dynamic_sfx->deh_sound_id_)
+    {
+        for (std::vector<SoundEffectDefinition *>::reverse_iterator iter = sfxdefs.rbegin(), iter_end = sfxdefs.rend();
+             iter != iter_end; iter++)
+        {
+            SoundEffectDefinition *def = (SoundEffectDefinition *)*iter;
+            if (!def->pc_speaker_sound_.empty() &&
+                epi::StringCaseCompareASCII(dynamic_sfx->lump_name_, def->lump_name_) == 0)
+            {
+                dynamic_sfx->pc_speaker_sound_ = def->pc_speaker_sound_;
+                break;
+            }
+        }
     }
 }
 

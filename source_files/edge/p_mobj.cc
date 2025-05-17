@@ -840,11 +840,6 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props)
     float absx, absy;
     float maxstep;
 
-    // Dasho - Not sure which method of capping momentum components to use yet
-
-    // mo->momentum_.X = HMM_Clamp(-kMaximumMove, mo->momentum_.X, kMaximumMove);
-    // mo->momentum_.Y = HMM_Clamp(-kMaximumMove, mo->momentum_.Y, kMaximumMove);
-
     if (fabs(mo->momentum_.X) > kMaximumMove)
     {
         float factor = kMaximumMove / fabs(mo->momentum_.X);
@@ -1083,7 +1078,7 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props)
     //      it's not worth playing - a bit like having auto-aim
     //      permanently off (as most real people are not crack-shots!)
     //
-    float friction = props->friction;
+    float friction;
 
     if (!AlmostEquals(mo->z, mo->floor_z_) && (mo->z > mo->floor_z_) && !(mo->on_ladder_ >= 0) &&
         !(mo->player_ && mo->player_->powers_[kPowerTypeJetpack] > 0) && !mo->on_slope_)
@@ -1091,6 +1086,10 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props)
         // apply drag when airborne
         friction = props->drag;
     }
+    else if (mo->flags_ & kMapObjectFlagNoClip)
+        friction = kFrictionDefault;
+    else
+        friction = props->friction;
 
     float x_diff = fabs(orig_x - mo->x);
     float y_diff = fabs(orig_y - mo->y);
@@ -1474,9 +1473,12 @@ static void P_MobjThinker(MapObject *mobj)
     {
         CalculateFullRegionProperties(mobj, &mobj_props);
 
-        mobj->momentum_.X += mobj_props.push.X;
-        mobj->momentum_.Y += mobj_props.push.Y;
-        mobj->momentum_.Z += mobj_props.push.Z;
+        if (!(mobj->flags_ & kMapObjectFlagNoClip))
+        {
+            mobj->momentum_.X += mobj_props.push.X;
+            mobj->momentum_.Y += mobj_props.push.Y;
+            mobj->momentum_.Z += mobj_props.push.Z;
+        }
     }
     else
     {
@@ -1503,27 +1505,30 @@ static void P_MobjThinker(MapObject *mobj)
                     if (mobj_props.friction < 0.0f || tn_props.friction < mobj_props.friction)
                         mobj_props.friction = tn_props.friction;
                 }
-                if (tn_props.push.X || tn_props.push.Y || tn_props.push.Z)
+                if (!(mobj->flags_ & kMapObjectFlagNoClip))
                 {
-                    SectorFlag flags = tn_props.special ? tn_props.special->special_flags_ : kSectorFlagNone;
-
-                    if (!((mobj->flags_ & kMapObjectFlagNoGravity) || (flags & kSectorFlagPushAll)) &&
-                        (AlmostEquals(mobj->z, mobj->floor_z_) || (flags & kSectorFlagWholeRegion)))
+                    if (tn_props.push.X || tn_props.push.Y || tn_props.push.Z)
                     {
-                        float push_mul = 1.0f;
+                        SectorFlag flags = tn_props.special ? tn_props.special->special_flags_ : kSectorFlagNone;
 
-                        if (!tn_props.push_constant)
+                        if (!((mobj->flags_ & kMapObjectFlagNoGravity) || (flags & kSectorFlagPushAll)) &&
+                            (AlmostEquals(mobj->z, mobj->floor_z_) || (flags & kSectorFlagWholeRegion)))
                         {
-                            EPI_ASSERT(mobj->info_->mass_ > 0);
-                            push_mul = 100.0f / mobj->info_->mass_;
-                        }
+                            float push_mul = 1.0f;
 
-                        if (tn_props.push.X)
-                            mobj->momentum_.X += push_mul * tn_props.push.X;
-                        if (tn_props.push.Y)
-                            mobj->momentum_.Y += push_mul * tn_props.push.Y;
-                        if (tn_props.push.Z)
-                            mobj->momentum_.Z += push_mul * tn_props.push.Z;
+                            if (!tn_props.push_constant)
+                            {
+                                EPI_ASSERT(mobj->info_->mass_ > 0);
+                                push_mul = 100.0f / mobj->info_->mass_;
+                            }
+
+                            if (tn_props.push.X)
+                                mobj->momentum_.X += push_mul * tn_props.push.X;
+                            if (tn_props.push.Y)
+                                mobj->momentum_.Y += push_mul * tn_props.push.Y;
+                            if (tn_props.push.Z)
+                                mobj->momentum_.Z += push_mul * tn_props.push.Z;
+                        }
                     }
                 }
             }

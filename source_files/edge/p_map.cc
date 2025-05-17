@@ -2463,7 +2463,8 @@ MapObject *DoMapTargetAutoAim(MapObject *source, BAMAngle angle, float distance,
     float x2, y2;
 
     // -KM- 1999/01/31 Autoaim is an option.
-    if (source->player_ && !level_flags.autoaim && !force_aim)
+    // Dasho - Unless mouselook is off, then vertical autoaim is not
+    if (source->player_ && !level_flags.autoaim && !force_aim && level_flags.mouselook)
     {
         return nullptr;
     }

@@ -597,7 +597,7 @@ static OptionMenuItem playoptions[] = {
 
     {kOptionMenuItemTypeSwitch, "Aim Assist",
      "Off/Vertical/Vertical+Snap To/Vertical+Horizontal/Vertical+Horizontal+Snap To", 5, &global_flags.autoaim,
-     OptionMenuChangeAutoAim, "\"Off\" not recommended when mouselook is disabled", nullptr, 0, 0, 0, ""},
+     OptionMenuChangeAutoAim, "Vertical assist is forced when mouselook is off", nullptr, 0, 0, 0, ""},
 
     {kOptionMenuItemTypeBoolean, "Jumping", YesNo, 2, &global_flags.jump, OptionMenuChangeJumping, nullptr, nullptr, 0,
      0, 0, ""},

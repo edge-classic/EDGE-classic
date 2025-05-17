@@ -677,31 +677,35 @@ float TTFFont::GetYShift()
 // Find string width from hu_font chars.  The string may not contain
 // any newline characters.
 //
-float ImageFont::StringWidth(std::string_view str)
+float ImageFont::StringWidth(const char *str)
 {
     float w = 0;
 
-    if (str.empty())
+    if (!str)
         return w;
 
-    for (size_t i = 0; i < str.size(); i++)
+    std::string_view width_check(str);
+
+    for (size_t i = 0; i < width_check.size(); i++)
     {
-        w += CharWidth(str[i]);
+        w += CharWidth(width_check[i]);
     }
 
     return w;
 }
 
-float PatchFont::StringWidth(std::string_view str)
+float PatchFont::StringWidth(const char *str)
 {
     float w = 0;
 
-    if (str.empty())
+    if (!str)
         return w;
 
-    for (size_t i = 0; i < str.size(); i++)
+    std::string_view width_check(str);
+
+    for (size_t i = 0; i < width_check.size(); i++)
     {
-        w += CharWidth(str[i]);
+        w += CharWidth(width_check[i]);
     }
 
     return w;
@@ -721,18 +725,21 @@ float PatchFont::GetCharYOffset(char ch)
     return patch_font_cache_.atlas_rectangles[ch].offset_y;
 }
 
-float TTFFont::StringWidth(std::string_view str)
+float TTFFont::StringWidth(const char *str)
 {
     float w = 0;
 
-    if (str.empty())
+    if (!str)
         return w;
 
-    for (size_t i = 0; i < str.size(); i++)
+    std::string_view width_check(str);
+
+    for (size_t i = 0; i < width_check.size(); i++)
     {
-        w += CharWidth(str[i]);
-        if (i + 1 < str.size())
-            w += stbtt_GetGlyphKernAdvance(truetype_info_, GetGlyphIndex(str[i]), GetGlyphIndex(str[i + 1])) *
+        w += CharWidth(width_check[i]);
+        if (i + 1 < width_check.size())
+            w += stbtt_GetGlyphKernAdvance(truetype_info_, GetGlyphIndex(width_check[i]),
+                                           GetGlyphIndex(width_check[i + 1])) *
                  truetype_kerning_scale_[current_font_size];
     }
 

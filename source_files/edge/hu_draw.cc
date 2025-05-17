@@ -18,10 +18,15 @@
 
 #include "hu_draw.h"
 
+#include <map>
+
 #include "am_map.h"
 #include "con_main.h"
 #include "ddf_font.h"
+#include "dm_state.h"
 #include "epi.h"
+#include "epi_file.h"
+#include "epi_filesystem.h"
 #include "epi_str_compare.h"
 #include "g_game.h"
 #include "i_defs_gl.h"
@@ -32,6 +37,7 @@
 #include "r_misc.h"
 #include "r_misc.h" //  R_Render
 #include "r_modes.h"
+#include "r_texgl.h"
 #include "r_units.h"
 
 // FIXME: this seems totally arbitrary, review it.
@@ -75,15 +81,156 @@ static float margin_y_multiplier;
 
 static constexpr float kDoomPixelAspectRatio = (5.0f / 6.0f);
 
-std::vector<std::string> hud_overlays = {
-    "",
-    "OVERLAY_LINES_1X",
-    "OVERLAY_LINES_2X",
-    "OVERLAY_VERTICAL_1X",
-    "OVERLAY_VERTICAL_2X",
-    "OVERLAY_GRILL_1X",
-    "OVERLAY_GRILL_2X",
-};
+std::map<std::string, std::pair<ImageData *, unsigned int>> available_overlays;
+
+void CollectOverlays()
+{
+    // Add the default (none) option first so it takes precedence
+    // over an overlay that might somehow have the same file stem
+    available_overlays.emplace("None", std::make_pair(nullptr, 0));
+
+    // Check for overlays
+    std::vector<epi::DirectoryEntry> ovd;
+    std::string                      overlay_dir = epi::PathAppend(home_directory, "overlays");
+
+    // Create home directory overlays folder if it doesn't aleady exist
+    if (!epi::IsDirectory(overlay_dir))
+        epi::MakeDirectory(overlay_dir);
+
+    ovd.clear();
+
+    if (!ReadDirectory(ovd, overlay_dir, "*.png"))
+    {
+        LogWarning("CollectOverlays: Failed to read '%s' directory!\n", overlay_dir.c_str());
+    }
+    else
+    {
+        for (size_t i = 0; i < ovd.size(); i++)
+        {
+            if (!ovd[i].is_dir)
+            {
+                std::string filename = epi::GetStem(ovd[i].name);
+                if (!available_overlays.count(filename))
+                {
+                    epi::File *ovimg_file = epi::FileOpen(ovd[i].name, epi::kFileAccessRead | epi::kFileAccessBinary);
+                    if (ovimg_file)
+                    {
+                        ImageData *ovimg_data = LoadImageData(ovimg_file);
+                        if (ovimg_data)
+                        {
+                            unsigned int tex_id = UploadTexture(ovimg_data, kUploadNone, (1 << 30));
+                            available_overlays.emplace(filename, std::make_pair(ovimg_data, tex_id));
+                        }
+                        delete ovimg_file;
+                    }
+                }
+            }
+        }
+    }
+    ovd.clear();
+    if (!ReadDirectory(ovd, overlay_dir, "*.tga"))
+    {
+        LogWarning("CollectOverlays: Failed to read '%s' directory!\n", overlay_dir.c_str());
+    }
+    else
+    {
+        for (size_t i = 0; i < ovd.size(); i++)
+        {
+            if (!ovd[i].is_dir)
+            {
+                std::string filename = epi::GetStem(ovd[i].name);
+                if (!available_overlays.count(filename))
+                {
+                    epi::File *ovimg_file = epi::FileOpen(ovd[i].name, epi::kFileAccessRead | epi::kFileAccessBinary);
+                    if (ovimg_file)
+                    {
+                        ImageData *ovimg_data = LoadImageData(ovimg_file);
+                        if (ovimg_data)
+                        {
+                            unsigned int tex_id = UploadTexture(ovimg_data, kUploadNone, (1 << 30));
+                            available_overlays.emplace(filename, std::make_pair(ovimg_data, tex_id));
+                        }
+                        delete ovimg_file;
+                    }
+                }
+            }
+        }
+    }
+
+    if (home_directory != game_directory)
+    {
+        ovd.clear();
+
+        // Read the program directory, but only add names we haven't encountered yet
+        overlay_dir = epi::PathAppend(game_directory, "overlays");
+
+        if (!ReadDirectory(ovd, overlay_dir, "*.png"))
+        {
+            LogWarning("CollectOverlays: Failed to read '%s' directory!\n", overlay_dir.c_str());
+        }
+        else
+        {
+            for (size_t i = 0; i < ovd.size(); i++)
+            {
+                if (!ovd[i].is_dir)
+                {
+                    std::string filename = epi::GetStem(ovd[i].name);
+                    if (!available_overlays.count(filename))
+                    {
+                        epi::File *ovimg_file =
+                            epi::FileOpen(ovd[i].name, epi::kFileAccessRead | epi::kFileAccessBinary);
+                        if (ovimg_file)
+                        {
+                            ImageData *ovimg_data = LoadImageData(ovimg_file);
+                            if (ovimg_data)
+                            {
+                                unsigned int tex_id = UploadTexture(ovimg_data, kUploadNone, (1 << 30));
+                                available_overlays.emplace(filename, std::make_pair(ovimg_data, tex_id));
+                            }
+                            delete ovimg_file;
+                        }
+                    }
+                }
+            }
+        }
+        ovd.clear();
+        if (!ReadDirectory(ovd, overlay_dir, "*.tga"))
+        {
+            LogWarning("CollectOverlays: Failed to read '%s' directory!\n", overlay_dir.c_str());
+        }
+        else
+        {
+            for (size_t i = 0; i < ovd.size(); i++)
+            {
+                if (!ovd[i].is_dir)
+                {
+                    std::string filename = epi::GetStem(ovd[i].name);
+                    if (!available_overlays.count(filename))
+                    {
+                        epi::File *ovimg_file =
+                            epi::FileOpen(ovd[i].name, epi::kFileAccessRead | epi::kFileAccessBinary);
+                        if (ovimg_file)
+                        {
+                            ImageData *ovimg_data = LoadImageData(ovimg_file);
+                            if (ovimg_data)
+                            {
+                                unsigned int tex_id = UploadTexture(ovimg_data, kUploadNone, (1 << 30));
+                                available_overlays.emplace(filename, std::make_pair(ovimg_data, tex_id));
+                            }
+                            delete ovimg_file;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Check for previously saved overlay CVAR; revert if not present anymore
+    if (!available_overlays.count(video_overlay.s_))
+    {
+        video_overlay = "None";
+    }
+}
 
 float HUDToRealCoordinatesX(float x)
 {

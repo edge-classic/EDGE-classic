@@ -2111,6 +2111,15 @@ void DeleteAllImages(bool shutdown)
                 delete im;
             }
         }
+        for (std::map<std::string, std::pair<ImageData *, unsigned int>>::iterator iter = available_overlays.begin(),
+                                                                                   iter_end = available_overlays.end();
+             iter != iter_end; ++iter)
+        {
+            if (iter->second.first)
+                delete iter->second.first;
+            if (iter->second.second)
+                render_state->DeleteTexture(&iter->second.second);
+        }
         ShutdownTextureSets();
         StopWipe();
         MenuShutdown();

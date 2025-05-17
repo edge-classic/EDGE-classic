@@ -63,6 +63,7 @@
 #include "r_colormap.h"
 #include "r_draw.h"
 #include "r_modes.h"
+#include "r_texgl.h"
 #include "s_music.h"
 #include "s_sound.h"
 #include "stb_sprintf.h"
@@ -554,7 +555,7 @@ void MenuReadSaveStrings(void)
                 if (save_extended_information_slots[i].save_image_data)
                 {
                     save_extended_information_slots[i].save_texture_id =
-                        UploadTexture(save_extended_information_slots[i].save_image_data, 2, (1 << 30));
+                        UploadTexture(save_extended_information_slots[i].save_image_data, kUploadClamp, (1 << 30));
                     save_extended_information_slots[i].save_image_page = save_page;
                     delete svimg_file;
                 }

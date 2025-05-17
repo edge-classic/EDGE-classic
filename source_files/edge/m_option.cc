@@ -218,6 +218,7 @@ static void OptionMenuBrowseHome(int key_pressed, ConsoleVariable *console_varia
 static void OptionMenuLanguageDrawer(int x, int y, int deltay);
 static void OptionMenuChangeLanguage(int key_pressed, ConsoleVariable *console_variable);
 static void OptionMenuChangeSoundfont(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangeOverlay(int key_pressed, ConsoleVariable *console_variable);
 static void InitMonitorSize();
 
 static constexpr char YesNo[]        = "Off/On"; // basic on/off
@@ -413,8 +414,8 @@ static OptionMenuItem vidoptions[] = {
      ""},
     {kOptionMenuItemTypeSwitch, "Dynamic Lighting", YesNo, 2, &use_dynamic_lights, nullptr, nullptr, nullptr, 0, 0, 0,
      ""},
-    {kOptionMenuItemTypeSwitch, "Overlay", "None/Lines 1x/Lines 2x/Vertical 1x/Vertical 2x/Grill 1x/Grill 2x", 7,
-     &video_overlay.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &video_overlay, 0, 0, 0, ""},
+    {kOptionMenuItemTypeFunction, "Overlay", nullptr, 0, nullptr, OptionMenuChangeOverlay, nullptr, nullptr, 0, 0, 0,
+     ""},
     {kOptionMenuItemTypeSwitch, "Invulnerability", "Simple/Textured", kTotalInvulnerabilityEffects,
      &invulnerability_effect, nullptr, nullptr, nullptr, 0, 0, 0, ""},
 #ifndef EDGE_WEB
@@ -1144,6 +1145,14 @@ void OptionMenuDrawer()
             fontType  = StyleDefinition::kTextSectionAlternate;
             TEXTscale = style->definition_->text_[fontType].scale_;
             HUDWriteText(style, fontType, (current_menu->menu_center) + 15, curry, midi_soundfont.s_.c_str());
+        }
+
+        // Draw current overlay
+        if (current_menu == &video_optmenu && current_menu->items[i].routine == OptionMenuChangeOverlay)
+        {
+            fontType  = StyleDefinition::kTextSectionAlternate;
+            TEXTscale = style->definition_->text_[fontType].scale_;
+            HUDWriteText(style, fontType, (current_menu->menu_center) + 15, curry, video_overlay.s_.c_str());
         }
 
         // -ACB- 1998/07/15 Menu Cursor is colour indexed.
@@ -2175,6 +2184,48 @@ static void OptionMenuChangeSoundfont(int key_pressed, ConsoleVariable *console_
     // update console_variable
     midi_soundfont = *sf_pos;
     RestartMIDI();
+}
+
+//
+// OptionMenuChangeOverlay
+//
+//
+static void OptionMenuChangeOverlay(int key_pressed, ConsoleVariable *console_variable)
+{
+    EPI_UNUSED(console_variable);
+
+    std::map<std::string, std::pair<ImageData *, unsigned int>>::iterator ov_pos;
+
+    if (!available_overlays.count(video_overlay.s_)) // Something is weird
+    {
+        LogWarning("OptionMenuChangeOverlay: Could not read list of available "
+                   "overlays. "
+                   "Falling back to default (none)!\n");
+        video_overlay = "None";
+        return;
+    }
+    else
+        ov_pos = available_overlays.find(video_overlay.s_);
+
+    if (key_pressed == kLeftArrow || key_pressed == kGamepadLeft)
+    {
+        if (ov_pos != available_overlays.begin())
+            ov_pos--;
+        else
+        {
+            ov_pos = available_overlays.end();
+            ov_pos--;
+        }
+    }
+    else if (key_pressed == kRightArrow || key_pressed == kGamepadRight)
+    {
+        ov_pos++;
+        if (ov_pos == available_overlays.end())
+            ov_pos = available_overlays.begin();
+    }
+
+    // update console_variable
+    video_overlay = ov_pos->first;
 }
 
 //

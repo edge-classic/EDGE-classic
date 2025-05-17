@@ -45,6 +45,7 @@ jobs:
           ${{github.workspace}}/edge_base
           ${{github.workspace}}/edge_defs
           ${{github.workspace}}/edge_fixes
+          ${{github.workspace}}/overlays
           ${{github.workspace}}/soundfont
           ${{github.workspace}}/edge-classic
         retention-days: ${{env.RETENTION_DAYS}}
@@ -81,6 +82,7 @@ jobs:
             edge_base
             edge_defs
             edge_fixes
+            overlays
             soundfont
             edge-classic.exe
             *.dll
@@ -102,6 +104,7 @@ jobs:
             edge_base
             edge_defs
             edge_fixes
+            overlays
             soundfont
             edge-classic.exe
             *.dll
@@ -134,6 +137,7 @@ jobs:
           ${{github.workspace}}/edge_base
           ${{github.workspace}}/edge_defs
           ${{github.workspace}}/edge_fixes
+          ${{github.workspace}}/overlays
           ${{github.workspace}}/soundfont
           ${{github.workspace}}/edge-classic
         retention-days: ${{env.RETENTION_DAYS}}

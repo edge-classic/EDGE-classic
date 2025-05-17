@@ -42,6 +42,7 @@ jobs:
         name: edge-classic-linux
         path: |
           ${{github.workspace}}/autoload
+          ${{github.workspace}}/crosshairs
           ${{github.workspace}}/edge_base
           ${{github.workspace}}/edge_defs
           ${{github.workspace}}/edge_fixes
@@ -79,6 +80,7 @@ jobs:
           name: edge-classic-mingw32
           path: |
             autoload
+            crosshairs
             edge_base
             edge_defs
             edge_fixes
@@ -101,6 +103,7 @@ jobs:
           name: edge-classic-msvc
           path: |
             autoload
+            crosshairs
             edge_base
             edge_defs
             edge_fixes
@@ -134,6 +137,7 @@ jobs:
         name: edge-classic-macos
         path: |
           ${{github.workspace}}/autoload
+          ${{github.workspace}}/crosshairs
           ${{github.workspace}}/edge_base
           ${{github.workspace}}/edge_defs
           ${{github.workspace}}/edge_fixes

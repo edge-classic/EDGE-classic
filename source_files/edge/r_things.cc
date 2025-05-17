@@ -25,6 +25,8 @@
 
 #include <math.h>
 
+#include <map>
+
 #include "AlmostEquals.h"
 #ifdef EDGE_CLASSIC
 #include "coal.h"
@@ -33,6 +35,9 @@
 #include "dm_state.h"
 #include "edge_profiling.h"
 #include "epi_color.h"
+#include "epi_file.h"
+#include "epi_filesystem.h"
+#include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "g_game.h" //current_map
 #include "i_defs_gl.h"
@@ -70,8 +75,7 @@ extern double    COALGetFloat(coal::VM *vm, const char *mod_name, const char *va
 
 extern bool erraticism_active;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(crosshair_style, "0",
-                             kConsoleVariableFlagArchive) // shape
+EDGE_DEFINE_CONSOLE_VARIABLE(crosshair_image, "None", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(crosshair_color, "0",
                              kConsoleVariableFlagArchive) // 0 .. 7
 EDGE_DEFINE_CONSOLE_VARIABLE(crosshair_size, "16.0",
@@ -87,8 +91,160 @@ extern float      widescreen_view_width_multiplier;
 // The minimum distance between player and a visible sprite.
 static constexpr float kMinimumSpriteDistance = 4.0f;
 
-static const Image *crosshair_image;
-static int          crosshair_which;
+std::map<std::string, unsigned int> available_crosshairs;
+
+void CollectCrosshairs()
+{
+    // Add the default (none) option first so it takes precedence
+    // over an overlay that might somehow have the same file stem
+    available_crosshairs.emplace("None", 0);
+
+    // Check for overlays
+    std::vector<epi::DirectoryEntry> chd;
+    std::string                      crosshair_dir = epi::PathAppend(home_directory, "crosshairs");
+
+    // Create home directory overlays folder if it doesn't aleady exist
+    if (!epi::IsDirectory(crosshair_dir))
+        epi::MakeDirectory(crosshair_dir);
+
+    chd.clear();
+
+    if (!ReadDirectory(chd, crosshair_dir, "*.png"))
+    {
+        LogWarning("CollectCrosshairs: Failed to read '%s' directory!\n", crosshair_dir.c_str());
+    }
+    else
+    {
+        for (size_t i = 0; i < chd.size(); i++)
+        {
+            if (!chd[i].is_dir)
+            {
+                std::string filename = epi::GetStem(chd[i].name);
+                if (!available_crosshairs.count(filename))
+                {
+                    epi::File *ovimg_file = epi::FileOpen(chd[i].name, epi::kFileAccessRead | epi::kFileAccessBinary);
+                    if (ovimg_file)
+                    {
+                        ImageData *ovimg_data = LoadImageData(ovimg_file);
+                        if (ovimg_data)
+                        {
+                            unsigned int tex_id = UploadTexture(ovimg_data, kUploadSmooth, (1 << 30));
+                            available_crosshairs.emplace(filename, tex_id);
+                            delete ovimg_data;
+                        }
+                        delete ovimg_file;
+                    }
+                }
+            }
+        }
+    }
+    chd.clear();
+    if (!ReadDirectory(chd, crosshair_dir, "*.tga"))
+    {
+        LogWarning("CollectCrosshairs: Failed to read '%s' directory!\n", crosshair_dir.c_str());
+    }
+    else
+    {
+        for (size_t i = 0; i < chd.size(); i++)
+        {
+            if (!chd[i].is_dir)
+            {
+                std::string filename = epi::GetStem(chd[i].name);
+                if (!available_crosshairs.count(filename))
+                {
+                    epi::File *ovimg_file = epi::FileOpen(chd[i].name, epi::kFileAccessRead | epi::kFileAccessBinary);
+                    if (ovimg_file)
+                    {
+                        ImageData *ovimg_data = LoadImageData(ovimg_file);
+                        if (ovimg_data)
+                        {
+                            unsigned int tex_id = UploadTexture(ovimg_data, kUploadSmooth, (1 << 30));
+                            available_crosshairs.emplace(filename, tex_id);
+                            delete ovimg_data;
+                        }
+                        delete ovimg_file;
+                    }
+                }
+            }
+        }
+    }
+
+    if (home_directory != game_directory)
+    {
+        chd.clear();
+
+        // Read the program directory, but only add names we haven't encountered yet
+        crosshair_dir = epi::PathAppend(game_directory, "crosshairs");
+
+        if (!ReadDirectory(chd, crosshair_dir, "*.png"))
+        {
+            LogWarning("CollectCrosshairs: Failed to read '%s' directory!\n", crosshair_dir.c_str());
+        }
+        else
+        {
+            for (size_t i = 0; i < chd.size(); i++)
+            {
+                if (!chd[i].is_dir)
+                {
+                    std::string filename = epi::GetStem(chd[i].name);
+                    if (!available_crosshairs.count(filename))
+                    {
+                        epi::File *ovimg_file =
+                            epi::FileOpen(chd[i].name, epi::kFileAccessRead | epi::kFileAccessBinary);
+                        if (ovimg_file)
+                        {
+                            ImageData *ovimg_data = LoadImageData(ovimg_file);
+                            if (ovimg_data)
+                            {
+                                unsigned int tex_id = UploadTexture(ovimg_data, kUploadSmooth, (1 << 30));
+                                available_crosshairs.emplace(filename, tex_id);
+                                delete ovimg_data;
+                            }
+                            delete ovimg_file;
+                        }
+                    }
+                }
+            }
+        }
+        chd.clear();
+        if (!ReadDirectory(chd, crosshair_dir, "*.tga"))
+        {
+            LogWarning("CollectCrosshairs: Failed to read '%s' directory!\n", crosshair_dir.c_str());
+        }
+        else
+        {
+            for (size_t i = 0; i < chd.size(); i++)
+            {
+                if (!chd[i].is_dir)
+                {
+                    std::string filename = epi::GetStem(chd[i].name);
+                    if (!available_crosshairs.count(filename))
+                    {
+                        epi::File *ovimg_file =
+                            epi::FileOpen(chd[i].name, epi::kFileAccessRead | epi::kFileAccessBinary);
+                        if (ovimg_file)
+                        {
+                            ImageData *ovimg_data = LoadImageData(ovimg_file);
+                            if (ovimg_data)
+                            {
+                                unsigned int tex_id = UploadTexture(ovimg_data, kUploadSmooth, (1 << 30));
+                                available_crosshairs.emplace(filename, tex_id);
+                                delete ovimg_data;
+                            }
+                            delete ovimg_file;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Check for previously saved overlay CVAR; revert if not present anymore
+    if (!available_crosshairs.count(crosshair_image.s_))
+    {
+        crosshair_image = "None";
+    }
+}
 
 inline BlendingMode GetThingBlending(float alpha, ImageOpacity opacity, int32_t hyper_flags = 0)
 {
@@ -476,20 +632,13 @@ static const RGBAColor crosshair_colors[8] = {kRGBALightGray, kRGBABlue,    kRGB
 
 static void DrawStdCrossHair(void)
 {
-    if (crosshair_style.d_ <= 0 || crosshair_style.d_ > 9)
-        return;
-
     if (crosshair_size.f_ < 0.1 || crosshair_brightness.f_ < 0.1)
         return;
 
-    if (!crosshair_image || crosshair_which != crosshair_style.d_)
-    {
-        crosshair_which = crosshair_style.d_;
+    unsigned int tex_id = available_crosshairs[crosshair_image.s_];
 
-        crosshair_image = ImageLookup(epi::StringFormat("STANDARD_CROSSHAIR_%d", crosshair_which).c_str());
-    }
-
-    GLuint tex_id = ImageCache(crosshair_image);
+    if (!tex_id)
+        return;
 
     RGBAColor color = crosshair_colors[crosshair_color.d_ & 7];
 

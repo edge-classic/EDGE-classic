@@ -109,6 +109,8 @@ extern ConsoleVariable busy_wait;
 
 extern ConsoleVariable gamma_correction;
 
+extern void CollectCrosshairs();
+
 ECFrameStats ec_frame_stats;
 
 // Application active?
@@ -2361,6 +2363,7 @@ static void EdgeStartup(void)
     CreateUserImages();
     PickLoadingScreen();
     PickMenuBackdrop();
+    CollectCrosshairs();
     CollectOverlays();
     HUDInit();
     ConsoleStart();

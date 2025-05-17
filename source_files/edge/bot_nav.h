@@ -73,9 +73,5 @@ BotPath *BotFindPath(const Position *start, const Position *finish, int flags);
 // find an pickup item in a nearby area, returns nullptr if none found.
 BotPath *BotFindThing(DeathBot *bot, float radius, MapObject *&best);
 
-// find an enemy to fight, or nullptr if none found.
-// caller is responsible to do a sight checks.
-MapObject *BotFindEnemy(DeathBot *bot, float radius);
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

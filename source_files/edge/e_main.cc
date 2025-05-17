@@ -109,12 +109,16 @@ extern ConsoleVariable busy_wait;
 
 extern ConsoleVariable gamma_correction;
 
+extern void CollectCrosshairs();
+
 ECFrameStats ec_frame_stats;
 
 // Application active?
 int app_state = kApplicationActive;
 
 bool single_tics = false; // debug flag to cancel adaptiveness
+
+static bool need_wipe = false;
 
 // -ES- 2000/02/13 Takes screenshot every screenshot_rate tics.
 // Must be used in conjunction with single_tics.
@@ -165,8 +169,6 @@ GameFlags default_game_flags = {
 
 GameFlags global_flags;
 
-bool mus_pause_stop = false;
-
 std::string branding_file;
 std::string configuration_file;
 std::string epkfile;
@@ -190,7 +192,7 @@ EDGE_DEFINE_CONSOLE_VARIABLE(team_name, "EDGE Team", kConsoleVariableFlagNoReset
 EDGE_DEFINE_CONSOLE_VARIABLE(application_name, "EDGE-Classic", kConsoleVariableFlagNoReset)
 EDGE_DEFINE_CONSOLE_VARIABLE(homepage, "https://edge-classic.github.io", kConsoleVariableFlagNoReset)
 
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(video_overlay, "0", kConsoleVariableFlagArchive, 0, 6)
+EDGE_DEFINE_CONSOLE_VARIABLE(video_overlay, "None", kConsoleVariableFlagArchive)
 
 EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(title_scaling, "0", kConsoleVariableFlagArchive, 0, 1)
 
@@ -263,14 +265,14 @@ class StartupProgress
             y += 10;
         }
 
-        if (!hud_overlays.at(video_overlay.d_).empty())
+        if (!need_wipe && epi::StringCompare(video_overlay.s_, "None") != 0)
         {
-            const Image *overlay =
-                ImageLookup(hud_overlays.at(video_overlay.d_).c_str(), kImageNamespaceGraphic, kImageLookupNull);
-            if (overlay)
-                HUDRawImage(0, 0, current_screen_width, current_screen_height, overlay, 0, 0,
-                            current_screen_width / overlay->ScaledWidthActual(),
-                            current_screen_height / overlay->ScaledHeightActual());
+            ImageData   *ov_data = available_overlays[video_overlay.s_].first;
+            unsigned int tex_id  = available_overlays[video_overlay.s_].second;
+            if (ov_data && tex_id)
+                HUDRawFromTexID(0, 0, current_screen_width, current_screen_height, tex_id, kOpacityComplex, 0, 0,
+                                (float)current_screen_width / ov_data->used_width_,
+                                (float)current_screen_height / ov_data->used_height_, HUDGetAlpha());
         }
 
         if (gamma_correction.f_ < 0)
@@ -606,8 +608,6 @@ static void DisplayPauseImage(void)
 
 ScreenWipe wipe_method = kScreenWipeMelt;
 
-static bool need_wipe = false;
-
 void ForceWipe(void)
 {
 #ifdef EDGE_WEB
@@ -752,14 +752,14 @@ void EdgeDisplay(void)
 
     {
         EDGE_ZoneNamedN(ZoneHudOverlays, "HudOverlays", true);
-        if (!hud_overlays.at(video_overlay.d_).empty())
+        if (!need_wipe && epi::StringCompare(video_overlay.s_, "None") != 0)
         {
-            const Image *overlay =
-                ImageLookup(hud_overlays.at(video_overlay.d_).c_str(), kImageNamespaceGraphic, kImageLookupNull);
-            if (overlay)
-                HUDRawImage(0, 0, current_screen_width, current_screen_height, overlay, 0, 0,
-                            current_screen_width / overlay->ScaledWidthActual(),
-                            current_screen_height / overlay->ScaledHeightActual());
+            ImageData   *ov_data = available_overlays[video_overlay.s_].first;
+            unsigned int tex_id  = available_overlays[video_overlay.s_].second;
+            if (ov_data && tex_id)
+                HUDRawFromTexID(0, 0, current_screen_width, current_screen_height, tex_id, kOpacityComplex, 0, 0,
+                                (float)current_screen_width / ov_data->used_width_,
+                                (float)current_screen_height / ov_data->used_height_, HUDGetAlpha());
         }
     }
 
@@ -2363,7 +2363,8 @@ static void EdgeStartup(void)
     CreateUserImages();
     PickLoadingScreen();
     PickMenuBackdrop();
-
+    CollectCrosshairs();
+    CollectOverlays();
     HUDInit();
     ConsoleStart();
     CreateQuitScreen();

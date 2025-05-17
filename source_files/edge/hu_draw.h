@@ -25,17 +25,24 @@
 
 #pragma once
 
+#include <map>
+
 #include "hu_font.h"
+#include "r_image.h"
 #include "r_units.h"
 
 // X coordinates of left and right edges of screen.
 // updated by calls to HUDSetCoordinateSystem() or HUDReset().
-extern float                    hud_x_left;
-extern float                    hud_x_right;
-extern float                    hud_x_middle;
-extern float                    hud_visible_top;
-extern float                    hud_visible_bottom;
-extern std::vector<std::string> hud_overlays;
+extern float                                                       hud_x_left;
+extern float                                                       hud_x_right;
+extern float                                                       hud_x_middle;
+extern float                                                       hud_visible_top;
+extern float                                                       hud_visible_bottom;
+extern std::map<std::string, std::pair<ImageData *, unsigned int>> available_overlays;
+
+// On startup, collect any overlays present in the
+// program or user folders
+void CollectOverlays();
 
 void  HUDSetCoordinateSystem(int width, int height);
 float HUDToRealCoordinatesX(float x);
@@ -93,9 +100,13 @@ void HUDStretchImage(float x, float y, float w, float h, const Image *image, flo
 void HUDStretchImageNoOffset(float x, float y, float w, float h, const Image *image, float sx, float sy);
 void HUDTileImage(float x, float y, float w, float h, const Image *image, float offset_x = 0.0f, float offset_y = 0.0f);
 
-// Functions for when we want to draw without having an image_c
+// Functions for when we want to draw without having an Image class
+// This can be things like save screenshots, crosshairs, overlays, etc;
+// Basically images we don't want to be stored in the regular Image containers
 void HUDStretchFromImageData(float x, float y, float w, float h, const ImageData *img, unsigned int tex_id,
                              ImageOpacity opacity);
+void HUDRawFromTexID(float hx1, float hy1, float hx2, float hy2, unsigned int tex_id, ImageOpacity opacity, float tx1,
+                     float ty1, float tx2, float ty2, float alpha);
 
 extern int hud_tic;
 

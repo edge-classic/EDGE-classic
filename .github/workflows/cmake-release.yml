@@ -27,9 +27,11 @@ jobs:
           name: edge-classic-msvc
           path: |
             autoload
+            crosshairs
             docs
             edge_base/*.epk
             edge_fixes
+            overlays
             soundfont
             edge-classic.exe
             *.dll
@@ -66,9 +68,11 @@ jobs:
           name: edge-classic-mingw
           path: |
             autoload
+            crosshairs
             docs
             edge_base/*.epk
             edge_fixes
+            overlays
             soundfont
             edge-classic.exe
             *.dll

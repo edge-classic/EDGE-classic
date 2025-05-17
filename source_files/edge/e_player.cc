@@ -40,6 +40,7 @@
 #include "hu_stuff.h"
 #include "i_system.h"
 #include "m_argv.h"
+#include "m_menu.h"
 #include "m_random.h"
 #include "p_local.h"
 #include "script/compat/lua_compat.h"
@@ -487,7 +488,11 @@ void DeathMatchSpawnPlayer(Player *p)
         }
     }
 
-    FatalError("No usable DM start found!");
+    // Dasho - Inform player and kick them back to the main screen instead
+    // so they can try a different map or do something else
+    // FatalError("No usable DM start found!");
+    DeferredEndGame();
+    StartMenuMessage(language["NoUsableDMStarts"], nullptr, false);
 }
 
 //

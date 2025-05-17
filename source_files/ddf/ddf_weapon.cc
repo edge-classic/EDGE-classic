@@ -872,12 +872,7 @@ static void DDFWStateGetDEHProjectile(const char *arg, State *cur_state)
     {
         int slope = 0;
         if (sscanf(args[2].c_str(), "%d", &slope) == 1 && slope != 0)
-        {
-            atk->slope_offset_ = tan((float)slope / 65536.0f * HMM_PI / 180.0);
-
-            if (slope < 0)
-                atk->slope_offset_ = -atk->slope_offset_;
-        }
+            atk->slope_offset_ = tan((float)slope / -65536.0f * HMM_PI / 180.0);
     }
     if (arg_size > 3)
     {

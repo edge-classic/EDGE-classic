@@ -166,35 +166,67 @@ void A_RunLuaScript(MapObject *mo)
 //  map to find a target.  There must be a better way...
 // -AJA- 2004/04/28: Rewritten. Mobjs on same side are never targeted.
 //
-// NOTE: a better way might be: do a mini "BSP render", use a small 1D
-//       occlusion buffer (e.g. 64 bits).
+// Dasho - Rewrote this to use A_LookForBlockmapTarget, but without FOV
+// restrictions and in a 4 blockmap radius of the thing; this seems to
+// mimic the Boom P_LookForTargets behavior a little better
 //
 bool A_LookForTargets(MapObject *we)
 {
-    MapObject *them;
-
     // Optimisation: nobody to support when side is zero
     if (we->side_ == 0)
         return LookForPlayers(we, we->info_->sight_angle_);
 
-    for (them = map_object_list_head; them != nullptr; them = them->next_)
+    float we_x = we->x;
+    float we_y = we->y;
+
+    float radius = kBlockmapUnitSize * 4;
+    float x1     = we_x - radius;
+    float x2     = we_x + radius;
+    float y1     = we_y - radius;
+    float y2     = we_y + radius;
+
+    int we_bx = BlockmapGetX(we_x);
+    int we_by = BlockmapGetY(we_y);
+    we_bx     = HMM_Clamp(0, we_bx, blockmap_width - 1);
+    we_by     = HMM_Clamp(0, we_by, blockmap_height - 1);
+    int lx    = we_bx - 5;
+    int ly    = we_by - 5;
+    int hx    = we_bx + 5;
+    int hy    = we_by + 5;
+    lx        = HMM_MAX(0, lx);
+    hx        = HMM_MIN(blockmap_width - 1, hx);
+    ly        = HMM_MAX(0, ly);
+    hy        = HMM_MIN(blockmap_height - 1, hy);
+
+    // first check the blockmap in our immediate vicinity
+    for (MapObject *mo = blockmap_things[we_by * blockmap_width + we_bx]; mo; mo = mo->blockmap_next_)
     {
-        if (them == we)
+        if (mo == we)
             continue;
 
-        bool same_side = ((them->side_ & we->side_) != 0);
+        if (we->source_ == mo)
+            continue;
+
+        // check whether thing touches the given bbox
+        float r = mo->radius_;
+
+        if (mo->x + r <= x1 || mo->x - r >= x2 || mo->y + r <= y1 || mo->y - r >= y2)
+            continue;
+
+        bool same_side = ((mo->side_ & we->side_) != 0);
 
         // only target monsters or players (not barrels)
-        if (!(them->extended_flags_ & kExtendedFlagMonster) && !them->player_)
+        if (!(mo->extended_flags_ & kExtendedFlagMonster) && !mo->player_)
             continue;
 
-        if (!(them->flags_ & kMapObjectFlagShootable))
+        if (!(mo->flags_ & kMapObjectFlagShootable))
             continue;
 
-        if (same_side && !we->support_object_ && them->support_object_ != we)
+        if (same_side && !we->support_object_ && mo->support_object_ != we)
         {
-            if (them->support_object_ && CheckSight(we, them->support_object_))
-                them = them->support_object_;
+            MapObject *them = nullptr;
+            if (mo->support_object_ && CheckSight(we, mo->support_object_))
+                them = mo->support_object_;
             else if (!CheckSight(we, them))
                 continue; // OK since same side
 
@@ -210,24 +242,275 @@ bool A_LookForTargets(MapObject *we)
         if (same_side)
             continue;
 
-        /// if (them == we->support_object_ || we == them->support_object_ ||
-        ///	(them->support_object_ && them->support_object_ ==
-        /// we->support_object_)) 	continue;
-
-        if ((we->info_ == them->info_) && !(we->extended_flags_ & kExtendedFlagDisloyalToOwnType))
+        if ((we->info_ == mo->info_) && !(we->extended_flags_ & kExtendedFlagDisloyalToOwnType))
             continue;
 
-        /// -AJA- IDEALLY: use this to prioritize possible targets.
-        /// if (! (them->target &&
-        ///	  (them->target == we || them->target == we->support_object_)))
-        ///	continue;
-
-        if (CheckSight(we, them))
+        if (CheckSight(we, mo))
         {
-            we->SetTarget(them);
+            we->SetTarget(mo);
             if (we->info_->chase_state_)
                 MapObjectSetStateDeferred(we, we->info_->chase_state_, 0);
             return true;
+        }
+    }
+
+    int      blockX;
+    int      blockY;
+    int      blockIndex;
+    int      firstStop;
+    int      secondStop;
+    int      thirdStop;
+    int      finalStop;
+    uint32_t count;
+
+    for (count = 1; count <= 4; count++)
+    {
+        blockX = HMM_Clamp(we_bx - count, 0, blockmap_width - 1);
+        blockY = HMM_Clamp(we_by - count, 0, blockmap_height - 1);
+
+        blockIndex = blockY * blockmap_width + blockX;
+        firstStop  = we_bx + count;
+        if (firstStop < 0)
+        {
+            continue;
+        }
+        if (firstStop >= blockmap_width)
+        {
+            firstStop = blockmap_width - 1;
+        }
+        secondStop = we_by + count;
+        if (secondStop < 0)
+        {
+            continue;
+        }
+        if (secondStop >= blockmap_height)
+        {
+            secondStop = blockmap_height - 1;
+        }
+        thirdStop  = secondStop * blockmap_width + blockX;
+        secondStop = secondStop * blockmap_width + firstStop;
+        firstStop += blockY * blockmap_width;
+        finalStop = blockIndex;
+
+        // Trace the first block section (along the top)
+        for (; blockIndex <= firstStop; blockIndex++)
+        {
+            for (MapObject *mo = blockmap_things[blockIndex]; mo; mo = mo->blockmap_next_)
+            {
+                if (we->source_ == mo)
+                    continue;
+
+                // check whether thing touches the given bbox
+                float r = mo->radius_;
+
+                if (mo->x + r <= x1 || mo->x - r >= x2 || mo->y + r <= y1 || mo->y - r >= y2)
+                    continue;
+
+                bool same_side = ((mo->side_ & we->side_) != 0);
+
+                // only target monsters or players (not barrels)
+                if (!(mo->extended_flags_ & kExtendedFlagMonster) && !mo->player_)
+                    continue;
+
+                if (!(mo->flags_ & kMapObjectFlagShootable))
+                    continue;
+
+                if (same_side && !we->support_object_ && mo->support_object_ != we)
+                {
+                    MapObject *them = nullptr;
+                    if (mo->support_object_ && CheckSight(we, mo->support_object_))
+                        them = mo->support_object_;
+                    else if (!CheckSight(we, them))
+                        continue; // OK since same side
+
+                    if (them)
+                    {
+                        we->SetSupportObject(them);
+                        if (we->info_->meander_state_)
+                            MapObjectSetStateDeferred(we, we->info_->meander_state_, 0);
+                        return true;
+                    }
+                }
+
+                if (same_side)
+                    continue;
+
+                if ((we->info_ == mo->info_) && !(we->extended_flags_ & kExtendedFlagDisloyalToOwnType))
+                    continue;
+
+                if (CheckSight(we, mo))
+                {
+                    we->SetTarget(mo);
+                    if (we->info_->chase_state_)
+                        MapObjectSetStateDeferred(we, we->info_->chase_state_, 0);
+                    return true;
+                }
+            }
+        }
+        // Trace the second block section (right edge)
+        for (blockIndex--; blockIndex <= secondStop; blockIndex += blockmap_width)
+        {
+            for (MapObject *mo = blockmap_things[blockIndex]; mo; mo = mo->blockmap_next_)
+            {
+                if (we->source_ == mo)
+                    continue;
+
+                // check whether thing touches the given bbox
+                float r = mo->radius_;
+
+                if (mo->x + r <= x1 || mo->x - r >= x2 || mo->y + r <= y1 || mo->y - r >= y2)
+                    continue;
+
+                bool same_side = ((mo->side_ & we->side_) != 0);
+
+                // only target monsters or players (not barrels)
+                if (!(mo->extended_flags_ & kExtendedFlagMonster) && !mo->player_)
+                    continue;
+
+                if (!(mo->flags_ & kMapObjectFlagShootable))
+                    continue;
+
+                if (same_side && !we->support_object_ && mo->support_object_ != we)
+                {
+                    MapObject *them = nullptr;
+                    if (mo->support_object_ && CheckSight(we, mo->support_object_))
+                        them = mo->support_object_;
+                    else if (!CheckSight(we, them))
+                        continue; // OK since same side
+
+                    if (them)
+                    {
+                        we->SetSupportObject(them);
+                        if (we->info_->meander_state_)
+                            MapObjectSetStateDeferred(we, we->info_->meander_state_, 0);
+                        return true;
+                    }
+                }
+
+                if (same_side)
+                    continue;
+
+                if ((we->info_ == mo->info_) && !(we->extended_flags_ & kExtendedFlagDisloyalToOwnType))
+                    continue;
+
+                if (CheckSight(we, mo))
+                {
+                    we->SetTarget(mo);
+                    if (we->info_->chase_state_)
+                        MapObjectSetStateDeferred(we, we->info_->chase_state_, 0);
+                    return true;
+                }
+            }
+        }
+        // Trace the third block section (bottom edge)
+        for (blockIndex -= blockmap_width; blockIndex >= thirdStop; blockIndex--)
+        {
+            for (MapObject *mo = blockmap_things[blockIndex]; mo; mo = mo->blockmap_next_)
+            {
+                if (we->source_ == mo)
+                    continue;
+
+                // check whether thing touches the given bbox
+                float r = mo->radius_;
+
+                if (mo->x + r <= x1 || mo->x - r >= x2 || mo->y + r <= y1 || mo->y - r >= y2)
+                    continue;
+
+                bool same_side = ((mo->side_ & we->side_) != 0);
+
+                // only target monsters or players (not barrels)
+                if (!(mo->extended_flags_ & kExtendedFlagMonster) && !mo->player_)
+                    continue;
+
+                if (!(mo->flags_ & kMapObjectFlagShootable))
+                    continue;
+
+                if (same_side && !we->support_object_ && mo->support_object_ != we)
+                {
+                    MapObject *them = nullptr;
+                    if (mo->support_object_ && CheckSight(we, mo->support_object_))
+                        them = mo->support_object_;
+                    else if (!CheckSight(we, them))
+                        continue; // OK since same side
+
+                    if (them)
+                    {
+                        we->SetSupportObject(them);
+                        if (we->info_->meander_state_)
+                            MapObjectSetStateDeferred(we, we->info_->meander_state_, 0);
+                        return true;
+                    }
+                }
+
+                if (same_side)
+                    continue;
+
+                if ((we->info_ == mo->info_) && !(we->extended_flags_ & kExtendedFlagDisloyalToOwnType))
+                    continue;
+
+                if (CheckSight(we, mo))
+                {
+                    we->SetTarget(mo);
+                    if (we->info_->chase_state_)
+                        MapObjectSetStateDeferred(we, we->info_->chase_state_, 0);
+                    return true;
+                }
+            }
+        }
+        // Trace the final block section (left edge)
+        for (blockIndex++; blockIndex > finalStop; blockIndex -= blockmap_width)
+        {
+            for (MapObject *mo = blockmap_things[blockIndex]; mo; mo = mo->blockmap_next_)
+            {
+                if (we->source_ == mo)
+                    continue;
+
+                // check whether thing touches the given bbox
+                float r = mo->radius_;
+
+                if (mo->x + r <= x1 || mo->x - r >= x2 || mo->y + r <= y1 || mo->y - r >= y2)
+                    continue;
+
+                bool same_side = ((mo->side_ & we->side_) != 0);
+
+                // only target monsters or players (not barrels)
+                if (!(mo->extended_flags_ & kExtendedFlagMonster) && !mo->player_)
+                    continue;
+
+                if (!(mo->flags_ & kMapObjectFlagShootable))
+                    continue;
+
+                if (same_side && !we->support_object_ && mo->support_object_ != we)
+                {
+                    MapObject *them = nullptr;
+                    if (mo->support_object_ && CheckSight(we, mo->support_object_))
+                        them = mo->support_object_;
+                    else if (!CheckSight(we, them))
+                        continue; // OK since same side
+
+                    if (them)
+                    {
+                        we->SetSupportObject(them);
+                        if (we->info_->meander_state_)
+                            MapObjectSetStateDeferred(we, we->info_->meander_state_, 0);
+                        return true;
+                    }
+                }
+
+                if (same_side)
+                    continue;
+
+                if ((we->info_ == mo->info_) && !(we->extended_flags_ & kExtendedFlagDisloyalToOwnType))
+                    continue;
+
+                if (CheckSight(we, mo))
+                {
+                    we->SetTarget(mo);
+                    if (we->info_->chase_state_)
+                        MapObjectSetStateDeferred(we, we->info_->chase_state_, 0);
+                    return true;
+                }
+            }
         }
     }
 
@@ -3642,17 +3925,6 @@ void A_PlayerSupportMeander(MapObject *object)
             object->angle_ += kBAMAngle45;
     }
 
-    //
-    // we have now meandered, now check for a support object, if we don't
-    // look for one and return; else look for targets to take out, if we
-    // find one, go for the chase.
-    //
-    /*  if (!object->support_object_)
-        {
-        A_PlayerSupportLook(object);
-        return;
-        } */
-
     A_LookForTargets(object);
 }
 
@@ -4988,7 +5260,7 @@ void A_RadiusDamage(MapObject *mo)
     }
 #endif
 
-    RadiusAttack(mo, mo, (float)args[1], (float)args[0], nullptr, false);
+    RadiusAttack(mo, mo->source_ ? mo->source_ : mo, (float)args[1], (float)args[0], nullptr, false);
 }
 
 //
@@ -5077,9 +5349,9 @@ void A_SpawnObject(MapObject *mo)
 
     spawn->SetRealSource(mo);
 
-    if (spawn->flags_ & kMapObjectFlagMissile)
+    if ((spawn->flags_ & kMapObjectFlagMissile) || (spawn->extended_flags_ & kExtendedFlagBounce))
     {
-        if (mo->flags_ & kMapObjectFlagMissile)
+        if ((mo->flags_ & kMapObjectFlagMissile) || (mo->extended_flags_ & kExtendedFlagBounce))
         {
             spawn->SetTarget(mo->target_);
             spawn->SetTracer(mo->tracer_);
@@ -5236,15 +5508,6 @@ void A_FriendLook(MapObject *object)
             }
         }
     }
-
-    /*
-        if (object->flags_ & kMapObjectFlagStealth)
-            object->target_visibility_ = 1.0f;
-
-        if (force_infighting.d_)
-            if (CreateAggression(object) || CreateAggression(object))
-                return;
-    */
 
     if (!A_LookForTargets(object)) // No target found
         return;

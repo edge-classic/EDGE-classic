@@ -119,7 +119,7 @@ int  option_menu_on    = 0;
 bool function_key_menu = false;
 
 extern ConsoleVariable m_language;
-extern ConsoleVariable crosshair_style;
+extern ConsoleVariable crosshair_image;
 extern ConsoleVariable crosshair_color;
 extern ConsoleVariable crosshair_size;
 extern ConsoleVariable opl_instrument_bank;
@@ -218,6 +218,8 @@ static void OptionMenuBrowseHome(int key_pressed, ConsoleVariable *console_varia
 static void OptionMenuLanguageDrawer(int x, int y, int deltay);
 static void OptionMenuChangeLanguage(int key_pressed, ConsoleVariable *console_variable);
 static void OptionMenuChangeSoundfont(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangeOverlay(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangeCrosshair(int key_pressed, ConsoleVariable *console_variable);
 static void InitMonitorSize();
 
 static constexpr char YesNo[]        = "Off/On"; // basic on/off
@@ -230,7 +232,8 @@ static constexpr char JoystickAxis[] = "Off/Turn/Turn (Reversed)/Look (Inverted)
 // Screen resolution changes
 static DisplayMode new_window_mode;
 
-extern std::set<std::string> available_soundfonts;
+extern std::set<std::string>               available_soundfonts;
+extern std::map<std::string, unsigned int> available_crosshairs;
 
 //
 //  OPTION STRUCTURES
@@ -413,8 +416,8 @@ static OptionMenuItem vidoptions[] = {
      ""},
     {kOptionMenuItemTypeSwitch, "Dynamic Lighting", YesNo, 2, &use_dynamic_lights, nullptr, nullptr, nullptr, 0, 0, 0,
      ""},
-    {kOptionMenuItemTypeSwitch, "Overlay", "None/Lines 1x/Lines 2x/Vertical 1x/Vertical 2x/Grill 1x/Grill 2x", 7,
-     &video_overlay.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &video_overlay, 0, 0, 0, ""},
+    {kOptionMenuItemTypeFunction, "Overlay", nullptr, 0, nullptr, OptionMenuChangeOverlay, nullptr, nullptr, 0, 0, 0,
+     ""},
     {kOptionMenuItemTypeSwitch, "Invulnerability", "Simple/Textured", kTotalInvulnerabilityEffects,
      &invulnerability_effect, nullptr, nullptr, nullptr, 0, 0, 0, ""},
 #ifndef EDGE_WEB
@@ -447,8 +450,8 @@ static OptionMenuItem uioptions[] = {
      OptionMenuUpdateConsoleVariableFromInt, nullptr, &skip_intros, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Max Pickup Messages", "1/2/3/4", 4, &maximum_pickup_messages.d_,
      OptionMenuUpdateConsoleVariableFromInt, nullptr, &maximum_pickup_messages, 0, 0, 0, ""},
-    {kOptionMenuItemTypeSwitch, "Crosshair", "None/Dot/Angle/Plus/Spiked/Thin/Cross/Carat/Circle/Double", 10,
-     &crosshair_style.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &crosshair_style, 0, 0, 0, ""},
+    {kOptionMenuItemTypeFunction, "Crosshair Image", nullptr, 0, nullptr, OptionMenuChangeCrosshair, nullptr, nullptr,
+     0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Crosshair Color", "White/Blue/Green/Cyan/Red/Pink/Yellow/Orange", 8,
      &crosshair_color.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &crosshair_color, 0, 0, 0, ""},
     {kOptionMenuItemTypeSlider, "Crosshair Size", nullptr, 0, &crosshair_size.f_,
@@ -597,7 +600,7 @@ static OptionMenuItem playoptions[] = {
 
     {kOptionMenuItemTypeSwitch, "Aim Assist",
      "Off/Vertical/Vertical+Snap To/Vertical+Horizontal/Vertical+Horizontal+Snap To", 5, &global_flags.autoaim,
-     OptionMenuChangeAutoAim, "\"Off\" not recommended when mouselook is disabled", nullptr, 0, 0, 0, ""},
+     OptionMenuChangeAutoAim, "Vertical assist is forced when mouselook is off", nullptr, 0, 0, 0, ""},
 
     {kOptionMenuItemTypeBoolean, "Jumping", YesNo, 2, &global_flags.jump, OptionMenuChangeJumping, nullptr, nullptr, 0,
      0, 0, ""},
@@ -1144,6 +1147,22 @@ void OptionMenuDrawer()
             fontType  = StyleDefinition::kTextSectionAlternate;
             TEXTscale = style->definition_->text_[fontType].scale_;
             HUDWriteText(style, fontType, (current_menu->menu_center) + 15, curry, midi_soundfont.s_.c_str());
+        }
+
+        // Draw current overlay
+        if (current_menu == &video_optmenu && current_menu->items[i].routine == OptionMenuChangeOverlay)
+        {
+            fontType  = StyleDefinition::kTextSectionAlternate;
+            TEXTscale = style->definition_->text_[fontType].scale_;
+            HUDWriteText(style, fontType, (current_menu->menu_center) + 15, curry, video_overlay.s_.c_str());
+        }
+
+        // Draw current crosshair
+        if (current_menu == &ui_optmenu && current_menu->items[i].routine == OptionMenuChangeCrosshair)
+        {
+            fontType  = StyleDefinition::kTextSectionAlternate;
+            TEXTscale = style->definition_->text_[fontType].scale_;
+            HUDWriteText(style, fontType, (current_menu->menu_center) + 15, curry, crosshair_image.s_.c_str());
         }
 
         // -ACB- 1998/07/15 Menu Cursor is colour indexed.
@@ -2175,6 +2194,90 @@ static void OptionMenuChangeSoundfont(int key_pressed, ConsoleVariable *console_
     // update console_variable
     midi_soundfont = *sf_pos;
     RestartMIDI();
+}
+
+//
+// OptionMenuChangeOverlay
+//
+//
+static void OptionMenuChangeOverlay(int key_pressed, ConsoleVariable *console_variable)
+{
+    EPI_UNUSED(console_variable);
+
+    std::map<std::string, std::pair<ImageData *, unsigned int>>::iterator ov_pos;
+
+    if (!available_overlays.count(video_overlay.s_)) // Something is weird
+    {
+        LogWarning("OptionMenuChangeOverlay: Could not read list of available "
+                   "overlays. "
+                   "Falling back to default (none)!\n");
+        video_overlay = "None";
+        return;
+    }
+    else
+        ov_pos = available_overlays.find(video_overlay.s_);
+
+    if (key_pressed == kLeftArrow || key_pressed == kGamepadLeft)
+    {
+        if (ov_pos != available_overlays.begin())
+            ov_pos--;
+        else
+        {
+            ov_pos = available_overlays.end();
+            ov_pos--;
+        }
+    }
+    else if (key_pressed == kRightArrow || key_pressed == kGamepadRight)
+    {
+        ov_pos++;
+        if (ov_pos == available_overlays.end())
+            ov_pos = available_overlays.begin();
+    }
+
+    // update console_variable
+    video_overlay = ov_pos->first;
+}
+
+//
+// OptionMenuChangeCrosshair
+//
+//
+static void OptionMenuChangeCrosshair(int key_pressed, ConsoleVariable *console_variable)
+{
+    EPI_UNUSED(console_variable);
+
+    std::map<std::string, unsigned int>::iterator ch_pos;
+
+    if (!available_crosshairs.count(crosshair_image.s_)) // Something is weird
+    {
+        LogWarning("OptionMenuChangeOverlay: Could not read list of available "
+                   "overlays. "
+                   "Falling back to default (none)!\n");
+        crosshair_image = "None";
+        return;
+    }
+    else
+        ch_pos = available_crosshairs.find(crosshair_image.s_);
+
+    if (key_pressed == kLeftArrow || key_pressed == kGamepadLeft)
+    {
+        if (ch_pos != available_crosshairs.begin())
+            ch_pos--;
+        else
+        {
+            ch_pos = available_crosshairs.end();
+            ch_pos--;
+        }
+    }
+    else if (key_pressed == kRightArrow || key_pressed == kGamepadRight)
+    {
+        ch_pos++;
+        if (ch_pos == available_crosshairs.end())
+            ch_pos = available_crosshairs.begin();
+    }
+
+    // update console_variable
+    crosshair_image = ch_pos->first;
 }
 
 //

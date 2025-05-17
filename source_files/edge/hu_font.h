@@ -70,10 +70,10 @@ class Font
     virtual float NominalWidth() const  = 0;
     virtual float NominalHeight() const = 0;
 
-    virtual float CharRatio(char ch)                = 0;
-    virtual float CharWidth(char ch)                = 0;
-    virtual float StringWidth(std::string_view str) = 0;
-    virtual float GetYShift()                       = 0;
+    virtual float CharRatio(char ch)           = 0;
+    virtual float CharWidth(char ch)           = 0;
+    virtual float StringWidth(const char *str) = 0;
+    virtual float GetYShift()                  = 0;
 
     virtual bool HasChar(char ch) const = 0;
 };
@@ -89,7 +89,7 @@ class ImageFont final : public Font
 
     float CharRatio(char ch) override;
     float CharWidth(char ch) override;
-    float StringWidth(std::string_view str) override;
+    float StringWidth(const char *str) override;
     float GetYShift() override
     {
         return 0;
@@ -127,7 +127,7 @@ class PatchFont final : public Font
         return 0;
     };
     float CharWidth(char ch) override;
-    float StringWidth(std::string_view str) override;
+    float StringWidth(const char *str) override;
     float GetYShift() override
     {
         return 0;
@@ -159,7 +159,7 @@ class TTFFont final : public Font
         return 0;
     };
     float CharWidth(char ch) override;
-    float StringWidth(std::string_view str) override;
+    float StringWidth(const char *str) override;
     int   GetGlyphIndex(char ch);
     float GetYShift() override;
 

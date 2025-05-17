@@ -828,18 +828,11 @@ void DeathBot::ThinkFight()
 
 void DeathBot::WeaveNearLeader(const MapObject *leader)
 {
-    // pick a position some distance away, so that a human player
-    // can get out of a narrow item closet (etc).
+    // pick a position some distance away
 
-    float dx = pl_->map_object_->x - leader->x;
-    float dy = pl_->map_object_->y - leader->y;
-
-    float dlen = HMM_MAX(1.0f, hypotf(dx, dy));
-
-    dx = dx * 96.0f / dlen;
-    dy = dy * 96.0f / dlen;
-
-    Position pos{leader->x + dx, leader->y + dy, leader->z};
+    Position pos{leader->x, leader->y, leader->z};
+    pos.x -= leader->radius_ * 4 * epi::BAMCos(leader->angle_);
+    pos.y -= leader->radius_ * 4 * epi::BAMSin(leader->angle_);
 
     TurnToward(leader, false);
     WeaveToward(pos);
@@ -1395,6 +1388,9 @@ void DeathBot::Think()
     if (!mo->target_ && leader && leader->player_ && !InDeathmatch())
     {
         Position pos = {leader->x, leader->y, leader->z};
+        // spawn thing a little bit behind the player
+        pos.x -= leader->radius_ * 4 * epi::BAMCos(leader->angle_);
+        pos.y -= leader->radius_ * 4 * epi::BAMSin(leader->angle_);
         if (DistTo(pos) > 1024)
         {
             switch (task_)

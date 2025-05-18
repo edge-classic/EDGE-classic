@@ -36,6 +36,7 @@
 #include <limits.h>
 
 #include <list>
+#include <map>
 
 #include "ddf_flat.h"
 #include "ddf_font.h"
@@ -80,8 +81,9 @@ extern ImageData *ReadAsEpiBlock(Image *rim);
 
 extern epi::File *OpenUserFileOrLump(ImageDefinition *def);
 
-extern void DeleteSkyTextures(void);
-extern void DeleteColourmapTextures(void);
+extern void                                DeleteSkyTextures(void);
+extern void                                DeleteColourmapTextures(void);
+extern std::map<std::string, unsigned int> available_crosshairs;
 
 extern bool erraticism_active;
 
@@ -2110,6 +2112,22 @@ void DeleteAllImages(bool shutdown)
                 }
                 delete im;
             }
+        }
+        for (std::map<std::string, std::pair<ImageData *, unsigned int>>::iterator iter = available_overlays.begin(),
+                                                                                   iter_end = available_overlays.end();
+             iter != iter_end; ++iter)
+        {
+            if (iter->second.first)
+                delete iter->second.first;
+            if (iter->second.second)
+                render_state->DeleteTexture(&iter->second.second);
+        }
+        for (std::map<std::string, unsigned int>::iterator iter     = available_crosshairs.begin(),
+                                                           iter_end = available_crosshairs.end();
+             iter != iter_end; ++iter)
+        {
+            if (iter->second)
+                render_state->DeleteTexture(&iter->second);
         }
         ShutdownTextureSets();
         StopWipe();

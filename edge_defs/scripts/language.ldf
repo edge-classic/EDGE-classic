@@ -70,6 +70,7 @@ FoundSecret="You found a secret!";
 BotCoop="Co-Op";
 BotOldDM="Deathmatch (Old)";
 BotNewDM="Deathmatch (New)";
+NoUsableDMStarts="Selected map has\nno usable deathmatch starts!\nReturning to main menu.";
 
 BotDifficulty1="Very Easy";
 BotDifficulty2="Easy";

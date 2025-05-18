@@ -902,7 +902,8 @@ void TouchSpecialThing(MapObject *special, MapObject *toucher)
         if (info.player->bonus_count_ > kBonusLimit)
             info.player->bonus_count_ = kBonusLimit;
 
-        if (special->info_->pickup_message_ != "" && language.IsValidRef(special->info_->pickup_message_.c_str()))
+        if (toucher->player_ == players[display_player] && special->info_->pickup_message_ != "" &&
+            language.IsValidRef(special->info_->pickup_message_.c_str()))
         {
             ConsoleMessage(kConsoleHUDTop, "%s", language[special->info_->pickup_message_]);
         }
@@ -995,7 +996,8 @@ static void DoObituary(const char *format, MapObject *victim, MapObject *killer)
 
     std::string msg = PatternSubstitution(format, keywords);
 
-    ConsoleMessage(kConsoleHUDTop, "%s", msg.c_str());
+    if (victim->player_ == players[display_player])
+        ConsoleMessage(kConsoleHUDTop, "%s", msg.c_str());
 }
 
 void ObituaryMessage(MapObject *victim, MapObject *killer, const DamageClass *damtype)

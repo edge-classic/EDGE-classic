@@ -2463,7 +2463,8 @@ MapObject *DoMapTargetAutoAim(MapObject *source, BAMAngle angle, float distance,
     float x2, y2;
 
     // -KM- 1999/01/31 Autoaim is an option.
-    if (source->player_ && !level_flags.autoaim && !force_aim)
+    // Dasho - Unless mouselook is off, then vertical autoaim is not
+    if (source->player_ && !level_flags.autoaim && !force_aim && level_flags.mouselook)
     {
         return nullptr;
     }
@@ -2690,14 +2691,16 @@ static bool RadiusAttackCallback(MapObject *thing, void *data)
     if (!(thing->flags_ & kMapObjectFlagShootable))
         return true;
 
-    if ((thing->hyper_flags_ & kHyperFlagFriendlyFireImmune) && radius_attack_check.source &&
+    MapObject *source = radius_attack_check.source;
+
+    if (source && source != thing && (thing->hyper_flags_ & kHyperFlagFriendlyFireImmune) &&
         (thing->side_ & radius_attack_check.source->side_) != 0)
     {
         return true;
     }
 
     // MBF21: If in same splash group, don't damage it
-    if (thing->info_->splash_group_ > 0 && radius_attack_check.source &&
+    if (source && source != thing && thing->info_->splash_group_ > 0 &&
         radius_attack_check.source->info_->splash_group_ > 0 &&
         (thing->info_->splash_group_ == radius_attack_check.source->info_->splash_group_))
     {
@@ -2710,10 +2713,10 @@ static bool RadiusAttackCallback(MapObject *thing, void *data)
     //
     if (thing->info_->extended_flags_ & kExtendedFlagExplodeImmune)
     {
-        if (!radius_attack_check.source)
+        if (!source)
             return true;
         // MBF21 FORCERADIUSDMG flag
-        if (!(radius_attack_check.source->mbf21_flags_ & kMBF21FlagForceRadiusDamage))
+        if (source != thing && !(source->mbf21_flags_ & kMBF21FlagForceRadiusDamage))
             return true;
     }
 

@@ -309,10 +309,6 @@ float DeathBot::EvaluateWeapon(int w_num, int &key) const
     WeaponDefinition *weapon = wp->info;
     EPI_ASSERT(weapon);
 
-    AttackDefinition *attack = weapon->attack_[0];
-    if (!attack)
-        return -1;
-
     key = weapon->bind_key_;
 
     // have enough ammo?
@@ -446,11 +442,6 @@ void DeathBot::LookForEnemies(float radius)
         // look for a new enemy
         pl_->map_object_->SetTarget(nullptr);
     }
-
-    // pick a random nearby monster, then check sight, since the enemy
-    // may be on the other side of a wall.
-
-    // MapObject *enemy = BotFindEnemy(this, radius);
 
     MapObject *enemy = A_LookForBlockmapTarget(pl_->map_object_, (uint32_t)radius / kBlockmapUnitSize);
 
@@ -828,18 +819,11 @@ void DeathBot::ThinkFight()
 
 void DeathBot::WeaveNearLeader(const MapObject *leader)
 {
-    // pick a position some distance away, so that a human player
-    // can get out of a narrow item closet (etc).
+    // pick a position some distance away
 
-    float dx = pl_->map_object_->x - leader->x;
-    float dy = pl_->map_object_->y - leader->y;
-
-    float dlen = HMM_MAX(1.0f, hypotf(dx, dy));
-
-    dx = dx * 96.0f / dlen;
-    dy = dy * 96.0f / dlen;
-
-    Position pos{leader->x + dx, leader->y + dy, leader->z};
+    Position pos{leader->x, leader->y, leader->z};
+    pos.x -= leader->radius_ * 4 * epi::BAMCos(leader->angle_);
+    pos.y -= leader->radius_ * 4 * epi::BAMSin(leader->angle_);
 
     TurnToward(leader, false);
     WeaveToward(pos);
@@ -1395,6 +1379,9 @@ void DeathBot::Think()
     if (!mo->target_ && leader && leader->player_ && !InDeathmatch())
     {
         Position pos = {leader->x, leader->y, leader->z};
+        // spawn thing a little bit behind the player
+        pos.x -= leader->radius_ * 4 * epi::BAMCos(leader->angle_);
+        pos.y -= leader->radius_ * 4 * epi::BAMSin(leader->angle_);
         if (DistTo(pos) > 1024)
         {
             switch (task_)

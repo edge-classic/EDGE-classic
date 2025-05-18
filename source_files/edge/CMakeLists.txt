@@ -268,8 +268,10 @@ else()
   PRE_BUILD
   COMMAND python3 ${EMPACKAGER} ${DEST_DIR}/edge-classic.data --preload
     ${CMAKE_SOURCE_DIR}/web/preload@/
+    ${CMAKE_SOURCE_DIR}/crosshairs@/crosshairs
     ${CMAKE_SOURCE_DIR}/edge_base@/edge_base
     ${CMAKE_SOURCE_DIR}/edge_defs@/edge_defs
+    ${CMAKE_SOURCE_DIR}/overlays@/overlays
     ${CMAKE_SOURCE_DIR}/soundfont@/soundfont
     --js-output=${DEST_DIR}/edge-classic-data.js
     --use-preload-cache

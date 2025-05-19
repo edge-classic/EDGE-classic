@@ -59,18 +59,22 @@ An optional texture pack to enhance the experience can be found [here.](https://
 
 # Notable Improvements over EDGE 1.35
 
-- UDMF map support
+- Uncapped framerate
+- Updated renderer with Direct3D11, GLES3, and GL 3.3 paths in addition to the legacy GL 1.3 renderer
+- Multithreaded BSP traversal (when using new renderer)
+- Support for Dehacked code pointers up to and including MBF21
 - DEHEXTRA compatibility
+- DSDehacked compatibility
+- Improved compatibility with Boom behavior and rendering (physics, height sectors, etc)
+- UDMF map support
+- Improved sound mixer with floating-point samples and OpenAL spatialization/attenuation models
 - A soundfont-capable MIDI player (SF2/SF3 support)
 - OPL emulation with external OP2/AIL/TMB/WOPL instrument support
-- Many more music and sound formats (MP3, OGG, FLAC, IT/S3M/XM/MOD Tracker music)
+- Many more music and sound formats (PC Speaker, IMF, MP3, OGG, FLAC, IT/S3M/XM/MOD/FT)
 - UMAPINFO compatibility
-- Migration from SDL1 to SDL2 (longevity and potential new features)
-- Improved support for gamepads
+- Migration from SDL1 to SDL2 (longevity and improved gamepad support)
+- Lua as the primary scripting language, with a COAL compatibility layer for ease of migration
 - Expanded DDF, RTS, and COAL features
-- Full support for the Chex Quest 1, HacX 1.2, Harmony and REKKR IWADs
-- Greatly improved Heretic/Blasphemer IWAD compatibility
-- Enhanced support for the Freedoom 1/2 IWADs
 - Widescreen statusbar, intermission, and title screens
 - Replaced GLBSP with AJBSP as the internal nodebuilder
 - Inventory system
@@ -86,7 +90,7 @@ Bugfixes and detailed changes can be found in CHANGELOG.txt
 # Currently Supported Platforms
 
 - Windows 7 or later
-- [Web Browsers](https://edge-classic.github.io/play.html) (Desktop browsers are supported, mobile browsers require future touch and gamepad input work)
+- [Web Browsers Supporting WebGL2](https://edge-classic.github.io/play.html)
 - Linux (x86 and ARM architecture - ARM tested with Raspberry Pi OS on a Pi 4B)
 - BSD (x86 and ARM64 architecture - tested with FreeBSD 13.1; ARM64 tested on a Pi 4B but not recommended unless proper video acceleration is available
                  as playable framerates are too difficult to achieve otherwise)
@@ -97,10 +101,10 @@ Bugfixes and detailed changes can be found in CHANGELOG.txt
 - The Ultimate Doom/Doom 1/Freedoom Phase 1
 - Doom 2/Freedoom Phase 2
 - Chex Quest 1
-- Chex Quest 3: Vanilla Edition
+- Chex Quest 3: Vanilla (Regular and Modding Edition)
 - Heretic/Blasphemer
 - HacX 1.2
-- Harmony
+- Harmony (Original and Compatible Releases)
 - REKKR
 
 To learn more about EDGE-Classic, DDF, RTS, or COAL, please visit [our wiki](https://github.com/dashodanger/EDGE-classic/wiki).

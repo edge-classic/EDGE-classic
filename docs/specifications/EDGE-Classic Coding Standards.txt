@@ -1,0 +1,200 @@
+=======================================
+EDGE-Classic Coding Standards
+=======================================
+
+By the EDGE Team, 2025
+
+=======================================
+Introduction
+=======================================
+
+The EDGE codebase has a long history, and has not only passed through many hands
+but made the transition from C to C++. The original coding standard document 
+(coding_std.txt, under the 'original_edge_specifications' folder in this directory) 
+was still very C-oriented, and so for EDGE-Classic several decisions were made in 
+order to better align with the C++ nature of the program. The guidelines seen
+below may not be implemented in the code in its entirety, but each iteration strives to 
+get closer to this mark.
+
+Two of the main references that serve as a foundation for this document are the 
+Google C++ Style Guide (https://google.github.io/styleguide/cppguide.html) and the Orthodox
+C++ Primer (https://gist.github.com/bkaradzic/2e39896bc7d8c34e042b#file-orthodoxc-md). The
+EDGE Team does not strictly adhere to either of these, but any deviations are not antithetical
+to them (in our opinion).
+
+=======================================
+Style and Formatting
+=======================================
+
+The .clang-format file under the source_files/ directory can and should be used
+with clang-format in order to maintain proper indentation, spacing,
+et cetera. This file is a modified version of the "Microsoft" style as listed
+at https://clang.llvm.org/docs/ClangFormatStyleOptions.html.
+
+=======================================
+Header files
+=======================================
+
+The .clang-format file described above will handle proper header sorting, as long as
+there is not a undue amount of lines between include declarations. 
+
+The program must be able to compile with sorted headers; any exceptions to this rule 
+must fall under one of these categories:
+- A library/dependency requires headers in a specific order
+- A certain macro must be defined before the file is included, and formatting would
+  interfere with this
+
+Situations outside of this indicate a problem that needs to be addressed. Exceptions
+should be guarded with the "#clang-format off" / "#clang-format on" pair.
+
+When including headers that have both C and C++ versions (i.e. <stdint.h> versus <cstdint>),
+opt for the C variant of the header.
+
+Use '#pragma once' instead of the '#ifdef' guard for header files.
+
+=======================================
+Naming conventions
+=======================================
+
+As a rule of thumb, all naming should be verbose and self-descriptive so that
+the purpose of a function, macro, variable, etc can be inferred without needing to
+reference other portions of the code.
+
+Function names should be written in CamelCase. Constants and enum values should also 
+be in CamelCase, but prepended with a lower-case k.
+
+All variable names should be written in lowercase; words should optionally
+(but preferably) be separated by an underscore. Variables that are members of classes
+(but not members of structs) should have an underscore appended to them as well.
+
+Macros should be uppercase, with underscores separating the words in their names.
+
+Namespaces should be in lowercase, with underscores separating words if necessary.
+
+Exceptions to the above rules should only be made when adhering to historical
+Doom naming conventions improves the ability to understand the code (in EDGE-Classic
+this is reflected in the Dehacked->DDF->EDGE pipeline).
+
+=======================================
+Usage of Macros
+=======================================
+
+The definition of macros should be avoided to the greatest extent possible to
+reduce potential "collisions". 
+
+Macros that define a numerical constant should be replaced with a constexpr value 
+of the appropriate type. 
+
+Function-like macros should be replaced with true functions (preferably inline). 
+
+Macros that must still be created after considering the above rules should begin with 
+the name of the library in question (in the case of EDGE-Classic this would be 
+AJBSP_, COAL_, DDF_, DEHACKED_, EDGE_, or EPI_).
+
+Macros provided by, or required for, dependencies are acceptable to use as-is.
+
+=======================================
+Comments
+=======================================
+
+C++ style line comments, '//', should be used for all comments in the code.
+Using the classical /* */ for blocks of code is permissible, but can cause
+issues if needing to use another /* */ pair to comment out a code block that
+contains them. If larger blocks of code, like entire big functions or
+groups of functions, are commented out, #if 0 / #endif could be used instead.
+
+Comments should be placed on separate lines, right before and with the same
+indentation as the line they describe. Brief comments (several words) can be
+placed at the end of the line they apply to, space permitting.
+
+Most big changes in the code should be marked with the contributor's
+name, the date, and a brief description of what's added.
+
+FIXME and TODO comments, although still very prevalent in the codebase, should
+be avoided. A better solution would be a code comment with the name of the
+contributor that has noticed or intends to remedy the situation in question. 
+FIXMEs and TODOs should be reviewed and pruned if irrelevant or unplanned.
+
+=======================================
+Casting
+=======================================
+
+Use C-style casts; casts such as dynamic_cast which require Run Time Type 
+Information are not supported.
+
+=======================================
+Types and Typedefs
+=======================================
+
+To the greatest extent possble, used fixed size types in conjunction with including
+<stdint.h>. In addition, do not use typedefs to rename a fixed size type into something
+that may seem more convenient or familiar (such as typedef uint8_t byte). The exception
+to this is when such a renaming makes code easier to understand becaue the alias
+better indicates the purpose of the type (examples in the current code include using
+BAMAngle and RGBAColor as aliases for uint32_t).
+
+Do not use typedef with structs or enums, simply define them.
+
+Reduce or avoid the use of 'auto' when declaring variables to reduce potential confusion.
+
+=======================================
+I/O
+=======================================
+
+Use C-style I/O. This means mechanisms such as FILE* and its associated functions instead
+of ifstream/ofstream and printf instead of cout. The EPI filesystem and string
+utility libraries are already designed with this in mind.
+
+=======================================
+Exception Handling
+=======================================
+
+C++ exceptions are not supported; do not attempt to use throw or try/catch. Use the EPI_ASSERT
+macro and FatalError function if necessary.
+
+=======================================
+Namespaces
+=======================================
+
+Much of the codebase, owing to its C roots, is still in the program's global namespace. Attempts
+should be made to gradually introduce new namespaces, or move code into the existing namespaces
+if appropriate.
+
+Do not use the 'using' keyword; it is more valuable to reduce confusion as to the namespace that
+a type/class/function resides in.
+
+=======================================
+Classes and Structs
+=======================================
+
+When considering whether to declare something a class or a struct, use the following guidelines:
+- If it has functions, use a class
+- If inheritance/derived variants are needed, use a class
+- If it needs non-public members, use a class
+- Otherwise, use a struct
+
+=======================================
+Compiler Warnings
+=======================================
+
+Code should be compiled with the /W3 (MSVC) or -Wall (GCC/Clang) compiler flags; code under the
+'source_files' directory should add the /W4 (MSVC) or -Wextra (GCC/Clang) flags. With GCC/Clang 
+on Linux, no warnings should be produced for files in the 'source_files' folder. MSVC, Emscripten,
+MinGW, or other setups may still produce warnings that should be addressed when possible.
+
+Warnings produced by compiling code under the 'libraries' folder should be examined, but are not
+required to be remediated. In most situations, upgrading the library releases in a timely manner
+will address the situation.
+
+=======================================
+Other Considerations
+=======================================
+
+Do not test floats for equality directly (==); use either the AlmostEquals function (preferred) or 
+subtraction with an appropriate epsilon.
+
+Strings should be stored and considered UTF-8 where possible, with the exception of Windows API
+boundaries, in which case the EPI library should be used to convert to/from wide strings.
+
+It is recommended to avoid functions that rely on installed locales; the EPI filesystem and 
+string functions should work regardless of system locale(s).

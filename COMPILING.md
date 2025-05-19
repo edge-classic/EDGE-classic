@@ -1,6 +1,38 @@
 
 # COMPILING EDGE-Classic
 
+## Build Options
+
+The following options can be passed to CMake to control certain features:
+
+- EDGE_SOKOL_GL (default OFF): Will force use of the Sokol GL 3.3 render path
+- EDGE_SOKOL_GLES3 (default OFF): Will force use of the Sokol GLES3 render path
+- EDGE_SOKOL_D3D11 (default OFF): Will force use of the Sokol Direct3D 11 render path
+- EDGE_LEGACY_GL (default OFF): Will force use of the original GL 1.3 render path. BSP traversal will not be threaded with this render path.
+
+Note: If none of the above options are selected, a default will be chosen based on platform. This means Sokol D3D11 for Windows, Sokol GLES3 for Emscripten, and Sokol GL 3.3 for all other targets.
+
+- EDGE_CLASSIC (default ON): Will build all of EDGE-Classic's default features. Disabling this will build a smaller core engine that is still capable of playing many Doom mapsets but will remove support for the following:
+-- COAL scripting language
+-- Dehacked patch parsing and application
+-- Tracker music (S3M/MOD/XM/IT/FT) playback
+-- OPL emulation for MIDI playback
+-- MUS to MIDI track conversion
+-- IMF music playback
+-- Doom format sound effect playback
+-- PC speaker sound effect playback
+-- MUSINFO-based music changers
+-- UMAPINFO parsing and application
+
+- EDGE_SANITIZE (default OFF): Will build with AddressSanitizer support. Suppressions can be found in ASanSuppress.txt.
+- EDGE_SANITIZE_THREADS (default OFF): Will build with ThreadSanitizer support. Suppressions can be found in TSanSuppress.txt. This option is mutually exclusive with EDGE_SANITIZE and only works with non-MSVC builds.
+- EDGE_PROFILING (default OFF): Will build with support for the Tracy profiler.
+- EDGE_EXTRA_CHECKS (default OFF): Will perform extra validation checks when launching/running the program for development purposes.
+
+- EDGE_MIMALLOC (default ON): Build and use the MiMalloc memory allocator. Note: This will override regular new/delete as well as malloc-related functions!.
+- EDGE_MEMORY_CHECK (default OFF): Will configure MiMalloc to perform extra checks and mitigations. This incurs a performance overhead cost.
+- EDGE_MEMORY_CHECK_FATAL (defaul OFF): Will consider issues reported by EDGE_MEMORY_CHECK functions to be fatal errors.
+
 ## Windows Compilation using MSVC Build Tools and VSCode
 
 Download the Visual Studio Build Tools Installer and install the 'Desktop Development with C++' Workload
@@ -34,18 +66,17 @@ Then, after navigating to the project directory:
 > strip edge-classic.exe (if desired)
 ```
 
-## Compilation for Windows XP using w64devkit
+## Windows Compilation from Linux using MinGW
 
-WARNING: w64devkit's bundled tools such as GNU Make can produce false positives in Windows Defender; please see https://github.com/skeeto/w64devkit/issues/79 for more information and steps to validate that the Make executable is valid. Any Windows Defender exceptions that are created to account for this are the responsibility of the user and the user alone, and are NOT recommended actions by the development team!
+Install the following packages with their dependencies (exact names may vary based on distribution):
+* `cmake`
+* `build-essential`
+* `mingw-w64`
 
-This section assumes that you have downloaded the `i686` release from https://github.com/skeeto/w64devkit/releases and extracted it to a folder of your choosing. You will also need to download the `SDL2-devel-<version>-mingw` package from https://github.com/libsdl-org/SDL/releases/latest and placed the contents of its `i686-w64-mingw32` folder into the `i686-w64-mingw32` folder of your w64devkit installation.
-
-Launch w64devkit.exe from your extracted w64devkit folder.
-
-Then, after navigating to the project directory:
+Then, after navigating to the project directory in a terminal:
 
 ```
-> cmake -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
+> cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=cmake/Toolchain-mingw32.cmake (32-bit build, 64-bit builds can use Toolchain-mingw64.cmake)
 > cmake --build build (-j# optional, with # being the number of threads/cores you'd like to use)
 > strip edge-classic.exe (if desired)
 ```
@@ -56,7 +87,7 @@ This section assumes that you have a display server and graphical environment in
 
 Install the following packages with their dependencies (exact names may vary based on distribution):
 * `cmake`
-* `g++`
+* `build-essential`
 * `libsdl2-dev`
 
 Then, after navigating to the project directory in a terminal:
@@ -81,8 +112,6 @@ Then, after navigating to the project directory in a terminal:
 > cmake --build build (-j# optional, with # being the number of threads/cores you'd like to use)
 ```
 ## WebGL Compilation
-
-*Please note, the web version is less mature than other platforms and there is ongoing work to better integrate it.*
 
 In order to build for the web you'll need:
 
@@ -111,9 +140,11 @@ Open a web browser, navigate to ```http://localhost:8000```, and play Edge Class
 
 In all cases (barring the WebGL build per the previous section), the executable will be copied to the root of the project folder upon success. You can either launch the program in place, or copy the following folders and files to a separate directory if desired:
 * autoload
+* crosshairs
 * edge_base
 * edge_fixes
+* overlays
 * soundfont
 * edge-classic/edge-classic.exe (OS-dependent)
 * edge_defs.epk
-* SDL2.dll (Windows-only, w64devkit builds will need to copy SDL2.dll from the /i686-w64-mingw32/bin of your w64devkit install to the directory containing edge-classic.exe)
+* SDL2.dll (MSVC/MinGW builds)

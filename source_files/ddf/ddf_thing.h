@@ -241,6 +241,8 @@ enum HyperFlag
     kHyperFlagMusicChanger = (1 << 23),
     // -Lobo- 2024/07/17: this thing can trigger teleports even if NO_TRIGGER_LINES is set
     kHyperFlagTriggerTeleports = (1 << 24),
+    // Dasho - Thing will automatically be assigned a unique ID on spawn
+    kHyperFlagAssignTID = (1 << 25)
 };
 
 // MBF21 flags not already covered by extended/hyper flags

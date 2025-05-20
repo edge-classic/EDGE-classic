@@ -10,6 +10,7 @@
 #include "hu_draw.h"
 #include "hu_font.h"
 #include "lua_compat.h"
+#include "p_blockmap.h"
 #include "p_local.h"
 #include "p_mobj.h"
 #include "r_image.h"
@@ -1377,23 +1378,32 @@ static int MO_query_tagged(lua_State *L)
 {
     int whattag  = (int)luaL_checknumber(L, 1);
     int whatinfo = (int)luaL_checknumber(L, 2);
+    // If this tag is not unique, it is not guaranteed which mobj
+    // will actually be returned. Plan accordingly - Dasho
+    std::multimap<int, MapObject *>::iterator findme = active_tagged_map_objects.find(whattag);
 
-    MapObject  *mo;
-    std::string temp_value;
-
-    for (mo = map_object_list_head; mo; mo = mo->next_)
-    {
-        if (mo->tag_ == whattag)
-        {
-            temp_value = GetQueryInfoFromMobj(mo, whatinfo);
-            break;
-        }
-    }
-
-    if (temp_value.empty())
+    if (findme == active_tagged_map_objects.end())
         lua_pushstring(L, "");
     else
-        lua_pushstring(L, temp_value.c_str());
+        lua_pushstring(L, GetQueryInfoFromMobj(findme->second, whatinfo).c_str());
+
+    return 1;
+}
+
+// mapobject.query_tid(thing tid, whatinfo)
+//
+static int MO_query_tid(lua_State *L)
+{
+    int whattid  = (int)luaL_checknumber(L, 1);
+    int whatinfo = (int)luaL_checknumber(L, 2);
+    // TIDs should be unique but if not, it is not guaranteed which mobj
+    // will actually be returned. Plan accordingly - Dasho
+    std::multimap<int, MapObject *>::iterator findme = active_tids.find(whattid);
+
+    if (findme == active_tids.end())
+        lua_pushstring(L, "");
+    else
+        lua_pushstring(L, GetQueryInfoFromMobj(findme->second, whatinfo).c_str());
 
     return 1;
 }
@@ -1588,6 +1598,12 @@ void CreateLuaTable_Mobj(lua_State *L, MapObject *mo)
     //---------------
 
     //---------------
+    // object.tid
+    lua_pushinteger(L, (int)mo->tid_);
+    lua_setfield(L, -2, "tid"); // add to MOBJ Table
+    //---------------
+
+    //---------------
     // object.type
     temp_value = "SCENERY"; // default to scenery
 
@@ -1663,9 +1679,6 @@ void CreateLuaTable_Mobj(lua_State *L, MapObject *mo)
     lua_pushinteger(L, (int)mo->radius_);
     lua_setfield(L, -2, "radius"); // add to MOBJ Table
     //---------------
-
-    lua_pushlightuserdata(L, mo);
-    lua_setfield(L, -2, "pointer"); // add to MOBJ Table
 
     //---------------
     // object.benefits
@@ -1853,29 +1866,80 @@ static int MO_object_info(lua_State *L)
 //
 static int MO_tagged_info(lua_State *L)
 {
-    int         whattag = (int)luaL_checknumber(L, 1);
-    MapObject  *mo;
-    std::string temp_value;
+    int whattag = (int)luaL_checknumber(L, 1);
+    int count   = active_tagged_map_objects.count(whattag);
 
-    for (mo = map_object_list_head; mo; mo = mo->next_)
-    {
-        if (mo->tag_ == whattag)
-        {
-            temp_value = "FOUNDIT";
-            break;
-        }
-    }
-
-    if (temp_value.empty())
+    if (!count)
     {
         lua_pushstring(L, ""); // Found nothing
         return 1;
     }
     else
     {
-        CreateLuaTable_Mobj(L, mo); // create table with mobj info
+        lua_createtable(L, 0, count);
+        auto findme = active_tagged_map_objects.equal_range(whattag);
+        int  index  = 1;
+        for (auto mobj = findme.first; mobj != findme.second; ++mobj, ++index)
+        {
+            lua_pushnumber(L, index);
+            CreateLuaTable_Mobj(L, mobj->second);
+            lua_settable(L, -3);
+        }
         return 1;
     }
+}
+
+// mapobject.tid_info(thing tid) LUA Only
+//
+static int MO_tid_info(lua_State *L)
+{
+    int whattid = (int)luaL_checknumber(L, 1);
+    int count   = active_tids.count(whattid);
+
+    if (!count)
+    {
+        lua_pushstring(L, ""); // Found nothing
+        return 1;
+    }
+    else
+    {
+        lua_createtable(L, 0, count);
+        auto findme = active_tids.equal_range(whattid);
+        int  index  = 1;
+        for (auto mobj = findme.first; mobj != findme.second; ++mobj, ++index)
+        {
+            lua_pushnumber(L, index);
+            CreateLuaTable_Mobj(L, mobj->second);
+            lua_settable(L, -3);
+        }
+        return 1;
+    }
+}
+
+static bool ObjectsInRadiusCallback(MapObject *thing, void *data)
+{
+    std::pair<lua_State *, int *> *lua_pair = (std::pair<lua_State *, int *> *)data;
+    lua_State                     *L        = lua_pair->first;
+    int                           *count    = lua_pair->second;
+    *count                                  = *count + 1;
+    lua_pushnumber(L, *count);
+    CreateLuaTable_Mobj(L, thing);
+    lua_settable(L, -3);
+    return true;
+}
+
+// mapobject.objects_in_radius(x, y, radius) LUA Only
+//
+static int MO_objects_in_radius(lua_State *L)
+{
+    float                         x      = luaL_checknumber(L, 1);
+    float                         y      = luaL_checknumber(L, 2);
+    float                         radius = luaL_checknumber(L, 3);
+    int                           count  = 0;
+    std::pair<lua_State *, int *> lua_pair(L, &count);
+    lua_createtable(L, 0, 0);
+    BlockmapThingIterator(x - radius, y - radius, x + radius, y + radius, ObjectsInRadiusCallback, &lua_pair);
+    return 1;
 }
 
 // mapobject.count(thing type/id)
@@ -1897,38 +1961,54 @@ static int MO_count(lua_State *L)
     return 1;
 }
 
-// mapobject.render_view(x, y, w, h, tag/pointer/tid)
+// mapobject.render_view(x, y, w, h, tag)
 //
-static int MO_render_view(lua_State *L)
+static int MO_render_view_tag(lua_State *L)
 {
-    float x = (float)luaL_checknumber(L, 1);
-    float y = (float)luaL_checknumber(L, 2);
-    float w = (float)luaL_checknumber(L, 3);
-    float h = (float)luaL_checknumber(L, 4);
-    // int         whattag = (int)luaL_checknumber(L, 5);
+    float x       = (float)luaL_checknumber(L, 1);
+    float y       = (float)luaL_checknumber(L, 2);
+    float w       = (float)luaL_checknumber(L, 3);
+    float h       = (float)luaL_checknumber(L, 4);
+    int   whattag = (int)luaL_checknumber(L, 5);
+    // If this tag is not unique, it is not guaranteed which mobj
+    // will actually be returned. Plan accordingly - Dasho
+    std::multimap<int, MapObject *>::iterator findme = active_tagged_map_objects.find(whattag);
 
-    const void *whatmobj = lua_topointer(L, 5);
-
-    MapObject  *mo;
-    std::string temp_value;
-
-    for (mo = map_object_list_head; mo; mo = mo->next_)
+    if (findme == active_tagged_map_objects.end())
     {
-        // if (mo->tag_ == whattag)
-        if (mo == whatmobj)
-        {
-            temp_value = "FOUNDIT";
-            break;
-        }
-    }
-
-    if (!temp_value.empty())
-    {
-        HUDRenderWorld(x, y, w, h, mo, 1);
-        lua_pushboolean(L, 1);
+        lua_pushboolean(L, 0);
     }
     else
+    {
+        HUDRenderWorld(x, y, w, h, findme->second, 1);
+        lua_pushboolean(L, 1);
+    }
+
+    return 1;
+}
+
+// mapobject.render_view_tid(x, y, w, h, tid)
+//
+static int MO_render_view_tid(lua_State *L)
+{
+    float x       = (float)luaL_checknumber(L, 1);
+    float y       = (float)luaL_checknumber(L, 2);
+    float w       = (float)luaL_checknumber(L, 3);
+    float h       = (float)luaL_checknumber(L, 4);
+    int   whattid = (int)luaL_checknumber(L, 5);
+    // TIDs should be unique, but if not it is not guaranteed which mobj
+    // will actually be returned. Plan accordingly - Dasho
+    std::multimap<int, MapObject *>::iterator findme = active_tids.find(whattid);
+
+    if (findme == active_tids.end())
+    {
         lua_pushboolean(L, 0);
+    }
+    else
+    {
+        HUDRenderWorld(x, y, w, h, findme->second, 1);
+        lua_pushboolean(L, 1);
+    }
 
     return 1;
 }
@@ -2436,11 +2516,15 @@ static int luaopen_player(lua_State *L)
 }
 
 static const luaL_Reg mapobjectlib[] = {{"query_tagged", MO_query_tagged},
+                                        {"query_tid", MO_query_tid},
                                         {"tagged_info", MO_tagged_info},
+                                        {"tid_info", MO_tid_info},
+                                        {"objects_in_radius", MO_objects_in_radius},
                                         {"object_info", MO_object_info},
                                         {"weapon_info", MO_weapon_info},
                                         {"count", MO_count},
-                                        {"render_view", MO_render_view},
+                                        {"render_view_tag", MO_render_view_tag},
+                                        {"render_view_tid", MO_render_view_tid},
                                         {nullptr, nullptr}};
 
 static int luaopen_mapobject(lua_State *L)

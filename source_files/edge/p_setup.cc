@@ -657,8 +657,9 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x, float 
 
     // spawn it now !
     // Use MobjCreateObject -ACB- 1998/08/06
-    MapObject *mo = CreateMapObject(x, y, z, info);
-
+    MapObject *mo = CreateMapObject(x, y, z, info, tag);
+    // Add TID to spawnpoint if applicable
+    point.tid       = mo->tid_;
     mo->angle_      = angle;
     mo->spawnpoint_ = point;
 
@@ -685,9 +686,6 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x, float 
         P_LookForPlayers(mo, mo->info_->sight_angle_);
         */
     }
-    // Lobo 2022: added tagged mobj support ;)
-    if (tag > 0)
-        mo->tag_ = tag;
 
     mo->interpolate_ = false;
     mo->old_x_       = mo->x;
@@ -3544,6 +3542,8 @@ void LevelSetup(void)
     // Must do before loading things
     GetMUSINFOTracksForLevel();
 #endif
+
+    next_available_tid = 1;
 
     if (!udmf_level)
         LoadThings(lumpnum + kLumpThings);

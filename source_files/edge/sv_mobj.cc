@@ -30,6 +30,7 @@
 #include "epi.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
+#include "p_mobj.h"
 #include "p_setup.h"
 #include "stb_sprintf.h"
 #include "sv_chunk.h"
@@ -139,6 +140,8 @@ static SaveField sv_fields_mobj[] = {
                     SaveGamePutFloat),
     EDGE_SAVE_FIELD(dummy_map_object, model_aspect_, "model_aspect", 1, kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
                     SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_map_object, tid_, "tid", 1, kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
     EDGE_SAVE_FIELD(dummy_map_object, tag_, "tag", 1, kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
                     SaveGamePutInteger),
     EDGE_SAVE_FIELD(dummy_map_object, wait_until_dead_tags_, "wud_tags", 1, kSaveFieldString, 0, nullptr,
@@ -249,6 +252,10 @@ static SaveField sv_fields_spawnpoint[] = {
     EDGE_SAVE_FIELD(dummy_spawn_point, info, "info", 1, kSaveFieldString, 0, nullptr, SaveGameMapObjectGetType,
                     SaveGameMapObjectPutType),
     EDGE_SAVE_FIELD(dummy_spawn_point, flags, "flags", 1, kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_spawn_point, flags, "tid", 1, kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_spawn_point, flags, "tag", 1, kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
                     SaveGamePutInteger),
 
     {0, nullptr, 0, {kSaveFieldInvalid, 0, nullptr}, nullptr, nullptr, nullptr}};
@@ -421,6 +428,15 @@ void SaveGameMapObjectFinaliseElems(void)
         // Lobo fix for RTS ONDEATH actions not working
         // when loading a game
         seen_monsters.insert(mo->info_);
+
+        if (mo->tag_)
+            active_tagged_map_objects.emplace(mo->tag_, mo);
+        if (mo->tid_)
+        {
+            active_tids.emplace(mo->tid_, mo);
+            if (mo->tid_ >= next_available_tid)
+                next_available_tid = mo->tid_ + 1;
+        }
     }
 }
 
@@ -560,6 +576,7 @@ bool SaveGameGetMapObject(void *storage, int index)
     int swizzle = SaveChunkGetInteger();
 
     *dest = (swizzle == 0) ? nullptr : (MapObject *)SaveGameMapObjectFindByIndex(swizzle - 1);
+
     return true;
 }
 

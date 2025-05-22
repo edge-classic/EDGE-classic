@@ -94,9 +94,22 @@ MapObject *map_object_list_head;
 // List of item respawn objects
 RespawnQueueItem *respawn_queue_head;
 
+// List of tagged mobjs
+std::multimap<int, MapObject *> active_tagged_map_objects;
+std::multimap<int, MapObject *> active_tids;
+int                             next_available_tid = 1;
+
+// List of mobj types actually seen in this map
+// (help avoid wait until dead scripts that would never fire, etc)
 std::unordered_set<const MapObjectDefinition *> seen_monsters;
 
 bool time_stop_active = false;
+
+static int MapObjectGetTID()
+{
+    next_available_tid++;
+    return next_available_tid - 1;
+}
 
 static void AddItemToQueue(const MapObject *mo)
 {
@@ -413,6 +426,7 @@ static void TeleportRespawn(MapObject *mobj)
     new_mo->angle_          = mobj->spawnpoint_.angle;
     new_mo->vertical_angle_ = mobj->spawnpoint_.vertical_angle;
     new_mo->tag_            = mobj->spawnpoint_.tag;
+    new_mo->tid_            = mobj->spawnpoint_.tid;
 
     if (mobj->spawnpoint_.flags & kMapObjectFlagAmbush)
         new_mo->flags_ |= kMapObjectFlagAmbush;
@@ -499,6 +513,7 @@ static void ResurrectRespawn(MapObject *mobj)
     mobj->SetTarget(nullptr);
 
     mobj->tag_ = mobj->spawnpoint_.tag;
+    mobj->tid_ = mobj->spawnpoint_.tid;
 
     if (mobj->spawnpoint_.flags & kMapObjectFlagAmbush)
         mobj->flags_ |= kMapObjectFlagAmbush;
@@ -1829,6 +1844,30 @@ static void RemoveMobjFromList(MapObject *mo)
         EPI_ASSERT(mo->next_->previous_ == mo);
         mo->next_->previous_ = mo->previous_;
     }
+
+    if (mo->tag_)
+    {
+        auto mobjs = active_tagged_map_objects.equal_range(mo->tag_);
+        for (auto mobj = mobjs.first; mobj != mobjs.second;)
+        {
+            if (mobj->second == mo)
+                mobj = active_tagged_map_objects.erase(mobj);
+            else
+                ++mobj;
+        }
+    }
+
+    if (mo->tid_)
+    {
+        auto mobjs = active_tids.equal_range(mo->tid_);
+        for (auto mobj = mobjs.first; mobj != mobjs.second;)
+        {
+            if (mobj->second == mo)
+                mobj = active_tids.erase(mobj);
+            else
+                ++mobj;
+        }
+    }
 }
 
 //
@@ -1909,6 +1948,9 @@ void RemoveAllMapObjects(bool loading)
         mo->reference_count_ = 0;
         DeleteMobj(mo);
     }
+    active_tagged_map_objects.clear();
+    active_tids.clear();
+    next_available_tid = 1;
 }
 
 void ClearRespawnQueue(void)
@@ -2262,7 +2304,7 @@ void RemoveMissile(MapObject *missile)
 //
 // -ACB- 1998/08/02 Procedure written.
 //
-MapObject *CreateMapObject(float x, float y, float z, const MapObjectDefinition *info)
+MapObject *CreateMapObject(float x, float y, float z, const MapObjectDefinition *info, int tag)
 {
     MapObject *mobj = MapObject::Allocate();
 
@@ -2398,6 +2440,18 @@ MapObject *CreateMapObject(float x, float y, float z, const MapObjectDefinition 
         intermission_stats.items++;
 
     mobj->last_heard_ = -1; // For now, the last player we heard
+
+    if (tag)
+    {
+        mobj->tag_ = tag;
+        active_tagged_map_objects.emplace(tag, mobj);
+    }
+
+    if (mobj->hyper_flags_ & kHyperFlagAssignTID)
+    {
+        mobj->tid_ = MapObjectGetTID();
+        active_tids.emplace(mobj->tid_, mobj);
+    }
     //
     // -ACB- 1998/08/27 Mobj Linked-List Addition
     //

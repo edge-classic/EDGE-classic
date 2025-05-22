@@ -1614,6 +1614,7 @@ static DDFSpecialFlags hyper_specials[] = {
     {"IMMOVABLE", kHyperFlagImmovable, 0},
     {"MUSIC_CHANGER", kHyperFlagMusicChanger, 0},
     {"TRIGGER_TELEPORTS", kHyperFlagTriggerTeleports, 0}, // Lobo: Can always activate teleporters.
+    {"ASSIGN_TID", kHyperFlagAssignTID, 0},               // Auto-assign unique tag on spawn
     {nullptr, 0, 0}};
 
 // MBF21 Boss Flags are already handled and converted to RTS in the Dehacked processor,

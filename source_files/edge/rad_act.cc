@@ -418,7 +418,7 @@ void ScriptSpawnThing(RADScriptTrigger *R, void *param)
         mo = CreateMapObject(t->x, t->y, t->z, minfo->respawneffect_);
     }
 
-    mo = CreateMapObject(t->x, t->y, t->z, minfo);
+    mo = CreateMapObject(t->x, t->y, t->z, minfo, t->tag);
 
     // -ACB- 1998/07/10 New Check, so that spawned mobj's don't
     //                  spawn somewhere where they should not.
@@ -430,8 +430,6 @@ void ScriptSpawnThing(RADScriptTrigger *R, void *param)
 
     MapObjectSetDirectionAndSpeed(mo, t->angle, t->slope, 0);
 
-    mo->tag_ = t->tag;
-
     mo->spawnpoint_.x              = t->x;
     mo->spawnpoint_.y              = t->y;
     mo->spawnpoint_.z              = t->z;
@@ -439,7 +437,8 @@ void ScriptSpawnThing(RADScriptTrigger *R, void *param)
     mo->spawnpoint_.vertical_angle = epi::BAMFromATan(t->slope);
     mo->spawnpoint_.info           = minfo;
     mo->spawnpoint_.flags          = t->ambush ? kMapObjectFlagAmbush : 0;
-    mo->spawnpoint_.tag            = t->tag;
+    mo->spawnpoint_.tag            = mo->tag_;
+    mo->spawnpoint_.tid            = mo->tid_;
 
     if (t->ambush)
         mo->flags_ |= kMapObjectFlagAmbush;
@@ -563,28 +562,46 @@ void ScriptDamageMonsters(RADScriptTrigger *R, void *param)
     // scan the mobj list
     // FIXME: optimise for fixed-sized triggers
 
-    MapObject *mo;
-    MapObject *next;
-
     Player *player = GetWhoDunnit(R);
 
-    for (mo = map_object_list_head; mo != nullptr; mo = next)
+    // If we have a tag, we can scan the active tagged mobj list instead
+    if (tag)
     {
-        next = mo->next_;
+        auto mobjs = active_tagged_map_objects.equal_range(tag);
+        for (auto mobj = mobjs.first; mobj != mobjs.second; ++mobj)
+        {
+            MapObject *mo = mobj->second;
+            if (info && mo->info_ != info)
+                continue;
 
-        if (info && mo->info_ != info)
-            continue;
+            if (!(mo->extended_flags_ & kExtendedFlagMonster) || mo->health_ <= 0)
+                continue;
 
-        if (tag && (mo->tag_ != tag))
-            continue;
+            if (!ScriptRadiusCheck(mo, R->info))
+                continue;
 
-        if (!(mo->extended_flags_ & kExtendedFlagMonster) || mo->health_ <= 0)
-            continue;
+            DamageMapObject(mo, nullptr, player ? player->map_object_ : nullptr, mon->damage_amount, nullptr);
+        }
+    }
+    else
+    {
+        MapObject *mo;
+        MapObject *next;
+        for (mo = map_object_list_head; mo != nullptr; mo = next)
+        {
+            next = mo->next_;
 
-        if (!ScriptRadiusCheck(mo, R->info))
-            continue;
+            if (info && mo->info_ != info)
+                continue;
 
-        DamageMapObject(mo, nullptr, player ? player->map_object_ : nullptr, mon->damage_amount, nullptr);
+            if (!(mo->extended_flags_ & kExtendedFlagMonster) || mo->health_ <= 0)
+                continue;
+
+            if (!ScriptRadiusCheck(mo, R->info))
+                continue;
+
+            DamageMapObject(mo, nullptr, player ? player->map_object_ : nullptr, mon->damage_amount, nullptr);
+        }
     }
 }
 
@@ -613,30 +630,53 @@ void ScriptThingEvent(RADScriptTrigger *R, void *param)
     // scan the mobj list
     // FIXME: optimise for fixed-sized triggers
 
-    MapObject *mo;
-    MapObject *next;
-
-    for (mo = map_object_list_head; mo != nullptr; mo = next)
+    // If we have a tag, we can scan the active tagged mobj list instead
+    if (tag)
     {
-        next = mo->next_;
+        auto mobjs = active_tagged_map_objects.equal_range(tag);
+        for (auto mobj = mobjs.first; mobj != mobjs.second; ++mobj)
+        {
+            MapObject *mo = mobj->second;
+            if (info && mo->info_ != info)
+                continue;
 
-        if (info && (mo->info_ != info))
-            continue;
+            // ignore certain things (e.g. corpses)
+            if (mo->health_ <= 0)
+                continue;
 
-        if (tag && (mo->tag_ != tag))
-            continue;
+            if (!ScriptRadiusCheck(mo, R->info))
+                continue;
 
-        // ignore certain things (e.g. corpses)
-        if (mo->health_ <= 0)
-            continue;
+            int state = MapObjectFindLabel(mo, tev->label);
 
-        if (!ScriptRadiusCheck(mo, R->info))
-            continue;
+            if (state)
+                MapObjectSetStateDeferred(mo, state + tev->offset, 0);
+        }
+    }
+    else
+    {
+        MapObject *mo;
+        MapObject *next;
 
-        int state = MapObjectFindLabel(mo, tev->label);
+        for (mo = map_object_list_head; mo != nullptr; mo = next)
+        {
+            next = mo->next_;
 
-        if (state)
-            MapObjectSetStateDeferred(mo, state + tev->offset, 0);
+            if (info && (mo->info_ != info))
+                continue;
+
+            // ignore certain things (e.g. corpses)
+            if (mo->health_ <= 0)
+                continue;
+
+            if (!ScriptRadiusCheck(mo, R->info))
+                continue;
+
+            int state = MapObjectFindLabel(mo, tev->label);
+
+            if (state)
+                MapObjectSetStateDeferred(mo, state + tev->offset, 0);
+        }
     }
 }
 

@@ -127,7 +127,7 @@ bool HitLiquidFloor(MapObject *thing);
 void       ItemRespawn(void);
 void       RemoveMissile(MapObject *missile);
 void       ExplodeMissile(MapObject *missile);
-MapObject *CreateMapObject(float x, float y, float z, const MapObjectDefinition *type);
+MapObject *CreateMapObject(float x, float y, float z, const MapObjectDefinition *type, int tag = 0);
 
 // -ACB- 2005/05/06 Sound Effect Category Support
 int GetSoundEffectCategory(const MapObject *mo);

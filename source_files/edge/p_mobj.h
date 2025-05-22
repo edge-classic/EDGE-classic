@@ -31,6 +31,7 @@
 
 #pragma once
 
+#include <map>
 #include <unordered_set>
 
 #include "con_var.h"
@@ -52,6 +53,9 @@ struct Subsector;
 struct TouchNode;
 struct Line;
 
+extern int                                             next_available_tid;
+extern std::multimap<int, MapObject *>                 active_tagged_map_objects;
+extern std::multimap<int, MapObject *>                 active_tids;
 extern std::unordered_set<const MapObjectDefinition *> seen_monsters;
 
 extern bool time_stop_active;
@@ -164,6 +168,9 @@ struct SpawnPoint
 
     // tag number
     int tag;
+
+    // tid number
+    int tid;
 };
 
 struct DynamicLightState
@@ -257,8 +264,9 @@ class MapObject : public Position
     float model_scale_      = 1.0f;
     float model_aspect_     = 1.0f;
 
-    // tag ID (for special operations)
+    // IDs (for special operations)
     int         tag_                  = 0;
+    int         tid_                  = 0;
     std::string wait_until_dead_tags_ = "";
 
     // Movement direction, movement generation (zig-zagging).
@@ -282,7 +290,7 @@ class MapObject : public Position
     int last_look_ = 0;
 
     // For respawning.
-    SpawnPoint spawnpoint_ = {0, 0, 0, 0, 0, nullptr, 0, 0};
+    SpawnPoint spawnpoint_ = {0, 0, 0, 0, 0, nullptr, 0, 0, 0};
 
     float original_height_ = 0;
 
@@ -421,7 +429,7 @@ class MapObject : public Position
 // Item-in-Respawn-que Structure -ACB- 1998/07/30
 struct RespawnQueueItem
 {
-    SpawnPoint               spawnpoint = {0, 0, 0, 0, 0, nullptr, 0, 0};
+    SpawnPoint               spawnpoint = {0, 0, 0, 0, 0, nullptr, 0, 0, 0};
     int                      time       = 0;
     struct RespawnQueueItem *next       = nullptr;
     struct RespawnQueueItem *previous   = nullptr;
@@ -431,6 +439,8 @@ inline float MapObjectMidZ(MapObject *mo)
 {
     return (mo->z + mo->height_ / 2);
 }
+
+int GetMapObjectAutotag();
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

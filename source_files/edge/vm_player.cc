@@ -1421,30 +1421,39 @@ static void MO_query_tagged(coal::VM *vm, int argc)
 
     double *argTag   = vm->AccessParam(0);
     double *argInfo  = vm->AccessParam(1);
-    int     whattag  = 1;
-    int     whatinfo = 1;
+    int     whattag  = (int)*argTag;
+    int     whatinfo = (int)*argInfo;
 
-    whattag  = (int)*argTag;
-    whatinfo = (int)*argInfo;
+    // If this tag is not unique, it is not guaranteed which mobj
+    // will actually be returned. Plan accordingly - Dasho
+    std::multimap<int, MapObject *>::iterator findme = active_tagged_map_objects.find(whattag);
 
-    MapObject *mo;
-
-    std::string temp_value;
-    temp_value.clear();
-
-    for (mo = map_object_list_head; mo; mo = mo->next_)
-    {
-        if (mo->tag_ == whattag)
-        {
-            temp_value = GetQueryInfoFromMobj(mo, whatinfo);
-            break;
-        }
-    }
-
-    if (temp_value.empty())
+    if (findme == active_tagged_map_objects.end())
         vm->ReturnString("");
     else
-        vm->ReturnString(temp_value.c_str());
+        vm->ReturnString(GetQueryInfoFromMobj(findme->second, whatinfo).c_str());
+}
+
+// mapobject.query_tid(thing tid, whatinfo)
+//
+static void MO_query_tid(coal::VM *vm, int argc)
+{
+    if (argc != 2)
+        FatalError("mapobject.query_tid: wrong number of arguments given\n");
+
+    double *argTID   = vm->AccessParam(0);
+    double *argInfo  = vm->AccessParam(1);
+    int     whattid  = (int)*argTID;
+    int     whatinfo = (int)*argInfo;
+
+    // TIDs should be unique but if not, it is not guaranteed which mobj
+    // will actually be returned. Plan accordingly - Dasho
+    std::multimap<int, MapObject *>::iterator findme = active_tids.find(whattid);
+
+    if (findme == active_tids.end())
+        vm->ReturnString("");
+    else
+        vm->ReturnString(GetQueryInfoFromMobj(findme->second, whatinfo).c_str());
 }
 
 // mapobject.count(thing type/id)
@@ -1696,6 +1705,7 @@ void COALRegisterPlaysim()
     ui_vm->AddNativeFunction("player.query_object", PL_query_object);
     ui_vm->AddNativeFunction("player.query_weapon", PL_query_weapon);
     ui_vm->AddNativeFunction("mapobject.query_tagged", MO_query_tagged);
+    ui_vm->AddNativeFunction("mapobject.query_tid", MO_query_tid);
     ui_vm->AddNativeFunction("mapobject.count", MO_count);
 
     ui_vm->AddNativeFunction("player.is_zoomed", PL_is_zoomed);

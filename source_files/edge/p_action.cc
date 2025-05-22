@@ -1040,7 +1040,32 @@ void A_MakeIntoCorpse(MapObject *mo)
     // object is on ground, it can be walked over
     mo->flags_ &= ~kMapObjectFlagSolid;
 
+    if (mo->tag_)
+    {
+        auto mobjs = active_tagged_map_objects.equal_range(mo->tag_);
+        for (auto mobj = mobjs.first; mobj != mobjs.second;)
+        {
+            if (mobj->second == mo)
+                mobj = active_tagged_map_objects.erase(mobj);
+            else
+                ++mobj;
+        }
+    }
+
+    if (mo->tid_)
+    {
+        auto mobjs = active_tids.equal_range(mo->tid_);
+        for (auto mobj = mobjs.first; mobj != mobjs.second;)
+        {
+            if (mobj->second == mo)
+                mobj = active_tids.erase(mobj);
+            else
+                ++mobj;
+        }
+    }
+
     mo->tag_ = 0;
+    mo->tid_ = 0;
 
     HitLiquidFloor(mo);
 }
@@ -1063,6 +1088,7 @@ void BringCorpseToLife(MapObject *corpse)
     if (!AlmostEquals(corpse->alpha_, 1.0f))
         corpse->target_visibility_ = corpse->alpha_;
     corpse->tag_ = corpse->spawnpoint_.tag;
+    corpse->tid_ = corpse->spawnpoint_.tid;
 
     corpse->flags_ &= ~kMapObjectFlagCountKill; // Lobo 2023: don't add to killcount
 

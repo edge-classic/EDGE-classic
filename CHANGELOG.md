@@ -1,48 +1,95 @@
-CHANGELOG for EDGE-Classic 1.39 (since EDGE-Classic 1.38)
+CHANGELOG for EDGE-Classic 1.5 (since EDGE-Classic 1.38)
 ====================================
 
 New Features
 ------------
-- Uncapped Framerate
-- VWAD support
-- MBF21 Dehacked support
-- Add DLight image-based auto-coloring via AUTOCOLOUR ddf field
+- Uncapped framerate
+-- 'framerate_limit' CVAR can be used to cap framerate maximum
+- New Sokol GFX Renderer
+-- Leverages platform-specific APIs (Direct3D 11 on Windows, WebGL2 GLES subset on Emscripten, and GL Core 3.3 on other platforms)
+--- Original GL 1.3 render path requires recompilation; see COMPILING.md for details
+-- Uses multithreaded BSP traversal/geometry creation
+- Improved sound mixer
+-- Uses threading, floating-point samples, and OpenAL attenuation/spatialization models
+-- Improved Freeverb-based reverb model used and exposed to modders via DDFVERB
+-- Underwater/reverb/vacuum effect nodes remove the need to premix/cache sounds
+- Dynamic light image-based coloring via AUTOCOLOUR DDF field
+-- Will use the average RGB value of the specified image as the light color
 - Implement "extra_light_step" CVAR
-- Emu de MIDI; remove ProtoSquare/ChipFreak soundfonts
-- New states action: LUA_RUN_SCRIPT("lua_script_name")
+-- Controls how much the light level is raised by actions such as A_Light1/2
+- New state action: LUA_RUN_SCRIPT("lua_script_name")
+-- Will pass a table containing the calling mobj's information as a parameter
 - New states actions:  CLEAR_TARGET and FRIEND_LOOKOUT
 - New BORE attack flag
-- Add "Simple Skies" to Performance Options menu
+-- Similar to existing TUNNEL special, but can damage the same mobj multiple times as it is passing through
 - New states actions: GRAVITY and NO_GRAVITY
-- New states action: SET_SCALE(float)
-- New LUA function: mapobject.render_view(x, y, w, h, tid). See the world from the eyes of any mobj.
+- New state action: SET_SCALE(float)
+-- Changes the objects visual scale. This does not affect the actual collision box and is mainly intended for special effects things, such as a puff of smoke gradually dissipating by expansion (in combination with TRANS_FADE) or shrinking and disappearing.
+- New DDFTHING special: ASSIGN_TID
+-- Will assign a unique ID to a mobj when it spawns, managed separately from tags
+- New LUA functions: mapobject.render_view_tag(x, y, w, h, tag) and mapobject.render_view_tid(x, y, w, h, tid). See the world from the eyes of any mobj.
+-- Tags/TIDs used for this function should be unique; no guarantees regarding which mobj is returned if shared between multiple mobjs
 
 
 General Improvements/Changes
 --------------------
-- Remove Opal instrument selector; bake-in AIL instrument set
-- Restore FMMIDI
+- Co-op bot improvements
+-- Bots and players (non-voodoo) will no longer clip or telefrag each other
+-- Bots will now follow behind the player instead of potentially obstructing their view
+-- Up to 15 bots can be spawned regardless of the number of single-player/co-op starts that exist
+- Implemented "idtakeall" cheat; removes current player loadout and gives them their initial benefits
+-- Also used for Heretic "idkfa" behavior, although it deviates somewhat
+- Add "Simple Skies" to Performance Options menu
+-- Can improve performance at the cost of breaking sky flooding, sky floors, and other behavior
+- Gameplay will be paused and the cursor released when the console is active
+- Consolidated SoundFont and OPL Instrument selection in Sound Menu
+-- Now a single option named "MIDI Instrument Set"
+--- Lumps named SNDFONT or pack files named SNDFONT.sf2/sf3 will override the "Default" soundfont option
+--- OPL emulation will use a GENMIDI lump/pack file if present, otherwise will fall back to a built-in instrument set
 - Default automap zoom halved.
 - Automap zoom persists for whole play session.
 - Allow negative percentages for DDFWEAPON bobbing
 - Update Heretic/Blasphemer cheats
-- Co-op bot improvements
 - Sky drawing improvements
 - Heretic/Blasphemer tweaks
-- Consolidate GL state changes and render calls
 - Autoscale intermission texts if there are too many lines to fit on the screen
 - MLOOK_TURN() Weapons.ddf action has been renamed to FACE() with identical behaviour
+- "Exclusive Fullscreen" and its functionality removed from Screen Options menu
  
 
-Bugs fixed
+Compatibility Fixes
+-------------------
+
+- Vanilla
+-- Mikoportal support expanded to include all mobjs, not just voodoo dolls
+-- Things can achieve peccaportal flight under the correct conditions
+--- Unlike true vanilla peccaportal flight, things retain a small degree of air control
+-- Fixes for fading light level cycling
+-- Fixed negative patch Y offset issue with SKY1 and W105_1 in Doom(1)
+-- Fixed CheckRelThing callback for missiles missing some collisions that should have occurred
+-- Improved scaling for intermission text that would not normally fit on the screen
+
+- Boom
+-- Boom Line 242 sector rendering vastly improved
+-- Carry scroller forces are now additive instead of averaged
+-- Changed method of determining the sectors a thing is touching (for carry purposes/etc) from
+a BSP-based to a linedef-based method to be more in line with Boom behavior
+
+- MBF
+-- A_Mushroom codepointer revised to be in line with original behavior
+-- Sky transfers now supported animated skies and scrolling
+
+- MBF21
+-- All MBF21 Dehacked code pointers implemented
+
+General Bugfixes
 ----------
-- Fixed negative patch Y offset issue with SKY1 and W105_1 in Doom(1)
+- Replaced PRNG as the previous ranlux24-based implementation was producing odd patterns/bias in regular gameplay
 - Fixed Glass linetypes not clearing the BlockSound flag after being shot
 - Fix UDMF sidedef mismask offset loading
 - Node follower CTD fix
 - Fixed legacy bug: switch activation noises when some switch images were not cached and the activating line was not textured
 - Flicker light fixes
-- Boom line 242 support vastly improved
 - Fix for patch atlas lookups for invalid characters
 - Calling named RTS Tags via state action RTS_ENABLE_TAGGED did not work
 - PNG textures/flats did not tile

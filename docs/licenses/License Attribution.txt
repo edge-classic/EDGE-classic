@@ -16,6 +16,9 @@ Blasphemer (various assets) - Copyright (c) 2021 Contributors to the Blasphemer 
 
 Freedoom (various assets) - Copyright (c) 2001-2019 Contributors to the Freedoom project
 
+minivorbis library - Copyright (c) 2020 Eduardo Bart
+  Copyright (c) 2002-2020 Xiph.org Foundation
+
 Mod4Play library - 	Copyright (c) 2024-2025 dashodanger
 					Copyright (c) 2022 Olav Sørensen
 
@@ -130,7 +133,7 @@ prns.h - Marc B. Reynolds
 
 "sf_GMbank" soundfont (renamed to Default.sf2) - The Csound Developers
 
-stb_image, stb_rect_pack, stb_sprintf, stb_truetype and stb_vorbis libraries - Sean Barrett
+stb_image, stb_rect_pack, stb_sprintf, and stb_truetype libraries - Sean Barrett
 
 ===========================================================================================
 SIL Open Font License

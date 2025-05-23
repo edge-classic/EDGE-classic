@@ -56,17 +56,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Download w64devkit
-        run: invoke-webrequest https://github.com/skeeto/w64devkit/releases/download/v2.1.0/w64devkit-x86-2.1.0.exe -outfile ${{github.workspace}}\w64devkit.exe
+        run: invoke-webrequest https://github.com/skeeto/w64devkit/releases/download/v2.2.0/w64devkit-x86-2.2.0.7z.exe -outfile ${{github.workspace}}\w64devkit.exe
       - name: Extract w64devkit
         run: ${{github.workspace}}\w64devkit.exe -y
       - name: Download SDL2-devel
-        run: invoke-webrequest https://github.com/libsdl-org/SDL/releases/download/release-2.32.4/SDL2-devel-2.32.4-mingw.zip -outfile ${{github.workspace}}\sdl2-devel.zip
+        run: invoke-webrequest https://github.com/libsdl-org/SDL/releases/download/release-2.32.6/SDL2-devel-2.32.6-mingw.zip -outfile ${{github.workspace}}\sdl2-devel.zip
       - name: Extract SDL2-devel
         run: expand-archive -path ${{github.workspace}}\sdl2-devel.zip -destinationpath ${{github.workspace}}
       - name: Copy SDL2-devel contents to w64devkit
         run: |
-          robocopy ${{github.workspace}}\SDL2-2.32.4\i686-w64-mingw32 ${{github.workspace}}\w64devkit\i686-w64-mingw32 /s ; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
-          robocopy ${{github.workspace}}\SDL2-2.32.4\i686-w64-mingw32 ${{github.workspace}}\w64devkit /s ; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
+          robocopy ${{github.workspace}}\SDL2-2.32.6\i686-w64-mingw32 ${{github.workspace}}\w64devkit\i686-w64-mingw32 /s ; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
+          robocopy ${{github.workspace}}\SDL2-2.32.6\i686-w64-mingw32 ${{github.workspace}}\w64devkit /s ; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
       - name: Set environment variables and build
         run: |
           $env:Path = "${{github.workspace}}\w64devkit\bin;" + $env:Path
@@ -74,7 +74,7 @@ jobs:
           cmake --build build --config ${{env.BUILD_TYPE}}
           strip ${{github.workspace}}\edge-classic.exe
       - name: Copy SDL2 DLL
-        run: copy-item -path ${{github.workspace}}\SDL2-2.32.4\i686-w64-mingw32\bin\SDL2.dll -destination ${{github.workspace}}
+        run: copy-item -path ${{github.workspace}}\SDL2-2.32.6\i686-w64-mingw32\bin\SDL2.dll -destination ${{github.workspace}}
       - uses: actions/upload-artifact@v4
         with:
           name: edge-classic-mingw32

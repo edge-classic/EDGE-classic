@@ -1157,7 +1157,7 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
         }
     }
 
-    if (!draw_culling.d_ && fc_to_use != kRGBANoValue)
+    if (!draw_culling.d_ && fc_to_use != kRGBANoValue && !AlmostEquals(fd_to_use, 0.0f))
     {
         render_state->ClearColor(fc_to_use);
         render_state->FogColor(fc_to_use);

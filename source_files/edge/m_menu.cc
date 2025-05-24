@@ -2091,7 +2091,7 @@ bool MenuResponder(InputEvent *ev)
 
             sector_brightness_correction = sector_brightness_correction.d_;
 
-            std::string msg = "Sector Brightness "; // TODO: Make language entry - Dasho
+            std::string msg = language["SectorBrightness"];
 
             switch (sector_brightness_correction.d_)
             {
@@ -2100,18 +2100,18 @@ bool MenuResponder(InputEvent *ev)
             case 2:
             case 3:
             case 4:
-                msg.append("-");
+                msg.append(" -");
                 msg.append(std::to_string((5 - sector_brightness_correction.d_) * 10));
                 break;
             case 5:
-                msg.append("Default");
+                msg.append(" Default");
                 break;
             case 6:
             case 7:
             case 8:
             case 9:
             case 10:
-                msg.append("+");
+                msg.append(" +");
                 msg.append(std::to_string((5 - sector_brightness_correction.d_) * -10));
                 break;
             default:

@@ -1717,7 +1717,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
             else
             {
                 // Test point against 2D projection of the slope side
-                if (std::abs(tri_v1.X - tri_v2.X) > std::abs(tri_v1.Y - tri_v2.Y))
+                if (HMM_ABS(tri_v1.X - tri_v2.X) > HMM_ABS(tri_v1.Y - tri_v2.Y))
                 {
                     if (PointInTriangle({{tri_v1.X, tri_v1.Z}}, {{tri_v2.X, tri_v2.Z}},
                                         {{(tri_v1.Z > tri_v2.Z ? tri_v1.X : tri_v2.X), sec_check->floor_height}},
@@ -1784,7 +1784,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
             else
             {
                 // Test point against 2D projection of the slope side
-                if (std::abs(tri_v1.X - tri_v2.X) > std::abs(tri_v1.Y - tri_v2.Y))
+                if (HMM_ABS(tri_v1.X - tri_v2.X) > HMM_ABS(tri_v1.Y - tri_v2.Y))
                 {
                     if (PointInTriangle({{tri_v1.X, tri_v1.Z}}, {{tri_v2.X, tri_v2.Z}},
                                         {{(tri_v1.Z < tri_v2.Z ? tri_v1.X : tri_v2.X), sec_check->ceiling_height}},

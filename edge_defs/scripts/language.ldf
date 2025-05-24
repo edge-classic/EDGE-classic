@@ -54,6 +54,10 @@ MenuDifficulty3="Hurt me plenty.";
 MenuDifficulty4="Ultra-Violence.";
 MenuDifficulty5="Nightmare!";
 
+// Message shown when Reduce Flash is on from the Accessibility Menu
+Teleporting="Teleporting...";
+SectorBrightness="Sector Brightness";
+
 IntermissionEntering="Entering";
 IntermissionFinished="Finished";
 IntermissionKills="Kills";

@@ -1174,7 +1174,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props)
 
     zmove = mo->momentum_.Z * (1.0f - props->viscosity);
 
-    if (mo->on_slope_ && mo->z > mo->floor_z_ && std::abs(mo->z - mo->floor_z_) < 6.0f) // 1/4 of default step size
+    if (mo->on_slope_ && mo->z > mo->floor_z_ && HMM_ABS(mo->z - mo->floor_z_) < 6.0f) // 1/4 of default step size
         zmove_vs = mo->floor_z_ - mo->z;
 
     // adjust height

@@ -33,6 +33,7 @@
 
 #include <unordered_map>
 
+#include "HandmadeMath.h"
 #include "deh_buffer.h"
 #include "deh_edge.h"
 #include "deh_field.h"
@@ -705,7 +706,7 @@ bool frames::SpreadGroupPass(bool alt_jumps)
 {
     bool changes = false;
 
-    int total = std::max((int)kTotalMBFStates, (int)new_states.size());
+    int total = HMM_MAX((int)kTotalMBFStates, (int)new_states.size());
 
     for (int i = 1; i < total; i++)
     {

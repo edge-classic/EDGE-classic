@@ -84,6 +84,10 @@ void StartupControl(void);
 // the PostEvent() function.
 void ControlGetEvents(void);
 
+// Used when hotplugging controllers or selecting a different gamepad
+// from the Options Menu
+void CheckJoystickChanged(void);
+
 // Shuts down all control devices.  This is the opposite of
 // StartupControl().  Should be called from SystemShutdown(), the
 // main code never calls this function.

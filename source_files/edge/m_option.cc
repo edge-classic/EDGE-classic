@@ -95,6 +95,7 @@
 #include "hu_draw.h"
 #include "hu_stuff.h"
 #include "hu_style.h"
+#include "i_system.h"
 #include "m_menu.h"
 #include "m_misc.h"
 #include "m_netgame.h"
@@ -220,6 +221,7 @@ static void OptionMenuChangeLanguage(int key_pressed, ConsoleVariable *console_v
 static void OptionMenuChangeSoundfont(int key_pressed, ConsoleVariable *console_variable);
 static void OptionMenuChangeOverlay(int key_pressed, ConsoleVariable *console_variable);
 static void OptionMenuChangeCrosshair(int key_pressed, ConsoleVariable *console_variable);
+static void OptionMenuChangeGamepad(int key_pressed, ConsoleVariable *console_variable);
 static void InitMonitorSize();
 
 static constexpr char YesNo[]        = "Off/On"; // basic on/off
@@ -506,8 +508,8 @@ static OptionMenuItem analogueoptions[] = {
     {kOptionMenuItemTypeSlider, "Y Sensitivity", nullptr, 0, &mouse_y_sensitivity.f_,
      OptionMenuUpdateConsoleVariableFromFloat, nullptr, &mouse_y_sensitivity, 0.25f, 1.0f, 15.0f, "%0.2f"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
-    {kOptionMenuItemTypeSwitch, "Gamepad", "None/1/2/3/4/5/6", 5, &joystick_device, nullptr, nullptr, nullptr, 0, 0, 0,
-     ""},
+    {kOptionMenuItemTypeSwitch, "Gamepad", "None/1/2/3/4", 5, &joystick_device, OptionMenuChangeGamepad, nullptr,
+     nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Left Stick X", JoystickAxis, 13, &joystick_axis[0], nullptr, nullptr, nullptr, 0, 0, 0,
      ""},
     {kOptionMenuItemTypeSwitch, "Left Stick Y", JoystickAxis, 13, &joystick_axis[1], nullptr, nullptr, nullptr, 0, 0, 0,
@@ -2278,6 +2280,17 @@ static void OptionMenuChangeCrosshair(int key_pressed, ConsoleVariable *console_
 
     // update console_variable
     crosshair_image = ch_pos->first;
+}
+
+//
+// OptionMenuChangeGamepad
+//
+//
+static void OptionMenuChangeGamepad(int key_pressed, ConsoleVariable *console_variable)
+{
+    EPI_UNUSED(key_pressed);
+    EPI_UNUSED(console_variable);
+    CheckJoystickChanged();
 }
 
 //

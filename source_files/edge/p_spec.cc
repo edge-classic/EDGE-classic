@@ -1352,7 +1352,7 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special, int tag, 
         (thing->info_->extended_flags_ & kExtendedFlagMonster) &&
         !(thing->flags_ & (kMapObjectFlagTeleport | kMapObjectFlagDropOff | kMapObjectFlagFloat)))
     {
-        if (std::abs(line->front_sector->floor_height - line->back_sector->floor_height) > thing->info_->step_size_)
+        if (HMM_ABS(line->front_sector->floor_height - line->back_sector->floor_height) > thing->info_->step_size_)
             return false;
     }
 

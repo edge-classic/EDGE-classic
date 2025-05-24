@@ -498,7 +498,7 @@ static void I_OpenJoystick(int index)
              SDL_GameControllerHasLED(gamepad_info) ? "Yes" : "No");
 }
 
-static void CheckJoystickChanged(void)
+void CheckJoystickChanged(void)
 {
     int new_total_joysticks = SDL_NumJoysticks();
 

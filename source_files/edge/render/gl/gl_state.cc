@@ -516,6 +516,8 @@ class GLRenderState : public RenderState
 
         for (int i = 0; i < 2; i++)
         {
+            render_state->ActiveTexture(GL_TEXTURE0 + i);
+            render_state->BindTexture(0);
             bind_texture_2d_[i]                  = 0;
             texture_environment_mode_[i]         = 0;
             texture_environment_combine_rgb_[i]  = 0;

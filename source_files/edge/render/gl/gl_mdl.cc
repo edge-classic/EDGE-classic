@@ -830,7 +830,7 @@ void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float 
             fd_to_use = 0.01f * current_map->indoor_fog_density_;
         }
     }
-    if (!draw_culling.d_ && fc_to_use != kRGBANoValue)
+    if (!draw_culling.d_ && fc_to_use != kRGBANoValue && !AlmostEquals(fd_to_use, 0.0f))
     {
         render_state->ClearColor(fc_to_use);
         render_state->FogMode(GL_EXP);

@@ -328,7 +328,7 @@ void DDFAddRawColourmap(const char *name, int size, const char *pack_name, int i
     }
 
     // limit length to 32
-    size = std::min(32, size / 256);
+    size = HMM_MIN(32, size / 256);
 
     std::string text = "<COLOURMAPS>\n\n";
 

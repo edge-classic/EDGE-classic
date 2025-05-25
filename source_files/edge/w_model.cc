@@ -305,8 +305,18 @@ void InitializeModels(void)
 
     models = new ModelDefinition *[total_models];
 
-    for (int i = 0; i < total_models; i++)
-        models[i] = nullptr;
+    models[0] = nullptr;
+
+    for (int i = 1; i < total_models; i++)
+    {
+        models[i] = LoadModelFromLump(i);
+        // precache skins too
+        for (int n = 0; n < 10; n++)
+        {
+            if (models[i] && models[i]->skins_[n])
+                ImagePrecache(models[i]->skins_[n]);
+        }
+    }
 }
 
 ModelDefinition *GetModel(int model_num)
@@ -323,83 +333,6 @@ ModelDefinition *GetModel(int model_num)
     }
 
     return models[model_num];
-}
-
-void PrecacheModels(void)
-{
-    if (total_models <= 0)
-        return;
-
-    uint8_t *model_present = new uint8_t[total_models];
-    EPI_CLEAR_MEMORY(model_present, uint8_t, total_models);
-
-    // mark all monsters (etc) in the level
-    for (MapObject *mo = map_object_list_head; mo; mo = mo->next_)
-    {
-        EPI_ASSERT(mo->state_);
-
-        if (!(mo->state_->flags & kStateFrameFlagModel))
-            continue;
-
-        int model = mo->state_->sprite;
-
-        const char *model_name = nullptr;
-
-        if (model >= 1 && model < total_models)
-            model_name = ddf_model_names[model].c_str();
-
-        if (model_name)
-        {
-            for (int i = 1; i < total_models; i++)
-            {
-                if (epi::StringCaseCompareMaxASCII(model_name, ddf_model_names[i], 4) == 0)
-                    model_present[i] = 1;
-            }
-        }
-    }
-
-    // mark all weapons
-    for (int k = 1; k < num_states; k++)
-    {
-        if ((states[k].flags & (kStateFrameFlagWeapon | kStateFrameFlagModel)) !=
-            (kStateFrameFlagWeapon | kStateFrameFlagModel))
-            continue;
-
-        int model = states[k].sprite;
-
-        const char *model_name = nullptr;
-
-        if (model >= 1 && model < total_models)
-            model_name = ddf_model_names[model].c_str();
-
-        if (model_name)
-        {
-            for (int i = 1; i < total_models; i++)
-            {
-                if (epi::StringCaseCompareMaxASCII(model_name, ddf_model_names[i], 4) == 0)
-                    model_present[i] = 1;
-            }
-        }
-    }
-
-    for (int i = 1; i < total_models; i++) // ignore SPR_NULL
-    {
-        if (model_present[i])
-        {
-            LogDebug("Precaching model: %s\n", ddf_model_names[i].c_str());
-
-            const ModelDefinition *def = GetModel(i);
-
-            // precache skins too
-            for (int n = 0; n < 10; n++)
-            {
-                if (def && def->skins_[n])
-                    ImagePrecache(def->skins_[n]);
-            }
-        }
-    }
-
-    delete[] model_present;
 }
 
 //--- editor settings ---

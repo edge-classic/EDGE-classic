@@ -466,7 +466,6 @@ void PrecacheLevelGraphics(void)
 {
     PrecacheSprites();
     PrecacheTextures();
-    PrecacheModels();
     PrecacheSky();
 }
 

@@ -48,8 +48,6 @@ class ModelDefinition
 
 void InitializeModels(void);
 
-void PrecacheModels(void);
-
 ModelDefinition *GetModel(int model_num);
 
 //--- editor settings ---

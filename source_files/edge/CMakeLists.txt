@@ -313,3 +313,76 @@ endif()
 if (COPY_FILES)
   add_custom_command( TARGET edge-classic POST_BUILD COMMAND_EXPAND_LISTS COMMAND ${CMAKE_COMMAND} -E copy_if_different ${COPY_FILES} ${DEST_DIR})
 endif()
+
+if (UNIX AND NOT EMSCRIPTEN)
+  if (EXISTS "${CMAKE_SOURCE_DIR}/edge_defs.epk")
+    set(HAVE_EPKS TRUE)
+  else()
+    set(HAVE_EPKS FALSE)
+  endif()
+
+  set(INSTALL_BASEDIR "${CMAKE_INSTALL_PREFIX}/share/edge-classic")
+
+  install(PROGRAMS "$<TARGET_FILE:edge-classic>" DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" RENAME "edge-classic.bin")
+  install(FILES "${CMAKE_SOURCE_DIR}/source_files/edge/edge-classic.png"
+          DESTINATION "${CMAKE_INSTALL_PREFIX}/share/pixmaps")
+
+  install(PROGRAMS "${CMAKE_SOURCE_DIR}/source_files/edge/edge-classic.sh" DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" RENAME "edge-classic")
+  install(FILES "${CMAKE_SOURCE_DIR}/source_files/edge/edge-classic.desktop"
+          DESTINATION "${CMAKE_INSTALL_PREFIX}/share/applications")
+
+  # Update launch script/desktop file with path information
+  install(CODE "file(APPEND \"${CMAKE_INSTALL_PREFIX}/bin/edge-classic\" \"\nexec \\\"${CMAKE_INSTALL_PREFIX}/bin/edge-classic.bin\\\" \\\"$@\\\" \\\"-game\\\" \\\"${INSTALL_BASEDIR}\\\"\n\")")
+  install(CODE "file(APPEND \"${CMAKE_INSTALL_PREFIX}/share/applications/edge-classic.desktop\" \"\nExec=\\\"${CMAKE_INSTALL_PREFIX}/bin/edge-classic.bin\\\" \\\"$@\\\" \\\"-game\\\" \\\"${INSTALL_BASEDIR}\\\"\")")
+  install(CODE "file(APPEND \"${CMAKE_INSTALL_PREFIX}/share/applications/edge-classic.desktop\" \"\nIcon=\"${CMAKE_INSTALL_PREFIX}/share/pixmaps/edge-classic.png\"\n\")")
+
+  install(
+    DIRECTORY "${CMAKE_SOURCE_DIR}/autoload"
+              "${CMAKE_SOURCE_DIR}/crosshairs"
+              "${CMAKE_SOURCE_DIR}/docs"
+              "${CMAKE_SOURCE_DIR}/edge_fixes"
+              "${CMAKE_SOURCE_DIR}/overlays"
+              "${CMAKE_SOURCE_DIR}/soundfont"
+    DESTINATION ${INSTALL_BASEDIR}
+    CONFIGURATIONS Release
+    PATTERN ".gitkeep" EXCLUDE
+    PATTERN ".gitignore" EXCLUDE
+  )
+
+  if (HAVE_EPKS)
+    install(
+      FILES "${CMAKE_SOURCE_DIR}/edge_defs.epk"
+      DESTINATION ${INSTALL_BASEDIR}
+      CONFIGURATIONS Release
+    )
+    install(
+      FILES "${CMAKE_SOURCE_DIR}/edge_base/blasphemer.epk"
+            "${CMAKE_SOURCE_DIR}/edge_base/chex1.epk"
+            "${CMAKE_SOURCE_DIR}/edge_base/chex3v.epk"
+            "${CMAKE_SOURCE_DIR}/edge_base/chex3vm.epk"
+            "${CMAKE_SOURCE_DIR}/edge_base/doom.epk"
+            "${CMAKE_SOURCE_DIR}/edge_base/doom1.epk"
+            "${CMAKE_SOURCE_DIR}/edge_base/doom2.epk"
+            "${CMAKE_SOURCE_DIR}/edge_base/freedoom1.epk"
+            "${CMAKE_SOURCE_DIR}/edge_base/freedoom2.epk"
+            "${CMAKE_SOURCE_DIR}/edge_base/hacx.epk"
+            "${CMAKE_SOURCE_DIR}/edge_base/harmony.epk"
+            "${CMAKE_SOURCE_DIR}/edge_base/harmonyc.epk"    
+            "${CMAKE_SOURCE_DIR}/edge_base/heretic.epk"
+            "${CMAKE_SOURCE_DIR}/edge_base/plutonia.epk"
+            "${CMAKE_SOURCE_DIR}/edge_base/rekkr.epk"
+            "${CMAKE_SOURCE_DIR}/edge_base/tnt.epk"  
+      DESTINATION "${INSTALL_BASEDIR}/edge_base"
+      CONFIGURATIONS Release
+    )
+  else()
+    install(
+      DIRECTORY "${CMAKE_SOURCE_DIR}/edge_base"
+                "${CMAKE_SOURCE_DIR}/edge_defs"
+      DESTINATION ${INSTALL_BASEDIR}
+      CONFIGURATIONS Release
+      PATTERN ".gitkeep" EXCLUDE
+      PATTERN ".gitignore" EXCLUDE
+    )
+  endif()
+endif()

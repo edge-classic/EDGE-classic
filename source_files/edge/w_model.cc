@@ -31,6 +31,8 @@
 #include "w_files.h"
 #include "w_wad.h"
 
+extern ConsoleVariable precache_all_models;
+
 // Model storage
 static ModelDefinition **models;
 static int               total_models = 0;
@@ -305,8 +307,26 @@ void InitializeModels(void)
 
     models = new ModelDefinition *[total_models];
 
-    for (int i = 0; i < total_models; i++)
-        models[i] = nullptr;
+    if (precache_all_models.d_)
+    {
+        models[0] = nullptr;
+
+        for (int i = 1; i < total_models; i++)
+        {
+            models[i] = LoadModelFromLump(i);
+            // precache skins too
+            for (int n = 0; n < 10; n++)
+            {
+                if (models[i] && models[i]->skins_[n])
+                    ImagePrecache(models[i]->skins_[n]);
+            }
+        }
+    }
+    else
+    {
+        for (int i = 0; i < total_models; i++)
+            models[i] = nullptr;
+    }
 }
 
 ModelDefinition *GetModel(int model_num)

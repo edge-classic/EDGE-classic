@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=EDGE-Classic
+Comment=Hardware accelerated Doom source port with powerful modding features
+Exec="/usr/local/bin/edge-classic.bin" "$@" "-game" "/usr/local/share/edge-classic"
+Icon=/usr/local/share/pixmaps/edge-classic.png
+Terminal=false
+Type=Application
+Categories=Game;ActionGame;
+StartupNotify=false

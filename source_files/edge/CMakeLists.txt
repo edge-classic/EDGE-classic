@@ -339,6 +339,8 @@ if (UNIX AND NOT EMSCRIPTEN)
               "${CMAKE_SOURCE_DIR}/soundfont"
     DESTINATION ${INSTALL_BASEDIR}
     CONFIGURATIONS Release
+    PATTERN ".gitkeep" EXCLUDE
+    PATTERN ".gitignore" EXCLUDE
   )
 
   if (HAVE_EPKS)
@@ -373,6 +375,8 @@ if (UNIX AND NOT EMSCRIPTEN)
                 "${CMAKE_SOURCE_DIR}/edge_defs"
       DESTINATION ${INSTALL_BASEDIR}
       CONFIGURATIONS Release
+      PATTERN ".gitkeep" EXCLUDE
+      PATTERN ".gitignore" EXCLUDE
     )
   endif()
 endif()

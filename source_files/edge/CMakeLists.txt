@@ -324,11 +324,17 @@ if (UNIX AND NOT EMSCRIPTEN)
   set(INSTALL_BASEDIR "${CMAKE_INSTALL_PREFIX}/share/edge-classic")
 
   install(PROGRAMS "$<TARGET_FILE:edge-classic>" DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" RENAME "edge-classic.bin")
+  install(FILES "${CMAKE_SOURCE_DIR}/source_files/edge/edge-classic.png"
+          DESTINATION "${CMAKE_INSTALL_PREFIX}/share/pixmaps")
+
   install(PROGRAMS "${CMAKE_SOURCE_DIR}/source_files/edge/edge-classic.sh" DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" RENAME "edge-classic")
   install(FILES "${CMAKE_SOURCE_DIR}/source_files/edge/edge-classic.desktop"
           DESTINATION "${CMAKE_INSTALL_PREFIX}/share/applications")
-  install(FILES "${CMAKE_SOURCE_DIR}/source_files/edge/edge-classic.png"
-          DESTINATION "${CMAKE_INSTALL_PREFIX}/share/pixmaps")
+
+  # Update launch script/desktop file with path information
+  install(CODE "file(APPEND \"${CMAKE_INSTALL_PREFIX}/bin/edge-classic\" \"\nexec \\\"${CMAKE_INSTALL_PREFIX}/bin/edge-classic.bin\\\" \\\"$@\\\" \\\"-game\\\" \\\"${INSTALL_BASEDIR}\\\"\n\")")
+  install(CODE "file(APPEND \"${CMAKE_INSTALL_PREFIX}/share/applications/edge-classic.desktop\" \"\nExec=\\\"${CMAKE_INSTALL_PREFIX}/bin/edge-classic.bin\\\" \\\"$@\\\" \\\"-game\\\" \\\"${INSTALL_BASEDIR}\\\"\")")
+  install(CODE "file(APPEND \"${CMAKE_INSTALL_PREFIX}/share/applications/edge-classic.desktop\" \"\nIcon=\"${CMAKE_INSTALL_PREFIX}/share/pixmaps/edge-classic.png\"\n\")")
 
   install(
     DIRECTORY "${CMAKE_SOURCE_DIR}/autoload"

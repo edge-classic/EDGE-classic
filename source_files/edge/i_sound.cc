@@ -86,11 +86,15 @@ void StartupAudio(void)
             no_sound = true;
             return;
         }
+        else
+            ma_sound_group_set_volume(&sfx_node, sound_effect_volume.f_ * 0.5f);
         if (ma_sound_group_init(&sound_engine, 0, NULL, &music_node) != MA_SUCCESS)
         {
             LogPrint("StartupSound: Unable to initialize music engine!\n");
             no_music = true;
         }
+        else
+            ma_sound_group_set_volume(&music_node, music_volume.f_);
 
         // configure FX nodes
 

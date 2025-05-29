@@ -1291,11 +1291,12 @@ static void InitializeDirectories(void)
 #ifdef _WIN32
         path = SDL_GetPrefPath(nullptr, application_name.c_str());
 #else
-        path = SDL_GetPrefPath(team_name.c_str(), application_name.c_str());
+        std::string lowpath = application_name.s_;
+        epi::StringLowerASCII(lowpath);
+        path = SDL_GetPrefPath(nullptr, lowpath.c_str());
 #endif
         if (!path)
             FatalError("Could not determine home directory!\n");
-
         home_directory = path;
         SDL_free(path);
         path = NULL;
@@ -2196,38 +2197,41 @@ static void AddAutoload(void)
     }
     fsd.clear();
 
-    // Check if autoload folder stuff is in home_directory as well, make the
-    // folder/subfolder if they don't exist (in home_directory only)
-    folder = epi::PathAppend(home_directory, "autoload");
-    if (!epi::IsDirectory(folder))
-        epi::MakeDirectory(folder);
+    if (game_directory != home_directory)
+    {
+        // Check if autoload folder stuff is in home_directory as well, make the
+        // folder/subfolder if they don't exist (in home_directory only)
+        folder = epi::PathAppend(home_directory, "autoload");
+        if (!epi::IsDirectory(folder))
+            epi::MakeDirectory(folder);
 
-    if (!ReadDirectory(fsd, folder, "*.*"))
-    {
-        LogWarning("Failed to read %s directory!\n", folder.c_str());
-    }
-    else
-    {
-        for (size_t i = 0; i < fsd.size(); i++)
+        if (!ReadDirectory(fsd, folder, "*.*"))
         {
-            if (!fsd[i].is_dir)
-                AddSingleCommandLineFile(fsd[i].name, true);
+            LogWarning("Failed to read %s directory!\n", folder.c_str());
         }
-    }
-    fsd.clear();
-    folder = epi::PathAppend(folder, game_base);
-    if (!epi::IsDirectory(folder))
-        epi::MakeDirectory(folder);
-    if (!ReadDirectory(fsd, folder, "*.*"))
-    {
-        LogWarning("Failed to read %s directory!\n", folder.c_str());
-    }
-    else
-    {
-        for (size_t i = 0; i < fsd.size(); i++)
+        else
         {
-            if (!fsd[i].is_dir)
-                AddSingleCommandLineFile(fsd[i].name, true);
+            for (size_t i = 0; i < fsd.size(); i++)
+            {
+                if (!fsd[i].is_dir)
+                    AddSingleCommandLineFile(fsd[i].name, true);
+            }
+        }
+        fsd.clear();
+        folder = epi::PathAppend(folder, game_base);
+        if (!epi::IsDirectory(folder))
+            epi::MakeDirectory(folder);
+        if (!ReadDirectory(fsd, folder, "*.*"))
+        {
+            LogWarning("Failed to read %s directory!\n", folder.c_str());
+        }
+        else
+        {
+            for (size_t i = 0; i < fsd.size(); i++)
+            {
+                if (!fsd[i].is_dir)
+                    AddSingleCommandLineFile(fsd[i].name, true);
+            }
         }
     }
 }

@@ -1961,7 +1961,7 @@ static int MO_count(lua_State *L)
     return 1;
 }
 
-// mapobject.render_view(x, y, w, h, tag)
+// mapobject.render_view_tag(x, y, w, h, tag)
 //
 static int MO_render_view_tag(lua_State *L)
 {

@@ -1845,6 +1845,7 @@ static void RemoveMobjFromList(MapObject *mo)
         mo->next_->previous_ = mo->previous_;
     }
 
+/*
     if (mo->tag_)
     {
         auto mobjs = active_tagged_map_objects.equal_range(mo->tag_);
@@ -1868,6 +1869,7 @@ static void RemoveMobjFromList(MapObject *mo)
                 ++mobj;
         }
     }
+*/
 }
 
 //
@@ -1910,7 +1912,6 @@ void RemoveMapObject(MapObject *mo)
     mo->extended_flags_ = 0;
     mo->hyper_flags_    = 0;
     mo->health_         = 0;
-    mo->tag_            = 0;
     mo->tics_           = -1;
     mo->wait_until_dead_tags_.clear();
 
@@ -1930,6 +1931,38 @@ void RemoveMapObject(MapObject *mo)
 
     mo->fuse_ = kTicRate * 5;
     // mo->morphtimeout = kTicRate * 5; //maybe we need this?
+
+
+
+    //Lobo: moved this here from RemoveMobjFromList() to trip DDF action "#REMOVE", which
+    // was not triggering in the above function
+    if (mo->tag_)
+    {
+        auto mobjs = active_tagged_map_objects.equal_range(mo->tag_);
+        for (auto mobj = mobjs.first; mobj != mobjs.second;)
+        {
+            if (mobj->second == mo)
+                mobj = active_tagged_map_objects.erase(mobj);
+            else
+                ++mobj;
+        }
+    }
+
+    if (mo->tid_)
+    {
+        auto mobjs = active_tids.equal_range(mo->tid_);
+        for (auto mobj = mobjs.first; mobj != mobjs.second;)
+        {
+            if (mobj->second == mo)
+                mobj = active_tids.erase(mobj);
+            else
+                ++mobj;
+        }
+    }
+
+    mo->tag_ = 0;
+    mo->tid_ = 0;
+
 }
 
 void RemoveAllMapObjects(bool loading)

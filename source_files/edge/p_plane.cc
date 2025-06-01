@@ -1638,15 +1638,15 @@ void RunActivePlanes(void)
 
             if (pmov->is_ceiling || pmov->is_elevator)
             {
-                pmov->sector->ceiling_move       = nullptr;
-                pmov->sector->old_ceiling_height = pmov->sector->ceiling_height;
+                pmov->sector->ceiling_move                = nullptr;
+                pmov->sector->old_ceiling_height          = pmov->sector->ceiling_height;
                 pmov->sector->interpolated_ceiling_height = pmov->sector->ceiling_height;
             }
 
             if (!pmov->is_ceiling)
             {
-                pmov->sector->floor_move       = nullptr;
-                pmov->sector->old_floor_height = pmov->sector->floor_height;
+                pmov->sector->floor_move                = nullptr;
+                pmov->sector->old_floor_height          = pmov->sector->floor_height;
                 pmov->sector->interpolated_floor_height = pmov->sector->floor_height;
             }
 

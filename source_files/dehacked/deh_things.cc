@@ -1202,8 +1202,8 @@ void HandleSounds(const DehackedMapObjectDefinition *info, int mt_num)
 
     // Dasho - Commented this out; Eviternity's boss will play his opening dialogue twice if we keep this.
     // Assume that anyone actually editing this thing will play a sound if they want to
-    //else if (mt_num == kMT_BOSSSPIT)
-        //wad::Printf("SIGHTING_SOUND = \"%s\";\n", sounds::GetSound(ksfx_bossit).c_str());
+    // else if (mt_num == kMT_BOSSSPIT)
+    // wad::Printf("SIGHTING_SOUND = \"%s\";\n", sounds::GetSound(ksfx_bossit).c_str());
 
     // Dasho - Removed melee state requirement, as the MBF21 A_MonsterBulletAttack codepointer
     // uses this sound

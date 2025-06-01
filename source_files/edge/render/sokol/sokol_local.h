@@ -1,9 +1,13 @@
 #pragma once
 
+#include "dm_state.h"
 #include "i_system.h"
+#include "n_network.h"
+#include "p_tick.h"
 #include "r_gldefs.h"
 #include "r_misc.h"
 #include "r_modes.h"
+#include "r_sky.h"
 #include "r_state.h"
 #include "sokol_gfx.h"
 #include "sokol_gfx_ec.h"

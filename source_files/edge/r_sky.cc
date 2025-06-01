@@ -67,6 +67,8 @@ static int      ddf_scroll_tic     = -1;
 
 SkyStretch current_sky_stretch = kSkyStretchUnset;
 
+static constexpr uint8_t kMBFSkyYShift = 28;
+
 EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(sky_stretch_mode, "0", kConsoleVariableFlagArchive, 0, 3);
 
 struct SectorSkyRing
@@ -450,22 +452,25 @@ static void RenderSkyCylinder(void)
     if (sky_image->ScaledWidthActual() > 256)
         tx = 0.125f / ((float)sky_image->ScaledWidthActual() / 256.0f);
 
-    // Set scrolling...I guess Boom transfers should take precedence since part of their purpose is to
+    // Set scrolling...I guess MBF transfers should take precedence since part of their purpose is to
     // override the normal sky - Dasho
     if (sky_ref)
     {
-        if (!AlmostEquals(sky_ref->old_offset.X, sky_ref->offset.X) && !console_active && !paused && !menu_active &&
-            !time_stop_active && !erraticism_active)
-            offx = HMM_Lerp(sky_ref->old_offset.X, fractional_tic, sky_ref->offset.X);
+        // Dasho - Dividing by the image height seems to work for scrolling skies, but not skies with static
+        // offsets. I've tested with a few WADs (Eviternity, PD2, Toilet Doom) and things seem to be right.
+        // The entire sky code needs to be rewritten anyway.
+        if (!AlmostEquals(sky_ref->old_offset.Y, sky_ref->offset.Y))
+        {
+            if (!console_active && !paused && !menu_active &&
+                !time_stop_active && !erraticism_active)
+            {
+                offy = (HMM_Lerp(sky_ref->old_offset.Y, fractional_tic, sky_ref->offset.Y) - kMBFSkyYShift) / sky_image->ScaledHeightActual();
+            }
+            else
+                offy = (sky_ref->offset.Y - kMBFSkyYShift) / sky_image->ScaledHeightActual();
+        }
         else
-            offx = sky_ref->offset.X;
-        offx /= (1024.0f * 16);
-        if (!AlmostEquals(sky_ref->old_offset.Y, sky_ref->offset.Y) && !console_active && !paused && !menu_active &&
-            !time_stop_active && !erraticism_active)
-            offy = HMM_Lerp(sky_ref->old_offset.Y, fractional_tic, sky_ref->offset.Y);
-        else
-            offy = sky_ref->offset.Y;
-        offy /= 128.0f;
+            offy = sky_ref->offset.Y - kMBFSkyYShift;
     }
     else
     {

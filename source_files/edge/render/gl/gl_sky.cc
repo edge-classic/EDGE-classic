@@ -7,6 +7,8 @@
 #include "i_defs_gl.h"
 #include "im_data.h"
 #include "m_math.h"
+#include "n_network.h"
+#include "p_tick.h"
 #include "r_colormap.h"
 #include "r_gldefs.h"
 #include "r_image.h"
@@ -55,7 +57,19 @@ void SetupSkyMatrices(void)
         glLoadIdentity();
 
         glRotatef(270.0f - epi::DegreesFromBAM(view_vertical_angle), 1.0f, 0.0f, 0.0f);
-        glRotatef(-epi::DegreesFromBAM(view_angle), 0.0f, 0.0f, 1.0f);
+
+        BAMAngle rot = view_angle;
+
+        if (sky_ref)
+        {
+            if (!AlmostEquals(sky_ref->old_offset.X, sky_ref->offset.X) && !console_active && !paused && !menu_active &&
+                !time_stop_active && !erraticism_active)
+                rot += epi::BAMFromDegrees(HMM_Lerp(sky_ref->old_offset.X, fractional_tic, sky_ref->offset.X) / sky_image->ScaledWidthActual());
+            else
+                rot += epi::BAMFromDegrees(sky_ref->offset.X / sky_image->ScaledWidthActual());
+        }
+
+        glRotatef(-epi::DegreesFromBAM(rot), 0.0f, 0.0f, 1.0f);
 
         if (current_sky_stretch == kSkyStretchStretch)
             glTranslatef(0.0f, 0.0f,

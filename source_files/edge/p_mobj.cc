@@ -638,14 +638,21 @@ int MapObjectFindLabel(MapObject *mobj, const char *label)
 //
 void MapObjectSetDirectionAndSpeed(MapObject *mo, BAMAngle angle, float slope, float speed)
 {
+    // Dasho - After reducing the value of kMaximumMove to match other ports, discovered
+    // that projectiles had vertical drift if their speed was greater than kMaxiumumMove. This
+    // seems like the best compromise without imposing a cap on the speed of things in DDF
+    float capped_speed = HMM_Clamp(-kMaximumMove, speed, kMaximumMove);
+
     mo->angle_          = angle;
     mo->vertical_angle_ = epi::BAMFromATan(slope);
 
-    mo->momentum_.Z = epi::BAMSin(mo->vertical_angle_) * speed;
-    speed *= epi::BAMCos(mo->vertical_angle_);
+    mo->momentum_.Z = epi::BAMSin(mo->vertical_angle_) * capped_speed;
 
-    mo->momentum_.X = epi::BAMCos(angle) * speed;
-    mo->momentum_.Y = epi::BAMSin(angle) * speed;
+    capped_speed *= epi::BAMCos(mo->vertical_angle_);
+    capped_speed = HMM_Clamp(-kMaximumMove, capped_speed, kMaximumMove);
+
+    mo->momentum_.X = epi::BAMCos(angle) * capped_speed;
+    mo->momentum_.Y = epi::BAMSin(angle) * capped_speed;
 }
 
 //
@@ -1845,31 +1852,31 @@ static void RemoveMobjFromList(MapObject *mo)
         mo->next_->previous_ = mo->previous_;
     }
 
-/*
-    if (mo->tag_)
-    {
-        auto mobjs = active_tagged_map_objects.equal_range(mo->tag_);
-        for (auto mobj = mobjs.first; mobj != mobjs.second;)
+    /*
+        if (mo->tag_)
         {
-            if (mobj->second == mo)
-                mobj = active_tagged_map_objects.erase(mobj);
-            else
-                ++mobj;
+            auto mobjs = active_tagged_map_objects.equal_range(mo->tag_);
+            for (auto mobj = mobjs.first; mobj != mobjs.second;)
+            {
+                if (mobj->second == mo)
+                    mobj = active_tagged_map_objects.erase(mobj);
+                else
+                    ++mobj;
+            }
         }
-    }
 
-    if (mo->tid_)
-    {
-        auto mobjs = active_tids.equal_range(mo->tid_);
-        for (auto mobj = mobjs.first; mobj != mobjs.second;)
+        if (mo->tid_)
         {
-            if (mobj->second == mo)
-                mobj = active_tids.erase(mobj);
-            else
-                ++mobj;
+            auto mobjs = active_tids.equal_range(mo->tid_);
+            for (auto mobj = mobjs.first; mobj != mobjs.second;)
+            {
+                if (mobj->second == mo)
+                    mobj = active_tids.erase(mobj);
+                else
+                    ++mobj;
+            }
         }
-    }
-*/
+    */
 }
 
 //
@@ -1932,10 +1939,8 @@ void RemoveMapObject(MapObject *mo)
     mo->fuse_ = kTicRate * 5;
     // mo->morphtimeout = kTicRate * 5; //maybe we need this?
 
-
-
-    //Lobo: moved this here from RemoveMobjFromList() to trip DDF action "#REMOVE", which
-    // was not triggering in the above function
+    // Lobo: moved this here from RemoveMobjFromList() to trip DDF action "#REMOVE", which
+    //  was not triggering in the above function
     if (mo->tag_)
     {
         auto mobjs = active_tagged_map_objects.equal_range(mo->tag_);
@@ -1962,7 +1967,6 @@ void RemoveMapObject(MapObject *mo)
 
     mo->tag_ = 0;
     mo->tid_ = 0;
-
 }
 
 void RemoveAllMapObjects(bool loading)

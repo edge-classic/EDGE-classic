@@ -1630,8 +1630,7 @@ void QuitEdge(int choice)
 #ifdef EDGE_WEB
     StartMenuMessage(language["QuitWhenWebPlayer"], nullptr, false);
     return;
-#endif
-
+#else
     char ref[64];
 
     std::string msg;
@@ -1665,6 +1664,7 @@ void QuitEdge(int choice)
 
     // Trigger the message
     StartMenuMessage(msg.c_str(), QuitResponse, true);
+#endif
 }
 
 // Accessible from console's 'quit now' command
@@ -1673,14 +1673,14 @@ void ImmediateQuit()
 #if EDGE_WEB
     LogPrint("Quit ignored on web platform\n");
     return;
-#endif
-
+#else
     LogPrint("Saving system defaults...\n");
     SaveDefaults();
 
     LogPrint("Exiting...\n");
 
     app_state = kApplicationPendingQuit;
+#endif
 }
 
 //----------------------------------------------------------------------------

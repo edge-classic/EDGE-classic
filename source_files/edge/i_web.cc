@@ -20,6 +20,7 @@
 
 #include "dm_defs.h"
 #include "e_main.h"
+#include "epi.h"
 #include "epi_filesystem.h"
 #include "epi_sdl.h" // needed for proper SDL main linkage
 #include "epi_str_util.h"
@@ -86,6 +87,8 @@ extern "C"
     static EM_BOOL WebHandlePointerLockChange(int eventType, const EmscriptenPointerlockChangeEvent *changeEvent,
                                               void *userData)
     {
+        EPI_UNUSED(eventType);
+        EPI_UNUSED(userData);
         if (changeEvent->isActive)
         {
             SDL_ShowCursor(SDL_FALSE);
@@ -100,6 +103,9 @@ extern "C"
 
     static EM_BOOL WebWindowResizedCallback(int eventType, const void *reserved, void *userData)
     {
+        EPI_UNUSED(eventType);
+        EPI_UNUSED(reserved);
+        EPI_UNUSED(userData);
         double width, height;
         emscripten_get_element_css_size("canvas", &width, &height);
 

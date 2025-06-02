@@ -614,7 +614,7 @@ void ForceWipe(void)
     // Wiping blocks the main thread while rendering outside of the main loop
     // tick Disabled on the platform until can be better integrated
     return;
-#endif
+#else
     if (game_state == kGameStateNothing)
         return;
 
@@ -625,6 +625,7 @@ void ForceWipe(void)
 
     // capture screen now (before new level is loaded etc..)
     EdgeDisplay();
+#endif
 }
 
 //

@@ -158,7 +158,11 @@ else()
 
   # warning level for edge specific source files 
   if (CLANG)
-    set (EDGE_WARNING_LEVEL -Wextra -Wunreachable-code-aggressive)
+    if (EMSCRIPTEN)
+      set (EDGE_WARNING_LEVEL -Wextra -Wunreachable-code-aggressive -Wnomain) # suppress "extern C" warning for main
+    else ()
+      set (EDGE_WARNING_LEVEL -Wextra -Wunreachable-code-aggressive)
+    endif ()
   else()
     set (EDGE_WARNING_LEVEL -Wextra)
   endif()

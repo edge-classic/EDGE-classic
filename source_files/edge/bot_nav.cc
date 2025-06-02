@@ -81,7 +81,6 @@ float BotEvaluateBigItem(const MapObject *mo)
             default:
                 return 65;
             }
-            break;
 
         case kBenefitTypePowerup:
             // invisibility is not here, since in COOP it makes monster
@@ -94,7 +93,6 @@ float BotEvaluateBigItem(const MapObject *mo)
             default:
                 return -1;
             }
-            break;
 
         case kBenefitTypeAmmo:
             // ignored here

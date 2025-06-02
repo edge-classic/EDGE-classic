@@ -328,7 +328,6 @@ static int OptionMenuGetCurrentSwitchValue(OptionMenuItem *item)
     default: {
         FatalError("OptionMenuGetCurrentSwitchValue: Menu item type is not a "
                    "switch!\n");
-        break;
     }
     }
 
@@ -1607,7 +1606,6 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             break;
         }
         FatalError("Invalid menu type!");
-        break;
     }
 
     case kRightArrow:
@@ -1692,7 +1690,6 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             break;
         }
         FatalError("Invalid menu type!");
-        break;
     }
     case kEscape:
     case kMouse2:

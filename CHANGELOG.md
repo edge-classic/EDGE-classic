@@ -3,24 +3,24 @@
 ## New Features
 
 - Uncapped framerate
-  - 'framerate_limit' CVAR can be used to cap framerate maximum
+  - 'framerate_limit' CVAR can be used to cap framerate maximum; default 500
 - New Sokol GFX Renderer
-  - Leverages platform-specific APIs (Direct3D 11 on Windows, WebGL2 GLES subset on Emscripten, and GL Core 3.3 on other platforms)
+  - Leverages platform-specific APIs (Direct3D 11 on Windows, WebGL2 on Emscripten, and GL Core 3.3 on other platforms)
     - Original GL 1.3 render path requires recompilation; see COMPILING.md for details
-  - Multithreaded BSP traversal/geometry creation
+  - Multithreaded BSP traversal/geometry creation (with new renderer)
 - Improved sound mixer
-  - Provides threading, floating-point samples, and OpenAL attenuation/spatialization models
+  - Provides threading, floating point samples, and OpenAL attenuation/spatialization models
   - Improved Freeverb-based reverb model used and exposed to modders via DDFVERB
-  - Underwater/reverb/vacuum effect nodes remove the need to premix/cache sounds
+  - Underwater/reverb/vacuum effect nodes remove the need to cache premixed sounds
 - Dynamic light image-based coloring via AUTOCOLOUR DDF field
   - Will use the average RGB value of the specified image as the light color
 - Implement "extra_light_step" CVAR
   - Controls how much the light level is raised by actions such as A_Light1/2
-- New state action: LUA_RUN_SCRIPT("lua_script_name")
+- New state action: LUA_RUN_SCRIPT("\<lua_script_name\>")
   - Will pass a table containing the calling mobj's information as a parameter
 - New states actions:  CLEAR_TARGET and FRIEND_LOOKOUT
 - New BORE attack flag
-  - Similar to existing TUNNEL special, but can damage the same mobj multiple times as it is passing through
+  - Can damage the same mobj multiple times as it is passing through, versus the once-per-mobj of the existing TUNNEL special
 - New states actions: GRAVITY and NO_GRAVITY
 - New state action: SET_SCALE(float)
   - Changes the objects visual scale. This does not affect the actual collision box and is mainly intended for special effects things, such as a puff of smoke gradually dissipating by expansion (in combination with TRANS_FADE) or shrinking and disappearing.
@@ -28,6 +28,8 @@
   - Will assign a unique ID to a mobj when it spawns, managed separately from tags
 - New LUA functions: mapobject.render_view_tag(x, y, w, h, tag) and mapobject.render_view_tid(x, y, w, h, tid). See the world from the eyes of any mobj.
   - Tags/TIDs used for this function should be unique; no guarantees regarding which mobj is returned if shared between multiple mobjs
+- New LUA functions: mapobject.tagged_info(tag) and mapobject.tid_info(tid).
+  - Will return a table of all active map objects with the matching tag/tid for iteration and scripting.
 
 
 ## General Improvements/Changes
@@ -49,7 +51,7 @@
 - Default automap zoom halved.
 - Automap zoom persists for whole play session.
 - Allow negative percentages for DDFWEAPON bobbing
-- Update Heretic/Blasphemer cheats
+- More accurate Heretic/Blasphemer cheats
 - Heretic/Blasphemer tweaks
 - Autoscale intermission texts if there are too many lines to fit on the screen
 - MLOOK_TURN() Weapons.ddf action has been renamed to FACE() with identical behaviour
@@ -67,6 +69,7 @@
 - Fixed negative patch Y offset issue with SKY1 and W105_1 in Doom(1)
 - Fixed CheckRelThing callback for missiles missing some collisions that should have occurred
 - Improved scaling for intermission text that would not normally fit on the screen
+- Reduced MAXMOVE value to 30 to align with expected behavior
 
 ### Boom
 - Boom Line 242 sector rendering vastly improved
@@ -76,7 +79,7 @@ a BSP-based to a linedef-based method to be more in line with Boom behavior
 
 ### MBF
 - A_Mushroom codepointer revised to be in line with original behavior
-- Sky transfers now supports animated skies and scrolling
+- Sky transfers now support offsets, animated skies and scrolling
 
 ### MBF21
 - All MBF21 Dehacked code pointers implemented
@@ -95,4 +98,5 @@ a BSP-based to a linedef-based method to be more in line with Boom behavior
 - MLOOK_TURN() and MLOOK_FACE() thing.ddf actions were exactly the same. Now MLOOK_TURN() affects horizontal and MLOOK_FACE() affects vertical.
 - Changed FACE() thing.ddf action to behave like it's horizontal equivalent TURN().
 - Stopped looping SFX still playing on intermission screen
+- Fixed player being able to build momentum by running against a wall/closed door
 

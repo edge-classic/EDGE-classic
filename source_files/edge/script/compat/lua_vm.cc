@@ -37,10 +37,7 @@ static int LuaPackLoader(lua_State *L)
     epi::File *file = OpenFileFromPack(pack_name);
 
     if (!file)
-    {
         FatalError("LUA: %s.lua: NOT FOUND\n", name);
-        return 0;
-    }
 
     std::string source = file->ReadText();
 
@@ -58,10 +55,7 @@ static int LuaPackSearcher(lua_State *L)
     LuaGetRequirePackPath(name, pack_name);
 
     if (CheckPackFilesForName(pack_name) == -1)
-    {
         FatalError("LUA: Unable to load file %s", pack_name.c_str());
-        return 0;
-    }
 
     lua_pushcfunction(L, LuaPackLoader);
     lua_pushstring(L, name);

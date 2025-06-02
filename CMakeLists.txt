@@ -157,7 +157,11 @@ else()
   endif()
 
   # warning level for edge specific source files 
-  set (EDGE_WARNING_LEVEL -Wextra)
+  if (CLANG)
+    set (EDGE_WARNING_LEVEL -Wextra -Wunreachable-code-aggressive)
+  else()
+    set (EDGE_WARNING_LEVEL -Wextra)
+  endif()
 
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fno-exceptions -fno-strict-aliasing")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fno-exceptions -fno-rtti -fno-strict-aliasing")

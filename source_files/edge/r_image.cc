@@ -159,16 +159,12 @@ Image *ImageContainerLookup(ImageType image_type, const char *name, int source_t
     {
     case kImageTypeTexture:
         return ImageContainerLookupInternal(real_textures, name_hash, source_type);
-        break;
     case kImageTypeGraphic:
         return ImageContainerLookupInternal(real_graphics, name_hash, source_type);
-        break;
     case kImageTypeFlat:
         return ImageContainerLookupInternal(real_flats, name_hash, source_type);
-        break;
     case kImageTypeSprite:
         return ImageContainerLookupInternal(real_sprites, name_hash, source_type);
-        break;
     default:
         FatalError("ImageContainerLookup: Unknown Image Type");
     }
@@ -1778,7 +1774,6 @@ void ImageMakeSaveString(const Image *image, char *type, char *namebuf)
 
     default:
         FatalError("ImageMakeSaveString: bad type %d\n", rim->source_type_);
-        break;
     }
 }
 

@@ -1712,7 +1712,7 @@ void A_FireCGun(MapObject *mo)
     AttackDefinition *attack = info->attack_[0];
 
     if (!attack)
-        FatalError("Weapon [%s] missing attack for %s action.\n", info->name_.c_str(), 0 ? "XXXSHOOT" : "SHOOT");
+        FatalError("Weapon [%s] missing attack for A_FireCGun action.\n", info->name_.c_str());
 
     // Some do not need ammunition anyway.
     // Return if current ammunition sufficient.

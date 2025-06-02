@@ -440,13 +440,14 @@ function doom_automap()
 
 	local TempMapName = hud.map_title()
     
-    if (DoesNameStartWith(hud.map_title(),hud.map_name()) == 0) then
-    	TempMapName = hud.map_name() .. ": " ..  hud.map_title()
+    if (DoesNameStartWith(TempMapName,hud.map_name()) == 1) then
+        local startindex, endindex = string.find(TempMapName, hud.map_title())
+    	TempMapName = hud.map_name() .. ": " ..   string.sub(TempMapName, endindex)
     end
 
     if (#hud.map_author() > 0) then
         hud.draw_text(0, 200 - 32 - 20, TempMapName)
-        hud.draw_text(0, 200 - 32 - 10, " Author: " .. hud.map_author())
+        hud.draw_text(0, 200 - 32 - 10, " " .. hud.map_author())
     else
         hud.draw_text(0, 200 - 32 - 10, TempMapName)
     end

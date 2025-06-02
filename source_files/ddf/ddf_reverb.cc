@@ -89,7 +89,6 @@ void ReverbDefinition::ParseField(const char *field, const char *contents, int i
         break;
     default:
         DDFError("Unknown reverbs.ddf command: %s\n", field);
-        break;
     }
     EPI_ASSERT(member);
     DDFMainGetPercent(contents, member);

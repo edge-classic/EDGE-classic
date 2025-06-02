@@ -523,14 +523,12 @@ class SokolRenderState : public RenderState
         case GL_RGB:
             // https://github.com/floooh/sokol/pull/111
             FatalError("GL_RGB is only supported by OpenGL, promote to GL_RGBA before calling TexImage2D");
-            break;
         case GL_RGBA:
             sg_texture_format = SG_PIXELFORMAT_RGBA8;
             bpp               = 4;
             break;
         case GL_ALPHA:
             FatalError("GL_ALPHA is only supported by OpenGL, promote to GL_RGBA before calling TexImage2D");
-            break;
         default:
             FatalError("Unknown texture format");
         }

@@ -653,10 +653,7 @@ void ParseUDMF_Pass(const std::string &data, int pass)
             return;
 
         if (lex.state_.token != epi::Scanner::kIdentifier)
-        {
             FatalError("AJBSP: Malformed TEXTMAP lump.\n");
-            return;
-        }
 
         section = lex.state_.string;
 

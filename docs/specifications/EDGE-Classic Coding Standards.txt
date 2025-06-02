@@ -179,8 +179,8 @@ Compiler Warnings
 
 Code should be compiled with the /W3 (MSVC) or -Wall (GCC/Clang) compiler flags; code under the
 'source_files' directory should add the /W4 (MSVC) or -Wextra (GCC/Clang) and 
--Wunreachable-code-aggressive (Clang) flags. With GCC/Clang on Linux, no warnings should be produced 
-for files in the 'source_files' folder. MSVC, Emscripten, MinGW, or other setups may still produce 
+-Wunreachable-code-aggressive (Clang) flags. With GCC/Clang on Linux or Emscripten, no warnings should be produced 
+for files in the 'source_files' folder. MSVC, MinGW, or other setups may still produce 
 warnings that should be addressed when possible.
 
 Warnings produced by compiling code under the 'libraries' folder should be examined, but are not

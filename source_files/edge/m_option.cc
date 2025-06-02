@@ -206,13 +206,13 @@ static void OptionMenuChangePCSpeakerMode(int key_pressed, ConsoleVariable *cons
 // -ACB- 1998/08/29 Moved to top and tried different system
 
 static void OptionMenuResOptDrawer(Style *style, int topy, int bottomy, int dy, int centrex);
-static void OptionMenuResolutionOptions(int key_pressed, ConsoleVariable *console_variable);
 static void OptionMenuSetResolution(int key_pressed, ConsoleVariable *console_variable);
 static void OptionMenuChangeResSize(int key_pressed, ConsoleVariable *console_variable);
 static void OptionMenuChangeResFull(int key_pressed, ConsoleVariable *console_variable);
 
 void OptionMenuHostNetGame(int key_pressed, ConsoleVariable *console_variable);
 #ifndef EDGE_WEB
+static void OptionMenuResolutionOptions(int key_pressed, ConsoleVariable *console_variable);
 static void OptionMenuBrowseHome(int key_pressed, ConsoleVariable *console_variable);
 #endif
 
@@ -1745,6 +1745,7 @@ static void OptionMenuUIOptions(int key_pressed, ConsoleVariable *console_variab
     current_item = current_menu->items + current_menu->pos;
 }
 
+#ifndef EDGE_WEB
 //
 // OptionMenuResolutionOptions
 //
@@ -1766,6 +1767,7 @@ static void OptionMenuResolutionOptions(int key_pressed, ConsoleVariable *consol
     current_menu = &res_optmenu;
     current_item = current_menu->items + current_menu->pos;
 }
+#endif
 
 //
 // OptionMenuAnalogueOptions

@@ -80,8 +80,7 @@ void GrabCursor(bool enable)
 #ifdef EDGE_WEB
     // On web, cursor lock is exclusively handled by selecting canvas
     return;
-#endif
-
+#else
     if (!program_window || graphics_shutdown)
         return;
 
@@ -100,6 +99,7 @@ void GrabCursor(bool enable)
     {
         SDL_SetRelativeMouseMode(SDL_FALSE);
     }
+#endif
 }
 
 void DeterminePixelAspect()

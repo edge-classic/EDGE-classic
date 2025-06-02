@@ -224,15 +224,14 @@ bool A_LookForTargets(MapObject *we)
 
         if (same_side && !we->support_object_ && mo->support_object_ != we)
         {
-            MapObject *them = nullptr;
             if (mo->support_object_ && CheckSight(we, mo->support_object_))
-                them = mo->support_object_;
-            else if (!CheckSight(we, them))
+                mo = mo->support_object_;
+            else if (!CheckSight(we, mo))
                 continue; // OK since same side
 
-            if (them)
+            if (mo)
             {
-                we->SetSupportObject(them);
+                we->SetSupportObject(mo);
                 if (we->info_->meander_state_)
                     MapObjectSetStateDeferred(we, we->info_->meander_state_, 0);
                 return true;
@@ -317,15 +316,14 @@ bool A_LookForTargets(MapObject *we)
 
                 if (same_side && !we->support_object_ && mo->support_object_ != we)
                 {
-                    MapObject *them = nullptr;
                     if (mo->support_object_ && CheckSight(we, mo->support_object_))
-                        them = mo->support_object_;
-                    else if (!CheckSight(we, them))
+                        mo = mo->support_object_;
+                    else if (!CheckSight(we, mo))
                         continue; // OK since same side
 
-                    if (them)
+                    if (mo)
                     {
-                        we->SetSupportObject(them);
+                        we->SetSupportObject(mo);
                         if (we->info_->meander_state_)
                             MapObjectSetStateDeferred(we, we->info_->meander_state_, 0);
                         return true;
@@ -372,15 +370,14 @@ bool A_LookForTargets(MapObject *we)
 
                 if (same_side && !we->support_object_ && mo->support_object_ != we)
                 {
-                    MapObject *them = nullptr;
                     if (mo->support_object_ && CheckSight(we, mo->support_object_))
-                        them = mo->support_object_;
-                    else if (!CheckSight(we, them))
+                        mo = mo->support_object_;
+                    else if (!CheckSight(we, mo))
                         continue; // OK since same side
 
-                    if (them)
+                    if (mo)
                     {
-                        we->SetSupportObject(them);
+                        we->SetSupportObject(mo);
                         if (we->info_->meander_state_)
                             MapObjectSetStateDeferred(we, we->info_->meander_state_, 0);
                         return true;
@@ -427,15 +424,14 @@ bool A_LookForTargets(MapObject *we)
 
                 if (same_side && !we->support_object_ && mo->support_object_ != we)
                 {
-                    MapObject *them = nullptr;
                     if (mo->support_object_ && CheckSight(we, mo->support_object_))
-                        them = mo->support_object_;
-                    else if (!CheckSight(we, them))
+                        mo = mo->support_object_;
+                    else if (!CheckSight(we, mo))
                         continue; // OK since same side
 
-                    if (them)
+                    if (mo)
                     {
-                        we->SetSupportObject(them);
+                        we->SetSupportObject(mo);
                         if (we->info_->meander_state_)
                             MapObjectSetStateDeferred(we, we->info_->meander_state_, 0);
                         return true;
@@ -482,15 +478,14 @@ bool A_LookForTargets(MapObject *we)
 
                 if (same_side && !we->support_object_ && mo->support_object_ != we)
                 {
-                    MapObject *them = nullptr;
                     if (mo->support_object_ && CheckSight(we, mo->support_object_))
-                        them = mo->support_object_;
-                    else if (!CheckSight(we, them))
+                        mo = mo->support_object_;
+                    else if (!CheckSight(we, mo))
                         continue; // OK since same side
 
-                    if (them)
+                    if (mo)
                     {
-                        we->SetSupportObject(them);
+                        we->SetSupportObject(mo);
                         if (we->info_->meander_state_)
                             MapObjectSetStateDeferred(we, we->info_->meander_state_, 0);
                         return true;

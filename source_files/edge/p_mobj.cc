@@ -1716,10 +1716,7 @@ void MapObject::ClearStaleReferences()
 static void DeleteMobj(MapObject *mo)
 {
     if (mo->reference_count_ != 0)
-    {
         FatalError("INTERNAL ERROR: DeleteMobh with refcount %d", mo->reference_count_);
-        return;
-    }
 
 #if (EDGE_DEBUG_MAP_OBJECTS > 0)
     LogDebug("tics=%05d  DELETE %p [%s]\n", level_time_elapsed, mo, mo->info_ ? mo->info_->name_.c_str() : "???");
@@ -2275,10 +2272,7 @@ void ItemRespawn(void)
         objtype = cur->spawnpoint.info;
 
         if (objtype == nullptr)
-        {
             FatalError("P_MobjItemRespawn: No such item type!");
-            return; // shouldn't happen.
-        }
 
         // spawn a teleport fog at the new spot
         EPI_ASSERT(objtype->respawneffect_);

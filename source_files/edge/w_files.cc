@@ -190,10 +190,7 @@ void ProcessFile(DataFile *df)
     {
         epi::File *file = epi::FileOpen(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
         if (file == nullptr)
-        {
             FatalError("Couldn't open file: %s\n", filename.c_str());
-            return;
-        }
 
         df->file_ = file;
 

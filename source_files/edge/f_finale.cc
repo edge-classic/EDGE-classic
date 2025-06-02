@@ -170,7 +170,6 @@ static void DoStartFinale(void)
 
     default:
         FatalError("DoStartFinale: bad stage #%d\n", (int)finale_stage);
-        break;
     }
 
     for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
@@ -342,7 +341,6 @@ void FinaleTicker(void)
 
     default:
         FatalError("FinaleTicker: bad finale_stage #%d\n", (int)finale_stage);
-        break;
     }
 
     if (finale_stage == kFinaleStageDone)
@@ -971,7 +969,6 @@ void FinaleDrawer(void)
 
     default:
         FatalError("FinaleDrawer: bad finale_stage #%d\n", (int)finale_stage);
-        break;
     }
 }
 

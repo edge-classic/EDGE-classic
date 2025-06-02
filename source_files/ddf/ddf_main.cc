@@ -538,7 +538,6 @@ static DDFReadCharReturn DDFMainProcessChar(char character, std::string &token, 
             return kDDFReadCharReturnTagStart;
         else
             DDFError("DDF: File must start with a tag!\n");
-        break;
 
     case kDDFReadStatusReadingTag:
         if (character == '>')
@@ -683,7 +682,6 @@ static DDFReadCharReturn DDFMainProcessChar(char character, std::string &token, 
         FatalError("DDFMainProcessChar: INTERNAL ERROR: "
                    "Bad status value %d !\n",
                    status);
-        break;
     }
 
     return kDDFReadCharReturnNothing;
@@ -1433,7 +1431,6 @@ void DDFMainGetWhenAppear(const char *info, void *storage)
             range[+1] > '5' || range[-1] > range[+1])
         {
             DDFError("Bad range in WHEN_APPEAR value: %s\n", info);
-            return;
         }
 
         for (char sk = '1'; sk <= '5'; sk++)

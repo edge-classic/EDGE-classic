@@ -461,7 +461,6 @@ void DoBigGameStuff(void)
 
         default:
             FatalError("DoBigGameStuff: Unknown game_action %d", game_action);
-            break;
         }
     }
 }

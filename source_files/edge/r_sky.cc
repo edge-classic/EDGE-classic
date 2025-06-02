@@ -461,10 +461,10 @@ static void RenderSkyCylinder(void)
         // The entire sky code needs to be rewritten anyway.
         if (!AlmostEquals(sky_ref->old_offset.Y, sky_ref->offset.Y))
         {
-            if (!console_active && !paused && !menu_active &&
-                !time_stop_active && !erraticism_active)
+            if (!console_active && !paused && !menu_active && !time_stop_active && !erraticism_active)
             {
-                offy = (HMM_Lerp(sky_ref->old_offset.Y, fractional_tic, sky_ref->offset.Y) - kMBFSkyYShift) / sky_image->ScaledHeightActual();
+                offy = (HMM_Lerp(sky_ref->old_offset.Y, fractional_tic, sky_ref->offset.Y) - kMBFSkyYShift) /
+                       sky_image->ScaledHeightActual();
             }
             else
                 offy = (sky_ref->offset.Y - kMBFSkyYShift) / sky_image->ScaledHeightActual();

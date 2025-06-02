@@ -686,7 +686,6 @@ void Scanner::ScriptMessage(MessageLevel level, const char *error, ...) const
         break;
     case kError:
         FatalError(newMessage.c_str(), list);
-        break;
     default:
         LogPrint(newMessage.c_str(), list);
         break;

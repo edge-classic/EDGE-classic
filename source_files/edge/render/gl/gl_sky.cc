@@ -64,7 +64,8 @@ void SetupSkyMatrices(void)
         {
             if (!AlmostEquals(sky_ref->old_offset.X, sky_ref->offset.X) && !console_active && !paused && !menu_active &&
                 !time_stop_active && !erraticism_active)
-                rot += epi::BAMFromDegrees(HMM_Lerp(sky_ref->old_offset.X, fractional_tic, sky_ref->offset.X) / sky_image->ScaledWidthActual());
+                rot += epi::BAMFromDegrees(HMM_Lerp(sky_ref->old_offset.X, fractional_tic, sky_ref->offset.X) /
+                                           sky_image->ScaledWidthActual());
             else
                 rot += epi::BAMFromDegrees(sky_ref->offset.X / sky_image->ScaledWidthActual());
         }

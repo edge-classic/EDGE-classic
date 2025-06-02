@@ -360,10 +360,7 @@ void SaveCopySlot(const char *src_name, const char *dest_name)
     std::vector<epi::DirectoryEntry> fsd;
 
     if (!ReadDirectory(fsd, src_dir, "*.*"))
-    {
         FatalError("SV_CopySlot: failed to read dir: %s\n", src_dir.c_str());
-        return;
-    }
 
     LogDebug("SV_CopySlot: copying %d files\n", (int)fsd.size());
 

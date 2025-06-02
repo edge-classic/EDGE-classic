@@ -415,7 +415,6 @@ static PackFile *ProcessZip(DataFile *df)
         case MZ_ZIP_FILE_READ_FAILED:
         case MZ_ZIP_FILE_SEEK_FAILED:
             FatalError("Failed to open EPK file: %s\n", df->name_.c_str());
-            break;
         default:
             FatalError("Not a EPK file (or is corrupted): %s\n", df->name_.c_str());
         }
@@ -1100,9 +1099,6 @@ bool FindPackFile(PackFile *pack, const std::string &name)
         }
         return false;
     }
-
-    // Fallback
-    return false;
 }
 
 epi::File *OpenPackFile(PackFile *pack, const std::string &name)
@@ -1171,9 +1167,6 @@ epi::File *OpenPackFile(PackFile *pack, const std::string &name)
         }
         return nullptr;
     }
-
-    // Fallback
-    return nullptr;
 }
 
 // Like the above, but is in the form of a stem + acceptable extensions

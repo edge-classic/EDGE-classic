@@ -78,6 +78,7 @@ extern bool need_mouse_recapture;
 void GrabCursor(bool enable)
 {
 #ifdef EDGE_WEB
+    EPI_UNUSED(enable);
     // On web, cursor lock is exclusively handled by selecting canvas
     return;
 #else

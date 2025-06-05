@@ -54,6 +54,8 @@ enum ImageSpecial : uint32_t
     kImageSpecialCrosshair = 1 << 7, // weapon crosshair (center vertically)
     kImageSpecialGrayscale = 1 << 8, // forces image to be grayscaled upon creation
     kImageSpecialPrecache  = 1 << 9, // forces image to be precached upon creation
+    kImageSpecialFlip      = 1 << 10, // horizontally flip image when loading
+    kImageSpecialInvert    = 1 << 11, // vertically flip image when loading
 };
 
 enum ImageTransparencyFix

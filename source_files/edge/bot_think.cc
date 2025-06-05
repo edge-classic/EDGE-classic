@@ -822,8 +822,8 @@ void DeathBot::WeaveNearLeader(const MapObject *leader)
     // pick a position some distance away
 
     Position pos{leader->x, leader->y, leader->z};
-    pos.x -= leader->radius_ * 4 * epi::BAMCos(leader->angle_);
-    pos.y -= leader->radius_ * 4 * epi::BAMSin(leader->angle_);
+    pos.x -= leader->radius_ * 8 * epi::BAMCos(leader->angle_);
+    pos.y -= leader->radius_ * 8 * epi::BAMSin(leader->angle_);
 
     TurnToward(leader, false);
     WeaveToward(pos);
@@ -1380,8 +1380,8 @@ void DeathBot::Think()
     {
         Position pos = {leader->x, leader->y, leader->z};
         // spawn thing a little bit behind the player
-        pos.x -= leader->radius_ * 4 * epi::BAMCos(leader->angle_);
-        pos.y -= leader->radius_ * 4 * epi::BAMSin(leader->angle_);
+        pos.x -= leader->radius_ * 0.1f * epi::BAMCos(leader->angle_);
+        pos.y -= leader->radius_ * 0.1f * epi::BAMSin(leader->angle_);
         if (DistTo(pos) > 1024)
         {
             switch (task_)

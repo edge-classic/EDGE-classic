@@ -1677,12 +1677,17 @@ void ConsoleShowPosition(void)
 
 void ConsoleENDOOM()
 {
-    ConsoleMessage(kConsoleOnly, "\n");
-    for (int i = 0; i < kENDOOMLines; i++)
-    {
-        ConsoleAddENDOOMLine(quit_lines[i]);
+    if (quit_lines[0] && quit_lines[0]->endoom_bytes_.size() == kENDOOMBytesPerLine)
+    { 
+        ConsoleMessage(kConsoleOnly, "\n");
+        for (int i = 0; i < kENDOOMLines; i++)
+        {
+            ConsoleAddENDOOMLine(quit_lines[i]);
+        }
+        ConsoleMessage(kConsoleOnly, "\n");
     }
-    ConsoleMessage(kConsoleOnly, "\n");
+    else
+        ConsoleMessage(kConsoleOnly, "No ENDOOM to display!\n");
 }
 
 void CreateQuitScreen()

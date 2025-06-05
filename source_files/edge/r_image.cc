@@ -1257,6 +1257,8 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
     bool clamp  = IM_ShouldClamp(rim);
     bool mip    = IM_ShouldMipmap(rim);
     bool smooth = IM_ShouldSmooth(rim);
+    bool flip   = false;
+    bool invert = false;
 
     int max_pix = IM_PixelLimit();
 
@@ -1274,8 +1276,12 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
             smooth = true;
         else if (rim->source_.user.def->special_ & kImageSpecialNoSmooth)
             smooth = false;
+
+        flip = (rim->source_.user.def->special_ & kImageSpecialFlip);
+
+        invert = (rim->source_.user.def->special_ & kImageSpecialInvert);
     }
-    else if (rim->source_type_ == kImageSourceGraphic && rim->source_.graphic.user_defined)
+    else if (rim->source_.graphic.user_defined)
     {
         if (rim->source_.graphic.special & kImageSpecialClamp)
             clamp = true;
@@ -1289,6 +1295,10 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
             smooth = true;
         else if (rim->source_.graphic.special & kImageSpecialNoSmooth)
             smooth = false;
+
+        flip = (rim->source_.graphic.special & kImageSpecialFlip);
+
+        invert = (rim->source_.graphic.special & kImageSpecialInvert);
     }
 
     const uint8_t *what_palette    = (const uint8_t *)&playpal_data[0];
@@ -1391,6 +1401,13 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
 
     if (do_whiten)
         tmp_img->Whiten();
+
+    // Need to flip or invert before checking image bounds.
+    if (flip)
+        tmp_img->Flip();
+
+    if (invert)
+        tmp_img->Invert();
 
     if (tmp_img->depth_ == 4 || (tmp_img->depth_ == 3 && rim->is_font_))
     {

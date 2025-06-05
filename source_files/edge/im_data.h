@@ -74,6 +74,9 @@ class ImageData
     // turn the image up-side-down.
     void Invert();
 
+    // horizontally flip the image
+    void Flip();
+
     // shrink an image to a smaller image.
     // The old size and the new size must be powers of two.
     // For RGB(A) images the pixel values are averaged.

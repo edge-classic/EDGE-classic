@@ -307,6 +307,8 @@ static DDFSpecialFlags image_specials[] = {{"NOALPHA", kImageSpecialNoAlpha, 0},
                                            {"CROSSHAIR", kImageSpecialCrosshair, 0},
                                            {"GRAYSCALE", kImageSpecialGrayscale, 0},
                                            {"FORCE_PRECACHE", kImageSpecialPrecache, 0},
+                                           {"FLIP", kImageSpecialFlip, 0},
+                                           {"INVERT", kImageSpecialInvert, 0},
                                            {nullptr, 0, 0}};
 
 static void DDFImageGetSpecial(const char *info, void *storage)

@@ -913,20 +913,19 @@ static void MoveOneSector(Sector *sec, ScriptMoveSectorParameter *t)
         return;
 
     SolidSectorMove(sec, t->is_ceiling, dh);
-
-    UpdateSectorInterpolation(sec);
-
+    
+    // We don't want to interpolate RTS sector movement, as it is always considered
+    // an 'instant' move
     if (t->is_ceiling)
-        sec->old_ceiling_height = sec->ceiling_height;
+        sec->old_ceiling_height = sec->interpolated_ceiling_height = sec->ceiling_height;
     else
-        sec->old_floor_height = sec->floor_height;
+        sec->old_floor_height = sec->interpolated_floor_height = sec->floor_height;
 }
 
 void ScriptMoveSector(RADScriptTrigger *R, void *param)
 {
     EPI_UNUSED(R);
     ScriptMoveSectorParameter *t = (ScriptMoveSectorParameter *)param;
-    int                        i;
 
     // SectorV compatibility
     if (t->tag == 0)
@@ -938,12 +937,8 @@ void ScriptMoveSector(RADScriptTrigger *R, void *param)
         return;
     }
 
-    // OPTIMISE !
-    for (i = 0; i < total_level_sectors; i++)
-    {
-        if (level_sectors[i].tag == t->tag)
-            MoveOneSector(level_sectors + i, t);
-    }
+    for (Sector *tsec = FindSectorFromTag(t->tag); tsec; tsec = tsec->tag_next)
+        MoveOneSector(tsec, t);
 }
 
 static void LightOneSector(Sector *sec, ScriptSectorLightParameter *t)

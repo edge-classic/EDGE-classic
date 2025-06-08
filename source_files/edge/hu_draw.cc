@@ -1295,6 +1295,17 @@ void HUDDrawText(float x, float y, const char *str, float size)
     if (!str)
         return;
 
+    float cy = y;
+    float total_h = (size > 0 ? size : HUDStringHeight(str)) * current_scale;
+
+    if (current_y_alignment >= 0)
+    {
+        if (current_y_alignment == 0)
+            total_h /= 2.0f;
+
+        cy -= total_h;
+    }
+
     while (*str)
     {
         // get the length of the line
@@ -1303,10 +1314,9 @@ void HUDDrawText(float x, float y, const char *str, float size)
             len++;
 
         float cx      = x;
-        float cy      = y;
-        float total_h = (size > 0 ? size : HUDStringHeight(str)) * current_scale;
         float total_w = 0;
         float yoff    = 0;
+        float line_h  = ((size > 0 ? size : HUDFontHeight()) + kVerticalSpacing) * current_scale;
 
         if (current_font->definition_->type_ == kFontTypeTrueType)
         {
@@ -1352,7 +1362,7 @@ void HUDDrawText(float x, float y, const char *str, float size)
             }
         }
 
-        total_h += HMM_ABS(yoff) * current_scale;
+        line_h += HMM_ABS(yoff) * current_scale;
 
         if (current_x_alignment >= 0)
         {
@@ -1360,14 +1370,6 @@ void HUDDrawText(float x, float y, const char *str, float size)
                 total_w /= 2.0f;
 
             cx -= total_w;
-        }
-
-        if (current_y_alignment >= 0)
-        {
-            if (current_y_alignment == 0)
-                total_h /= 2.0f;
-
-            cy -= total_h;
         }
 
         if (current_font->definition_->type_ == kFontTypeTrueType)
@@ -1429,7 +1431,7 @@ void HUDDrawText(float x, float y, const char *str, float size)
             break;
 
         str += (len + 1);
-        cy += total_h + kVerticalSpacing;
+        cy += line_h + kVerticalSpacing;
     }
 }
 

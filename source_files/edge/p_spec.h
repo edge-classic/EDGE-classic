@@ -86,6 +86,7 @@ struct PlaneMover
 {
     const PlaneMoverDefinition *type;
     Sector                     *sector;
+    Sector                     *model = nullptr;
 
     bool is_ceiling;
     bool is_elevator;

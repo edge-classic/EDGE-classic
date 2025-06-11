@@ -2910,26 +2910,36 @@ bool CheckSolidSectorMove(Sector *sec, bool is_ceiling, float dh)
     // first check real sector
     //
 
-    if (is_ceiling && dh < 0 && sec->top_extrafloor && (sec->ceiling_height - dh < sec->top_extrafloor->top_height))
+    if (sec->top_extrafloor)
     {
-        return false;
-    }
-
-    if (!is_ceiling && dh > 0 && sec->bottom_extrafloor &&
-        (sec->floor_height + dh > sec->bottom_extrafloor->bottom_height))
-    {
-        return false;
-    }
-
-    if (is_ceiling)
-    {
-        if (sec->ceiling_move && dh < 0 && sec->ceiling_height <= sec->floor_height)
-            sec->ceiling_move->destination_height = sec->floor_height - dh;
+        if (is_ceiling && dh < 0 && (sec->ceiling_height - dh < sec->top_extrafloor->top_height))
+        {
+            return false;
+        }
     }
     else
     {
-        if (sec->floor_move && dh > 0 && sec->floor_height >= sec->ceiling_height)
-            sec->floor_move->destination_height = sec->ceiling_height - dh;
+        if (is_ceiling && dh < 0 && (sec->ceiling_height - dh < sec->floor_height))
+        {
+            return false;
+        }
+    }
+
+    if (sec->bottom_extrafloor)
+    {
+        if (!is_ceiling && dh > 0 &&
+            (sec->floor_height + dh > sec->bottom_extrafloor->bottom_height))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        if (!is_ceiling && dh > 0 &&
+            (sec->floor_height + dh > sec->ceiling_height))
+        {
+            return false;
+        }
     }
 
     // don't allow a dummy sector to go FUBAR

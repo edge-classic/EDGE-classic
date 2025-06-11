@@ -340,7 +340,8 @@ static SaveField sv_fields_plane_move[] = {
                     SR_PlaneMovePutType),
     EDGE_SAVE_FIELD(dummy_plane_mover, sector, "sector", 1, kSaveFieldIndex, 4, "sectors", SaveGameGetSector,
                     SaveGamePutSector),
-
+    EDGE_SAVE_FIELD(dummy_plane_mover, model, "model", 1, kSaveFieldIndex, 4, "sectors", SaveGameGetSector,
+                    SaveGamePutSector),
     EDGE_SAVE_FIELD(dummy_plane_mover, is_ceiling, "is_ceiling", 1, kSaveFieldNumeric, 4, nullptr, SaveGameGetBoolean,
                     SaveGamePutBoolean),
     EDGE_SAVE_FIELD(dummy_plane_mover, is_elevator, "is_elevator", 1, kSaveFieldNumeric, 4, nullptr, SaveGameGetBoolean,

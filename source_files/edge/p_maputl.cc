@@ -49,6 +49,7 @@
 #include "r_state.h"
 
 extern unsigned int root_node;
+extern std::vector<PlaneMover *>       active_planes;
 
 //
 // ApproximateDistance
@@ -941,6 +942,53 @@ void RecomputeGapsAroundSector(Sector *sec)
     }
 
     sec->sight_gap_number = GapSightConstruct(sec->sight_gaps, sec);
+
+    // Dasho - Update plane mover destinations if necessary
+
+    for (PlaneMover *pl : active_planes)
+    {
+        if (!pl || !pl->sector || pl->sector != sec)
+            continue;
+
+        if (pl->model && pl->model == sec)
+        {
+            if ((pl->type->destref_ & kTriggerHeightReferenceMask) == kTriggerHeightReferenceTriggeringLinedef)
+            {
+                if (pl->type->destref_ & kTriggerHeightReferenceCeiling)
+                    pl->destination_height = sec->ceiling_height;
+                else
+                    pl->destination_height = sec->floor_height;
+            }
+        }
+        else if (pl->sector && pl->sector == sec)
+        {
+            TriggerHeightReference ref = pl->type->destref_;
+
+            switch (ref & kTriggerHeightReferenceMask)
+            {
+                case kTriggerHeightReferenceCurrent:
+                {
+                    if ((ref & kTriggerHeightReferenceCeiling) && !pl->is_ceiling)
+                        pl->destination_height = sec->ceiling_height;
+                    else if (!(ref & kTriggerHeightReferenceCeiling) && pl->is_ceiling)
+                        pl->destination_height = sec->floor_height;
+                    break;
+                }
+
+                case kTriggerHeightReferenceSurrounding:
+                    pl->destination_height = FindSurroundingHeight(ref, sec);
+                    break;
+
+                case kTriggerHeightReferenceLowestLowTexture:
+                    pl->destination_height = FindRaiseToTexture(sec);
+                    break;
+
+                case kTriggerHeightReferenceAbsolute:
+                default:
+                    break;
+            }
+        }
+    }
 }
 
 static inline bool CheckBoundingBoxOverlap(float *bspcoord, float *test)

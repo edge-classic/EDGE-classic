@@ -687,6 +687,7 @@ static PlaneMover *P_SetupSectorAction(Sector *sector, const PlaneMoverDefinitio
         sector->floor_move = plane;
 
     plane->sector               = sector;
+    plane->model                = model;
     plane->crush                = def->crush_damage_;
     plane->sound_effect_started = false;
 

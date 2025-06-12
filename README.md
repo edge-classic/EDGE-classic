@@ -29,7 +29,7 @@ Download from ModDB [here.](https://www.moddb.com/mods/edge-classic-add-ons/down
 
 A Hexen/Heretic-inspired gameplay mod for Doom. New enemies, weapons, items, and attacks.
 
-Download from ModDB [here.](https://www.moddb.com/mods/edge-classic-add-ons/addons/heathen-v1)
+Download from ModDB [here.](https://www.moddb.com/mods/edge-classic-add-ons/addons/heathen)
 
 ## Duke it out in DOOM
 

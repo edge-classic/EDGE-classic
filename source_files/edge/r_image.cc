@@ -2039,9 +2039,7 @@ void DeleteAllImages(bool shutdown)
                     render_state->DeleteTexture(&pat->patch_font_cache_.atlas_whitened_smoothed_texture_id);
             }
         }
-        ImageMap::iterator iter;
-        ImageMap::iterator iter_end;
-        for (iter = real_graphics.begin(), iter_end = real_graphics.end(); iter != iter_end; ++iter)
+        for (ImageMap::iterator iter = real_graphics.begin(), iter_end = real_graphics.end(); iter != iter_end; ++iter)
         {
             for (Image *im : iter->second)
             {
@@ -2062,7 +2060,7 @@ void DeleteAllImages(bool shutdown)
                 delete im;
             }
         }
-        for (iter = real_textures.begin(), iter_end = real_textures.end(); iter != iter_end; ++iter)
+        for (ImageMap::iterator iter = real_textures.begin(), iter_end = real_textures.end(); iter != iter_end; ++iter)
         {
             for (Image *im : iter->second)
             {
@@ -2083,7 +2081,7 @@ void DeleteAllImages(bool shutdown)
                 delete im;
             }
         }
-        for (iter = real_flats.begin(), iter_end = real_flats.end(); iter != iter_end; ++iter)
+        for (ImageMap::iterator iter = real_flats.begin(), iter_end = real_flats.end(); iter != iter_end; ++iter)
         {
             for (Image *im : iter->second)
             {
@@ -2104,7 +2102,7 @@ void DeleteAllImages(bool shutdown)
                 delete im;
             }
         }
-        for (iter = real_sprites.begin(), iter_end = real_sprites.end(); iter != iter_end; ++iter)
+        for (ImageMap::iterator iter = real_sprites.begin(), iter_end = real_sprites.end(); iter != iter_end; ++iter)
         {
             for (Image *im : iter->second)
             {

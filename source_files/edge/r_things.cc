@@ -1026,6 +1026,8 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
     }
 
     bsp_mirror_set.Coordinate(mx, my);
+    bsp_mirror_set.Height(mz);
+    bsp_mirror_set.Height(fz);
 
     float tr_x = mx - view_x;
     float tr_y = my - view_y;
@@ -1319,9 +1321,6 @@ static bool RenderThing(DrawThing *dthing, bool solid)
     {
         if (gzb >= gzt)
             return false;
-
-        bsp_mirror_set.Height(gzb);
-        bsp_mirror_set.Height(gzt);
     }
 
     dthing->top    = gzt;

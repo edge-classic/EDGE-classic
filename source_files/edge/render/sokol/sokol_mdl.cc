@@ -333,7 +333,7 @@ MDLModel *MDLLoad(epi::File *f, float &radius)
 
     LogDebug("  frames:%d  points:%d  tris: %d\n", num_frames, num_points, num_tris);
 
-    md->vertices_per_frame_ = num_points;
+    md->vertices_per_frame_ = num_verts;
 
     LogDebug("  vertices_per_frame_:%d\n", md->vertices_per_frame_);
 

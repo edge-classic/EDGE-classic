@@ -1,3 +1,19 @@
+# CHANGELOG for EDGE-Classic 1.5 RC2 (since EDGE-Classic 1.5 RC1)
+
+## New Features
+
+- Added FLIP and INVERT DDFIMAGE specials to allow easier creation of mirrored images, etc
+
+## General Bugfixes
+
+- Moved bot catch-up spawn closer to the player to prevent getting stuck in level geometry
+- Fixed CTD when using the 'endoom' console command with no valid ENDOOM lump present
+- Fixed HUD messages with newline characters not formatting properly
+- Removed interpolation when performing the RTS MOVE_SECTOR action to prevent visual artifacts
+- Fixed plane movers using the sector's current floor/ceiling height as targets not updating their destination heights properly
+- Fixed CTD when loading MDL format models in the Sokol renderer (MD2/3s were not affected)
+- Fixed rendering height of things when active portals were in view (mirrors were not affected)
+
 # CHANGELOG for EDGE-Classic 1.5 RC1 (since EDGE-Classic 1.38)
 
 ## New Features

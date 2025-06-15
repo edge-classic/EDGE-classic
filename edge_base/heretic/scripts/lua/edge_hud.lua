@@ -234,15 +234,8 @@ function heretic_automap()
     --		heretic_life_gem()
     --	}
 	
-	local TempMapName = hud.map_title()
-    
-    if (DoesNameStartWith(hud.map_title(),hud.map_name()) == 0) then
-    	TempMapName = hud.map_name() .. ": " ..  hud.map_title()
-    end
-
-	
     if (which == 0) then --heretic_status_bar()
-        hud.draw_text(30, 148, TempMapName)
+        hud.draw_text(30, 148, hud.map_title())
         hud.set_scale(0.75)
         hud.draw_text(10, 10, "Kills:    " .. player.kills() .. "/" .. player.map_enemies())
         if (player.map_secrets() > 0) then
@@ -256,7 +249,7 @@ function heretic_automap()
         heretic_life_gem()
     end
     if (which == 1) then --heretic_overlay_status()
-        hud.draw_text(0, 155, TempMapName)
+        hud.draw_text(0, 155, hud.map_title())
         hud.set_scale(0.75)
         hud.draw_text(10, 10, "Kills:    " .. player.kills() .. "/" .. player.map_enemies())
         if (player.map_secrets() > 0) then

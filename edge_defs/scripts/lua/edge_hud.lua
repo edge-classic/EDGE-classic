@@ -434,22 +434,14 @@ function doom_automap()
         new_overlay_status()
     end
 
-
     hud.text_font("DOOM")
     hud.text_color(hud.GREEN)
 
-	local TempMapName = hud.map_title()
-    
-    if (DoesNameStartWith(TempMapName,hud.map_name()) == 1) then
-        local startindex, endindex = string.find(TempMapName, hud.map_title())
-    	TempMapName = hud.map_name() .. ": " ..   string.sub(TempMapName, endindex)
-    end
-
     if (#hud.map_author() > 0) then
-        hud.draw_text(0, 200 - 32 - 20, TempMapName)
+        hud.draw_text(0, 200 - 32 - 20, hud.map_title())
         hud.draw_text(0, 200 - 32 - 10, " " .. hud.map_author())
     else
-        hud.draw_text(0, 200 - 32 - 10, TempMapName)
+        hud.draw_text(0, 200 - 32 - 10, hud.map_title())
     end
 	
 

@@ -1026,6 +1026,9 @@ void MDLRenderModel2D(MDLModel *md, int frame, float x, float y, float xscale, f
     xscale = yscale * info->model_scale_ * info->model_aspect_;
     yscale = yscale * info->model_scale_;
 
+    render_state->ActiveTexture(GL_TEXTURE1);
+    render_state->Disable(GL_TEXTURE_2D);
+    render_state->ActiveTexture(GL_TEXTURE0);
     render_state->Enable(GL_TEXTURE_2D);
     render_state->BindTexture(skin_tex);
 

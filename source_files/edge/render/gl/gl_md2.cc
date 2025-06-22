@@ -1379,6 +1379,9 @@ void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, f
     xscale = yscale * info->model_scale_ * info->model_aspect_;
     yscale = yscale * info->model_scale_;
 
+    render_state->ActiveTexture(GL_TEXTURE1);
+    render_state->Disable(GL_TEXTURE_2D);
+    render_state->ActiveTexture(GL_TEXTURE0);
     render_state->Enable(GL_TEXTURE_2D);
     render_state->BindTexture(skin_tex);
 

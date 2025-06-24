@@ -449,10 +449,15 @@ module mapobject
 	constant SPAWN_HEALTH  = 3
 	constant PICKUP_BENEFIT  = 4
 	constant KILL_BENEFIT  = 5
+	constant TAG  = 6
+	constant TID  = 7
 	
 	
 	function count(type)    : float = native
 	function query_tagged(tag, whatinfo) : string = native
+	function query_tid(tid, whatinfo) : string = native
+	function render_view_tag(x, y, w, h, tag) : float = native
+	function render_view_tid(x, y, w, h, tid) : float = native
 }
 
 module benefit

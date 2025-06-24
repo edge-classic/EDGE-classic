@@ -1271,6 +1271,23 @@ static std::string GetQueryInfoFromMobj(MapObject *obj, int whatinfo)
             temp_string = GetMobjBenefits(obj, true);
         }
         break;
+
+    case 6: // Tag
+        if (obj)
+        {
+            temp_num    = obj->tag_;
+            temp_string = std::to_string(temp_num);
+        }
+        break;
+
+    case 7: // Tid
+        if (obj)
+        {
+            temp_num    = obj->tid_;
+            temp_string = std::to_string(temp_num);
+        }
+        break;
+
     }
 
     if (temp_string.empty())
@@ -1391,7 +1408,7 @@ static void PL_query_object(coal::VM *vm, int argc)
     else
         maxdistance = (int)*maxd;
 
-    if (whatinfo < 1 || whatinfo > 5)
+    if (whatinfo < 1 || whatinfo > 7)
         FatalError("player.query_object: bad whatInfo number: %d\n", whatinfo);
 
     MapObject *obj = GetMapTargetAimInfo(ui_player_who->map_object_, ui_player_who->map_object_->angle_, maxdistance);
@@ -1433,6 +1450,7 @@ static void MO_query_tagged(coal::VM *vm, int argc)
     else
         vm->ReturnString(GetQueryInfoFromMobj(findme->second, whatinfo).c_str());
 }
+
 
 // mapobject.query_tid(thing tid, whatinfo)
 //
@@ -1481,6 +1499,60 @@ static void MO_count(coal::VM *vm, int argc)
 
     vm->ReturnFloat(thingcount);
 }
+
+
+// mapobject.render_view_tag(x, y, w, h, tag)
+//
+static void MO_render_view_tag(coal::VM *vm, int argc)
+{
+    EPI_UNUSED(argc);
+
+    float x = *vm->AccessParam(0);
+    float y = *vm->AccessParam(1);
+    float w = *vm->AccessParam(2);
+    float h = *vm->AccessParam(3);
+    double *argTag   = vm->AccessParam(4);
+    int   whattag  = (int)*argTag;
+
+    // If this tag is not unique, it is not guaranteed which mobj
+    // will actually be returned. Plan accordingly - Dasho
+    std::multimap<int, MapObject *>::iterator findme = active_tagged_map_objects.find(whattag);
+
+    if (findme == active_tagged_map_objects.end())
+        vm->ReturnFloat(0);
+    else
+    {
+        HUDRenderWorld(x, y, w, h, findme->second, 1);
+        vm->ReturnFloat(1);
+    }
+}
+
+// mapobject.render_view_tid(x, y, w, h, tid)
+//
+static void MO_render_view_tid(coal::VM *vm, int argc)
+{
+    EPI_UNUSED(argc);
+
+    float x = *vm->AccessParam(0);
+    float y = *vm->AccessParam(1);
+    float w = *vm->AccessParam(2);
+    float h = *vm->AccessParam(3);
+    double *argtid   = vm->AccessParam(4);
+    int   whattid  = (int)*argtid;
+
+    // TIDs should be unique but if not, it is not guaranteed which mobj
+    // will actually be returned. Plan accordingly - Dasho
+    std::multimap<int, MapObject *>::iterator findme = active_tids.find(whattid);
+
+    if (findme == active_tids.end())
+        vm->ReturnFloat(0);
+    else
+    {
+        HUDRenderWorld(x, y, w, h, findme->second, 1);
+        vm->ReturnFloat(1);
+    }
+}
+
 
 // player.query_weapon(maxdistance,whatinfo,[SecAttack])
 //
@@ -1707,6 +1779,8 @@ void COALRegisterPlaysim()
     ui_vm->AddNativeFunction("mapobject.query_tagged", MO_query_tagged);
     ui_vm->AddNativeFunction("mapobject.query_tid", MO_query_tid);
     ui_vm->AddNativeFunction("mapobject.count", MO_count);
+    ui_vm->AddNativeFunction("mapobject.render_view_tag", MO_render_view_tag);
+    ui_vm->AddNativeFunction("mapobject.render_view_tid", MO_render_view_tid);
 
     ui_vm->AddNativeFunction("player.is_zoomed", PL_is_zoomed);
     ui_vm->AddNativeFunction("player.weapon_state", PL_weapon_state);

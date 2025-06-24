@@ -42,10 +42,12 @@
   - Changes the objects visual scale. This does not affect the actual collision box and is mainly intended for special effects things, such as a puff of smoke gradually dissipating by expansion (in combination with TRANS_FADE) or shrinking and disappearing.
 - New DDFTHING special: ASSIGN_TID
   - Will assign a unique ID to a mobj when it spawns, managed separately from tags
-- New LUA functions: mapobject.render_view_tag(x, y, w, h, tag) and mapobject.render_view_tid(x, y, w, h, tid). See the world from the eyes of any mobj.
+- New LUA/COAL functions: mapobject.render_view_tag(x, y, w, h, tag) and mapobject.render_view_tid(x, y, w, h, tid). See the world from the eyes of any mobj.
   - Tags/TIDs used for this function should be unique; no guarantees regarding which mobj is returned if shared between multiple mobjs
 - New LUA functions: mapobject.tagged_info(tag) and mapobject.tid_info(tid).
   - Will return a table of all active map objects with the matching tag/tid for iteration and scripting.
+- New LUA-only function: mapobject.objects_in_radius(x, y, radius).
+  - Will return a table of all map objects within a given radius from the indicated XY coordinates, for iteration and scripting.
 
 
 ## General Improvements/Changes

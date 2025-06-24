@@ -144,40 +144,49 @@ void LuaCallGlobalFunction(lua_State *L, const char *function_name, MapObject *m
 {
     EDGE_ZoneScoped;
 
-    int top = lua_gettop(L);
-    lua_getglobal(L, function_name);
-    int status = 0;
-    if (lua_debug.d_)
+    //If we try and call a lua script from DDF(e.g. LUA_RUN_SCRIPT()), but are running COAL, then log a warning and do nothing
+    if (!LuaGetLuaHUDDetected()) 
     {
-        if (mo)
-        {
-            CreateLuaTable_Mobj(L, mo);
-            status = dbg_pcall(L, 1, 0, 0);
-        }
-        else
-            status = dbg_pcall(L, 0, 0, 0);
+        LogWarning(epi::StringFormat("Error calling LUA function '%s': No LUAHUDS present\n", function_name).c_str());
     }
     else
     {
-        int base = lua_gettop(L);            // function index
-        lua_pushcfunction(L, LuaMsgHandler); // push message handler */
-        lua_insert(L, base);                 // put it under function and args */
 
-        if (mo)
+        int top = lua_gettop(L);
+        lua_getglobal(L, function_name);
+        int status = 0;
+        if (lua_debug.d_)
         {
-            CreateLuaTable_Mobj(L, mo);
-            status = lua_pcall(L, 1, 0, base);
+            if (mo)
+            {
+                CreateLuaTable_Mobj(L, mo);
+                status = dbg_pcall(L, 1, 0, 0);
+            }
+            else
+                status = dbg_pcall(L, 0, 0, 0);
         }
         else
-            status = lua_pcall(L, 0, 0, base);
-    }
+        {
+            int base = lua_gettop(L);            // function index
+            lua_pushcfunction(L, LuaMsgHandler); // push message handler */
+            lua_insert(L, base);                 // put it under function and args */
 
-    if (status != LUA_OK)
-    {
-        LuaError(epi::StringFormat("Error calling global function %s\n", function_name).c_str(), lua_tostring(L, -1));
-    }
+            if (mo)
+            {
+                CreateLuaTable_Mobj(L, mo);
+                status = lua_pcall(L, 1, 0, base);
+            }
+            else
+                status = lua_pcall(L, 0, 0, base);
+        }
 
-    lua_settop(L, top);
+        if (status != LUA_OK)
+        {
+            LuaError(epi::StringFormat("Error calling global function %s\n", function_name).c_str(), lua_tostring(L, -1));
+        }
+
+        lua_settop(L, top);
+    }
 }
 
 static int LuaSandbox_Warning(lua_State *L)

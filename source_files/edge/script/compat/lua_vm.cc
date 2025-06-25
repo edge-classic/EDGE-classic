@@ -9,6 +9,10 @@
 #include "lua_compat.h"
 #include "w_files.h"
 
+#ifdef EDGE_CLASSIC
+extern bool GetCOALDetected();
+#endif
+
 // Enable Lua debugging
 EDGE_DEFINE_CONSOLE_VARIABLE(lua_debug, "0", kConsoleVariableFlagReadOnly)
 
@@ -145,9 +149,9 @@ void LuaCallGlobalFunction(lua_State *L, const char *function_name, MapObject *m
     EDGE_ZoneScoped;
 
     //If we try and call a lua script from DDF(e.g. LUA_RUN_SCRIPT()), but are running COAL, then log a warning and do nothing
-    if (!LuaGetLuaHUDDetected()) 
+    if (GetCOALDetected()) 
     {
-        LogWarning(epi::StringFormat("Error calling LUA function '%s': No LUAHUDS present\n", function_name).c_str());
+        LogWarning("Error calling LUA function '%s': No LUAHUDS present\n", function_name);
     }
     else
     {

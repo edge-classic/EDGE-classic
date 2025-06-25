@@ -6,7 +6,7 @@
 #include "w_wad.h"
 
 #ifdef EDGE_CLASSIC
-bool GetCOALDetected();
+extern bool GetCOALDetected();
 #endif
 
 lua_State *global_lua_state = nullptr;

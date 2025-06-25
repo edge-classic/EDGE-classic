@@ -906,7 +906,8 @@ int CheckForUniqueGameLumps(epi::File *file)
                 // method
                 else if (epi::StringCompare(lump0, "ENDOOM") == 0)
                 {
-                    EPI_ASSERT(entry.size == 4000);
+                    if (entry.size != 4000) // Malformed ENDOOM
+                        continue;
                     file->Seek(entry.position, epi::File::kSeekpointStart);
                     uint8_t *endoom = new uint8_t[entry.size];
                     file->Read(endoom, entry.size);

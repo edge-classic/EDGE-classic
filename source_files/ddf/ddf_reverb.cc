@@ -35,14 +35,14 @@ static ReverbDefinition *dynamic_reverb = nullptr;
 void ReverbDefinition::StartEntry(const char *name, bool extend)
 {
     if (!name)
-        DDFError("New movie entry is missing a name!\n");
+        DDFError("New REVERB entry is missing a name!\n");
 
     dynamic_reverb = Lookup(name);
 
     if (extend)
     {
         if (!dynamic_reverb)
-            DDFError("Unknown movie to extend: %s\n", name);
+            DDFError("Unknown REVERB to extend: %s\n", name);
         return;
     }
 

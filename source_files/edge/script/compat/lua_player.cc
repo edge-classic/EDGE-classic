@@ -1247,6 +1247,23 @@ static std::string GetQueryInfoFromMobj(MapObject *obj, int whatinfo)
             temp_string = GetMobjBenefits(obj, true);
         }
         break;
+
+    case 6: // Tag
+        if (obj)
+        {
+            temp_num    = obj->tag_;
+            temp_string = std::to_string(temp_num);
+        }
+        break;
+
+    case 7: // Tid
+        if (obj)
+        {
+            temp_num    = obj->tid_;
+            temp_string = std::to_string(temp_num);
+        }
+        break;
+
     }
 
     if (temp_string.empty())
@@ -1350,7 +1367,7 @@ static int PL_query_object(lua_State *L)
     int maxdistance = (int)luaL_checknumber(L, 1);
     int whatinfo    = (int)luaL_checknumber(L, 2);
 
-    if (whatinfo < 1 || whatinfo > 5)
+    if (whatinfo < 1 || whatinfo > 7)
         FatalError("player.query_object: bad whatInfo number: %d\n", whatinfo);
 
     MapObject *obj = GetMapTargetAimInfo(ui_player_who->map_object_, ui_player_who->map_object_->angle_, maxdistance);

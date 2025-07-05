@@ -238,7 +238,36 @@ bool CheatResponder(InputEvent *ev)
     //
     else if (CheckCheatSequence(&cheat_ammo_no_keys, key))
     {
-        pl->armours_[kArmourTypeBlue] = kMaximumArmor;
+        // Dasho - Original code made blue armor additive to lesser armour (green),
+        // instead of replacing it. This should be a bit more robust and also
+        // account for the best armor (including EDGE-specific types) that the player
+        // already had
+        if (pl->armours_[kArmourTypeRed] > 0)
+        {
+            pl->armours_[kArmourTypeRed] = kMaximumArmor;
+            pl->armours_[kArmourTypeYellow] = 0;
+            pl->armours_[kArmourTypePurple] = 0;
+            pl->armours_[kArmourTypeBlue] = 0;
+            pl->armours_[kArmourTypeGreen] = 0;
+        }
+        else if (pl->armours_[kArmourTypeYellow] > 0)
+        {
+            pl->armours_[kArmourTypeYellow] = kMaximumArmor;
+            pl->armours_[kArmourTypePurple] = 0;
+            pl->armours_[kArmourTypeBlue] = 0;
+            pl->armours_[kArmourTypeGreen] = 0;
+        }
+        else if (pl->armours_[kArmourTypePurple] > 0)
+        {
+            pl->armours_[kArmourTypePurple] = kMaximumArmor;
+            pl->armours_[kArmourTypeBlue] = 0;
+            pl->armours_[kArmourTypeGreen] = 0;
+        }
+        else
+        {
+            pl->armours_[kArmourTypeBlue] = kMaximumArmor;
+            pl->armours_[kArmourTypeGreen] = 0;
+        }
 
         UpdateTotalArmour(pl);
 
@@ -256,7 +285,36 @@ bool CheatResponder(InputEvent *ev)
     //
     else if (CheckCheatSequence(&cheat_ammo, key))
     {
-        pl->armours_[kArmourTypeBlue] = kMaximumArmor;
+        // Dasho - Original code made blue armor additive to lesser armour (green),
+        // instead of replacing it. This should be a bit more robust and also
+        // account for the best armor (including EDGE-specific types) that the player
+        // already had
+        if (pl->armours_[kArmourTypeRed] > 0)
+        {
+            pl->armours_[kArmourTypeRed] = kMaximumArmor;
+            pl->armours_[kArmourTypeYellow] = 0;
+            pl->armours_[kArmourTypePurple] = 0;
+            pl->armours_[kArmourTypeBlue] = 0;
+            pl->armours_[kArmourTypeGreen] = 0;
+        }
+        else if (pl->armours_[kArmourTypeYellow] > 0)
+        {
+            pl->armours_[kArmourTypeYellow] = kMaximumArmor;
+            pl->armours_[kArmourTypePurple] = 0;
+            pl->armours_[kArmourTypeBlue] = 0;
+            pl->armours_[kArmourTypeGreen] = 0;
+        }
+        else if (pl->armours_[kArmourTypePurple] > 0)
+        {
+            pl->armours_[kArmourTypePurple] = kMaximumArmor;
+            pl->armours_[kArmourTypeBlue] = 0;
+            pl->armours_[kArmourTypeGreen] = 0;
+        }
+        else
+        {
+            pl->armours_[kArmourTypeBlue] = kMaximumArmor;
+            pl->armours_[kArmourTypeGreen] = 0;
+        }
 
         UpdateTotalArmour(pl);
 

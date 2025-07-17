@@ -29,10 +29,6 @@ Note: If none of the above options are selected, a default will be chosen based 
 - EDGE_PROFILING (default OFF): Will build with support for the Tracy profiler.
 - EDGE_EXTRA_CHECKS (default OFF): Will perform extra validation checks when launching/running the program for development purposes.
 
-- EDGE_MIMALLOC (default ON): Build and use the MiMalloc memory allocator. Note: This will override regular new/delete as well as malloc-related functions!.
-- EDGE_MEMORY_CHECK (default OFF): Will configure MiMalloc to perform extra checks and mitigations. This incurs a performance overhead cost.
-- EDGE_MEMORY_CHECK_FATAL (default OFF): Will consider issues reported by EDGE_MEMORY_CHECK functions to be fatal errors.
-
 ## Windows Compilation using MSVC Build Tools and VSCode
 
 Download the Visual Studio Build Tools Installer and install the 'Desktop Development with C++' Workload

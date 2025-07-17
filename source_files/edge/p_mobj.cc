@@ -1233,15 +1233,18 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props)
                 // Squat down. Decrease viewheight for a moment after hitting
                 // the ground (hard), and utter appropriate sound.
                 mo->player_->delta_view_height_ = zmove / 8.0f;
-                if (mo->info_->maxfall_ > 0 && -mo->momentum_.Z > hurt_momz)
+                if (mo->player_->health_ > 0)
                 {
-                    if (!(mo->player_->cheats_ & kCheatingGodMode) && mo->player_->powers_[kPowerTypeInvulnerable] < 1)
-                        StartSoundEffect(mo->info_->fallpain_sound_, GetSoundEffectCategory(mo), mo);
+                    if (mo->info_->maxfall_ > 0 && -mo->momentum_.Z > hurt_momz)
+                    {
+                        if (!(mo->player_->cheats_ & kCheatingGodMode) && mo->player_->powers_[kPowerTypeInvulnerable] < 1)
+                            StartSoundEffect(mo->info_->fallpain_sound_, GetSoundEffectCategory(mo), mo);
+                        else
+                            StartSoundEffect(mo->info_->oof_sound_, GetSoundEffectCategory(mo), mo);
+                    }
                     else
                         StartSoundEffect(mo->info_->oof_sound_, GetSoundEffectCategory(mo), mo);
                 }
-                else
-                    StartSoundEffect(mo->info_->oof_sound_, GetSoundEffectCategory(mo), mo);
 
                 HitLiquidFloor(mo);
             }
@@ -1338,7 +1341,8 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props)
             if (mo->player_ && mo->player_->map_object_ == mo && gravity < 0 && zmove > kOofSpeed && !fly_or_swim)
             {
                 mo->player_->delta_view_height_ = zmove / 8.0f;
-                StartSoundEffect(mo->info_->oof_sound_, GetSoundEffectCategory(mo), mo);
+                if (mo->player_->health_ > 0)
+                    StartSoundEffect(mo->info_->oof_sound_, GetSoundEffectCategory(mo), mo);
             }
             if (mo->info_->maxfall_ > 0 && gravity < 0 && mo->momentum_.Z > hurt_momz && (!mo->player_ || !fly_or_swim))
             {

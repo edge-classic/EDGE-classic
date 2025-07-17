@@ -199,23 +199,26 @@ static void CalcHeight(Player *player)
     //  Hypertension's E1M1 starting script)! 6/7/2011 - Ajaped said to remove
     //  FRACUNIT...seeya oldness.
 
-    // if ((player->map_object_->momentum_.z <=
-    // -35.0)&&(player->map_object_->momentum_.z >= -40.0))
-    if ((player->map_object_->momentum_.Z <= -35.0) && (player->map_object_->momentum_.Z >= -36.0))
-        if (player->map_object_->info_->falling_sound_ && !AlmostEquals(player->map_object_->floor_z_, -32768.0f))
+    if (player->map_object_->info_->falling_sound_ && player->health_ > 0)
+    {
+        if ((player->map_object_->momentum_.Z <= -35.0) && (player->map_object_->momentum_.Z >= -36.0))
         {
-            int sfx_cat;
+            if (!AlmostEquals(player->map_object_->floor_z_, -32768.0f))
+            {
+                int sfx_cat;
 
-            if (player == players[console_player])
-            {
-                sfx_cat = kCategoryPlayer;
+                if (player == players[console_player])
+                {
+                    sfx_cat = kCategoryPlayer;
+                }
+                else
+                {
+                    sfx_cat = kCategoryOpponent;
+                }
+                StartSoundEffect(player->map_object_->info_->falling_sound_, sfx_cat, player->map_object_);
             }
-            else
-            {
-                sfx_cat = kCategoryOpponent;
-            }
-            StartSoundEffect(player->map_object_->info_->falling_sound_, sfx_cat, player->map_object_);
         }
+    }
 
     // don't apply bobbing when jumping, but have a smooth
     // transition at the end of the jump.

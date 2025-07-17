@@ -99,10 +99,6 @@
 #include "w_texture.h"
 #include "w_wad.h"
 
-#ifdef EDGE_MEMORY_CHECK
-#include <mimalloc.h>
-#endif
-
 extern ImageData *ReadAsEpiBlock(Image *rim);
 
 extern ConsoleVariable busy_wait;
@@ -2268,40 +2264,6 @@ void EdgeShutdown(void)
 #endif
 }
 
-#ifdef EDGE_MEMORY_CHECK
-static void MemoryCheckOutput(const char *msg, void *arg)
-{
-    EPI_UNUSED(arg);
-
-    size_t i   = 0;
-    size_t len = strlen(msg);
-    for (i = 0; i < len; i++)
-    {
-        if (msg[i] != '\n' && msg[i] != '\r' && msg[i] != '\t' && msg[i] != ' ')
-            break;
-    }
-    if (len && i != len)
-    {
-
-        LogDebug("%s", msg);
-#ifdef EDGE_MEMORY_CHECK_FATAL
-        // skip the prefix
-        if (!strcmp(msg, "mimalloc: warning: ") || !strcmp(msg, "mimalloc: error: "))
-        {
-            return;
-        }
-        FatalError("Memory Check Error: %s", msg);
-#endif
-    }
-}
-
-static void InitializeMemoryCheck()
-{
-    mi_option_enable(mi_option_show_errors);
-    mi_register_output(MemoryCheckOutput, nullptr);
-}
-#endif
-
 static void EdgeStartup(void)
 {
     ConsoleInit();
@@ -2527,11 +2489,6 @@ static void InitialState(void)
 //
 void EdgeMain(int argc, const char **argv)
 {
-
-#ifdef EDGE_MEMORY_CHECK
-    InitializeMemoryCheck();
-#endif
-
     // Seed RandomByte RNG
     InitRandomState();
 

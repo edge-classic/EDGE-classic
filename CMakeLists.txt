@@ -53,19 +53,6 @@ option(EDGE_SANITIZE_THREADS "Enable thread sanitizing (No-op with MSVC)" OFF)
 option(EDGE_PROFILING "Enable Profiling" OFF)
 option(EDGE_EXTRA_CHECKS "Enable diagnostic checks/functions" OFF)
 
-# memory allocator
-option(EDGE_MIMALLOC "Enable mimalloc" ON)
-# disable Mimalloc if targeting Emscripten or using MSY2 MinGW32,
-# which fails for some reason
-if (EMSCRIPTEN OR (MSYS AND ${CMAKE_SIZEOF_VOID_P} MATCHES 4))
-  set(EDGE_MIMALLOC OFF)
-endif()
-# Enables exhaustive memory checks, see mimalloc CMakeLists.txt for what is enabled
-# Memory error logging goes to debug.txt
-option(EDGE_MEMORY_CHECK "Enable Memory Checks" OFF)
-# If fatal memory checks are enabled, any memory error will be fatal and provide a callstack
-option(EDGE_MEMORY_CHECK_FATAL "Enable Fatal Memory Checks" OFF)
-
 include("${CMAKE_SOURCE_DIR}/cmake/EDGEClassic.cmake")
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
@@ -78,18 +65,14 @@ if (EMSCRIPTEN)
   include("${CMAKE_SOURCE_DIR}/cmake/Emscripten.cmake")  
 endif()
 
-# Set WIN32_WINNT to Windows 7 if using the new renderer or mimalloc
-if ((WIN32 OR MINGW) AND (EDGE_SOKOL OR EDGE_MIMALLOC))
+# Set WIN32_WINNT to Windows 7 if using the new renderer
+if ((WIN32 OR MINGW) AND EDGE_SOKOL)
   add_definitions(-D_WIN32_WINNT=0x601)
 endif()
 
 if(MSVC)
-    # Use static C runtime, necessary for mimalloc and also means matching C runtime doesn't need to be on users box
+    # Use static C runtime, means matching C runtime doesn't need to be on users box
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:Debug>")   
-    if (EDGE_MIMALLOC)
-      # Override memory allocations to use mimalloc
-      add_compile_options(/FI${CMAKE_SOURCE_DIR}/libraries/mimalloc/include/mimalloc-override.h)
-    endif()
 endif()
 
 if (MSVC)
@@ -243,16 +226,6 @@ endif()
 
 if (EDGE_EXTRA_CHECKS)
   add_compile_definitions(EDGE_EXTRA_CHECKS)
-endif()
-
-if (EDGE_MIMALLOC)
-  add_compile_definitions(EDGE_MIMALLOC)
-  if (EDGE_MEMORY_CHECK)
-    add_compile_definitions(EDGE_MEMORY_CHECK)
-    if (EDGE_MEMORY_CHECK_FATAL)
-      add_compile_definitions(EDGE_MEMORY_CHECK_FATAL)
-    endif()
-  endif()
 endif()
 
 add_subdirectory(libraries)

@@ -390,7 +390,7 @@ static void MovePlayer(Player *player)
             {
                 float sec_fh =
                     (tn->sector->floor_vertex_slope && sector == tn->sector) ? mo->floor_z_ : tn->sector->floor_height;
-                if (!AlmostEquals(mo->z, sec_fh))
+                if (mo->z > sec_fh)
                     continue;
                 if (fric < 0.0f || tn->sector->properties.friction < fric)
                 {

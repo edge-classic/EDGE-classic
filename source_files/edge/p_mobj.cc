@@ -710,7 +710,7 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz, 
                 float            sec_fh   = (tn->sector->floor_vertex_slope && mo->subsector_->sector == tn->sector)
                                                 ? mo->floor_z_
                                                 : tn->sector->floor_height;
-                if (AlmostEquals(bz, sec_fh))
+                if (bz <= sec_fh)
                 {
                     if (new_p->friction < 0.0f || tn_props.friction < new_p->friction)
                         new_p->friction = tn_props.friction;
@@ -719,7 +719,7 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz, 
                 {
                     SectorFlag tn_flags = tn_props.special ? tn_props.special->special_flags_ : kSectorFlagNone;
 
-                    if (!(tn_flags & kSectorFlagWholeRegion) && !AlmostEquals(bz, tn->sector->floor_height))
+                    if (!(tn_flags & kSectorFlagWholeRegion) && bz > sec_fh)
                         continue;
 
                     push_mul = 1.0f;
@@ -747,7 +747,7 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz, 
     {
         if (p->push.X || p->push.Y || p->push.Z)
         {
-            if (!(flags & kSectorFlagWholeRegion) && !AlmostEquals(bz, floor_height))
+            if (!(flags & kSectorFlagWholeRegion) && bz > floor_height)
                 return;
 
             push_mul = 1.0f;
@@ -1526,7 +1526,7 @@ static void P_MobjThinker(MapObject *mobj)
                 float            sec_fh   = (tn->sector->floor_vertex_slope && mobj->subsector_->sector == tn->sector)
                                                 ? mobj->floor_z_
                                                 : tn->sector->floor_height;
-                if (AlmostEquals(mobj->z, sec_fh))
+                if (mobj->z <= sec_fh)
                 {
                     if (mobj_props.friction < 0.0f || tn_props.friction < mobj_props.friction)
                         mobj_props.friction = tn_props.friction;
@@ -1537,8 +1537,8 @@ static void P_MobjThinker(MapObject *mobj)
                     {
                         SectorFlag flags = tn_props.special ? tn_props.special->special_flags_ : kSectorFlagNone;
 
-                        if (!((mobj->flags_ & kMapObjectFlagNoGravity) || (flags & kSectorFlagPushAll)) &&
-                            (AlmostEquals(mobj->z, mobj->floor_z_) || (flags & kSectorFlagWholeRegion)))
+                        if ((!(mobj->flags_ & kMapObjectFlagNoGravity) || (flags & kSectorFlagPushAll)) &&
+                            (mobj->z <= sec_fh || (flags & kSectorFlagWholeRegion)))
                         {
                             float push_mul = 1.0f;
 

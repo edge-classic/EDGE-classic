@@ -19,5 +19,5 @@
 # Ignore
 ##################################################
 
-# SDL internal; likely cannot do anything about this
 leak:SDL_InitSubSystem_REAL
+leak:_dbus_*

@@ -191,7 +191,10 @@ if(MINGW OR MSVC OR (WIN32 AND CLANG))
   set(SDL2_DIR "${CMAKE_SOURCE_DIR}/libraries/sdl2")
 endif()
 
-find_package(SDL2 REQUIRED)
+# The Emscripten USE_SDL=2 flag covers this
+if (NOT EMSCRIPTEN)
+  find_package(SDL2 REQUIRED)
+endif()
 
 # set certain definitions (if appropriate)
 

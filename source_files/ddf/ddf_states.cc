@@ -283,7 +283,7 @@ int DDFStateFindLabel(const std::vector<StateRange> &group, const char *label, b
     }
 
     if (!quiet)
-        DDFError("Unknown label '%s' (object has no such frames).\n", label);
+        DDFWarnError("Unknown label '%s' (object has no such frames).\n", label);
 
     return 0;
 }

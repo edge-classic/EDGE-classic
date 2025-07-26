@@ -79,7 +79,7 @@ bool CheckWeaponSprite(WeaponDefinition *info);
 
 void DesireWeaponChange(Player *p, int key);
 void CycleWeapon(Player *p, int dir);
-void SelectNewWeapon(Player *player, int priority, AmmunitionType ammo);
+void SelectNewWeapon(Player *player, int priority, AmmunitionType ammo, bool initial_spawn = false);
 void TrySwitchNewWeapon(Player *p, int new_weap, AmmunitionType new_ammo);
 bool TryFillNewWeapon(Player *p, int idx, AmmunitionType ammo, int *qty);
 void FillWeapon(Player *p, int slot);

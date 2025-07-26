@@ -644,7 +644,7 @@ void CycleWeapon(Player *p, int dir)
 //
 // This routine deliberately ignores second attacks.
 //
-void SelectNewWeapon(Player *p, int priority, AmmunitionType ammo)
+void SelectNewWeapon(Player *p, int priority, AmmunitionType ammo, bool initial_spawn)
 {
     // int key = -1; - Seems to be unused - Dasho
     WeaponDefinition *info;
@@ -656,7 +656,7 @@ void SelectNewWeapon(Player *p, int priority, AmmunitionType ammo)
         if (!p->weapons_[i].owned)
             continue;
 
-        if (info->dangerous_ || info->priority_ < priority)
+        if ((info->dangerous_ && !initial_spawn) || info->priority_ < priority)
             continue;
 
         if (ammo != kAmmunitionTypeDontCare && info->ammo_[0] != ammo)
@@ -828,7 +828,7 @@ void SetupPlayerSprites(Player *p)
 
     // choose highest priority FREE weapon as the default
     if (p->ready_weapon_ == KWeaponSelectionNone)
-        SelectNewWeapon(p, -100, kAmmunitionTypeDontCare);
+        SelectNewWeapon(p, -100, kAmmunitionTypeDontCare, true);
     else
         p->pending_weapon_ = p->ready_weapon_;
 

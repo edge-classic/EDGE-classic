@@ -1475,6 +1475,8 @@ void ReadUMAPINFOLumps(void)
                         temp_level->f_end_.text_flat_ = ibd_lookup;
                     }
                 }
+                else
+                    temp_level->f_end_.text_flat_ = "FLOOR4_8";
             }
 
             if (Maps.maps[i].intermusic[0])
@@ -1583,6 +1585,8 @@ void ReadUMAPINFOLumps(void)
                                     temp_level->f_end_.text_flat_ = ibd_lookup;
                                 }
                             }
+                            else
+                                temp_level->f_end_.text_flat_ = "FLOOR4_8"; 
                         }
                         else
                         {
@@ -1613,6 +1617,8 @@ void ReadUMAPINFOLumps(void)
                                     secret_level->f_pre_.text_flat_ = ibd_lookup;
                                 }
                             }
+                            else
+                                secret_level->f_pre_.text_flat_ = "FLOOR4_8";
                         }
                     }
                 }

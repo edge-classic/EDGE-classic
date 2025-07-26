@@ -747,31 +747,31 @@ static void ParseUMAPINFOEntry(epi::Scanner &lex, MapEntry *val)
             val->partime = 35 * lex.state_.number;
             break;
         case umapinfo::kIntertext: {
-            std::string it_builder = value;
+            value = lex.state_.string;
             while (lex.CheckToken(','))
             {
-                it_builder.append("\n");
+                value.append("\n");
                 lex.GetNextToken();
-                it_builder.append(lex.state_.string);
+                value.append(lex.state_.string);
             }
             if (val->intertext)
                 free(val->intertext);
-            val->intertext = (char *)calloc(it_builder.size() + 1, sizeof(char));
-            epi::CStringCopyMax(val->intertext, it_builder.c_str(), it_builder.size());
+            val->intertext = (char *)calloc(value.size() + 1, sizeof(char));
+            epi::CStringCopyMax(val->intertext, value.c_str(), value.size());
         }
         break;
         case umapinfo::kIntertextSecret: {
-            std::string it_builder = value;
+            value = lex.state_.string;
             while (lex.CheckToken(','))
             {
-                it_builder.append("\n");
+                value.append("\n");
                 lex.GetNextToken();
-                it_builder.append(lex.state_.string);
+                value.append(lex.state_.string);
             }
             if (val->intertextsecret)
                 free(val->intertextsecret);
-            val->intertextsecret = (char *)calloc(it_builder.size() + 1, sizeof(char));
-            epi::CStringCopyMax(val->intertextsecret, it_builder.c_str(), it_builder.size());
+            val->intertextsecret = (char *)calloc(value.size() + 1, sizeof(char));
+            epi::CStringCopyMax(val->intertextsecret, value.c_str(), value.size());
         }
         break;
         case umapinfo::kInterbackdrop: {

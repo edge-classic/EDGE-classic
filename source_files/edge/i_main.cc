@@ -34,7 +34,14 @@ extern "C"
         if (SDL_Init(0) < 0)
             FatalError("Couldn't init SDL!!\n%s\n", SDL_GetError());
 
-        executable_path = SDL_GetBasePath();
+        char *exec_path = SDL_GetBasePath();
+
+        if (!exec_path)
+            FatalError("Couldn't determing program directory!\n");
+        else
+            executable_path = exec_path;
+
+        SDL_free(exec_path);
 
         EdgeMain(argc, (const char **)argv);
         EdgeShutdown();

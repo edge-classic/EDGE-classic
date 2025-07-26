@@ -1,20 +1,4 @@
-# CHANGELOG for EDGE-Classic 1.5 RC2 (since EDGE-Classic 1.5 RC1)
-
-## New Features
-
-- Added FLIP and INVERT DDFIMAGE specials to allow easier creation of mirrored images, etc
-
-## General Bugfixes
-
-- Moved bot catch-up spawn closer to the player to prevent getting stuck in level geometry
-- Fixed CTD when using the 'endoom' console command with no valid ENDOOM lump present
-- Fixed HUD messages with newline characters not formatting properly
-- Removed interpolation when performing the RTS MOVE_SECTOR action to prevent visual artifacts
-- Fixed plane movers using the sector's current floor/ceiling height as targets not updating their destination heights properly
-- Fixed CTD when loading MDL format models in the Sokol renderer (MD2/3s were not affected)
-- Fixed rendering height of things when active portals were in view (mirrors were not affected)
-
-# CHANGELOG for EDGE-Classic 1.5 RC1 (since EDGE-Classic 1.38)
+# CHANGELOG for EDGE-Classic 1.5 (since EDGE-Classic 1.38)
 
 ## New Features
 
@@ -34,10 +18,10 @@
   - Controls how much the light level is raised by actions such as A_Light1/2
 - New state action: LUA_RUN_SCRIPT("\<lua_script_name\>")
   - Will pass a table containing the calling mobj's information as a parameter
-- New states actions:  CLEAR_TARGET and FRIEND_LOOKOUT
+- New state actions:  CLEAR_TARGET and FRIEND_LOOKOUT
 - New BORE attack flag
   - Can damage the same mobj multiple times as it is passing through, versus the once-per-mobj of the existing TUNNEL special
-- New states actions: GRAVITY and NO_GRAVITY
+- New state actions: GRAVITY and NO_GRAVITY
 - New state action: SET_SCALE(float)
   - Changes the objects visual scale. This does not affect the actual collision box and is mainly intended for special effects things, such as a puff of smoke gradually dissipating by expansion (in combination with TRANS_FADE) or shrinking and disappearing.
 - New DDFTHING special: ASSIGN_TID
@@ -48,10 +32,14 @@
   - Will return a table of all active map objects with the matching tag/tid for iteration and scripting.
 - New LUA-only function: mapobject.objects_in_radius(x, y, radius).
   - Will return a table of all map objects within a given radius from the indicated XY coordinates, for iteration and scripting.
+- Added FLIP and INVERT DDFIMAGE specials to allow easier creation of mirrored images, etc
 
 
 ## General Improvements/Changes
 
+- Crosshairs and overlays no longer limited to a hardcoded list of options
+  - Images placed in the "crosshairs" or "overlays" folder will be added to the appropriate menu option
+    on the next run
 - Co-op bot improvements
   - Bots and players (non-voodoo) will no longer clip or telefrag each other
   - Bots will now follow behind the player instead of potentially obstructing their view
@@ -94,6 +82,7 @@
 - Carry scroller forces are now additive instead of averaged
 - Changed method of determining the sectors a thing is touching (for carry purposes/etc) from
 a BSP-based to a linedef-based method to be more in line with Boom behavior
+- Updated friction/wind force calculations to be more in line with Boom behavior
 
 ### MBF
 - A_Mushroom codepointer revised to be in line with original behavior
@@ -117,4 +106,7 @@ a BSP-based to a linedef-based method to be more in line with Boom behavior
 - Changed FACE() thing.ddf action to behave like it's horizontal equivalent TURN().
 - Stopped looping SFX still playing on intermission screen
 - Fixed player being able to build momentum by running against a wall/closed door
-
+- Fixed CTD when using the 'endoom' console command with no valid ENDOOM lump present
+- Fixed HUD messages with newline characters not formatting properly
+- Fixed plane movers using the sector's current floor/ceiling height as targets not updating their destination heights properly
+- Fixed UMAPINFO-defined levels that add intertext/intertextsecret without defining a backdrop not using the default flat

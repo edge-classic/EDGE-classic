@@ -178,6 +178,25 @@ static void GetMUSINFOTracksForLevel(void)
 
             value = lex.state_.string;
 
+            // Dasho - Ran into an issue where a MUSINFO entry had leading numbers; since the lump name
+            // is not quoted the scanner was splitting it into separate tokens. Hopefully this sorts it out
+            if (mus_number != -1)
+            {
+                int line_check = lex.GetLine();
+
+                while (lex.TokensLeft())
+                {
+                    lex.GetNextToken();
+                    if (line_check == lex.GetLine())
+                        value.append(lex.state_.string);
+                    else
+                    {
+                        lex.Rewind();
+                        break;
+                    }
+                }
+            }
+
             // A valid map name should be the end of this block
             if (mapdefs.Lookup(value.c_str()))
                 return;

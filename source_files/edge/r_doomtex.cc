@@ -314,7 +314,7 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
         if (!img)
             FatalError("Error loading image in lump: %s\n", packfile_name ? packfile_name : GetLumpNameFromIndex(lump));
 
-        // Try and manually tile, or at least fill in the black gaps ]
+        // Try and manually tile, or at least fill in the black gaps
         img->FillMarginX(rim->actual_width_);
         img->FillMarginY(rim->actual_height_);
 
@@ -383,6 +383,11 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
     }
 
     delete[] realpatch;
+
+
+    // Try and manually tile, or at least fill in the black gaps. Should catch stray textures-as-flats here
+    img->FillMarginX(rim->actual_width_);
+    img->FillMarginY(rim->actual_height_);
 
     return img;
 }

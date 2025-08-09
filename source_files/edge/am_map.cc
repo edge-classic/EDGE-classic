@@ -1386,26 +1386,30 @@ void AutomapRender(float x, float y, float w, float h, MapObject *focus)
 
     EPI_ASSERT(automap_style);
 
+    map_alpha       = HUDGetAlpha();
+    HUDSetAlpha(automap_style->definition_->bg_.translucency_);
+
     if (automap_style->background_image_)
     {
-        float old_alpha = HUDGetAlpha();
-        HUDSetAlpha(automap_style->definition_->bg_.translucency_);
         if (automap_style->definition_->special_ == 0)
             HUDStretchImage(-90, 0, 500, 200, automap_style->background_image_, 0.0, 0.0);
         else
             HUDTileImage(-90, 0, 500, 200, automap_style->background_image_, 0.0, 0.0);
-        HUDSetAlpha(old_alpha);
     }
     else if (automap_style->definition_->bg_.colour_ != kRGBANoValue)
     {
-        float old_alpha = HUDGetAlpha();
-        HUDSetAlpha(automap_style->definition_->bg_.translucency_);
         HUDSolidBox(x, y, x + w, y + h, automap_style->definition_->bg_.colour_);
-        HUDSetAlpha(old_alpha);
+    }
+    else
+    {
+        // Dasho: Draw a black background as a fallback. We need to explicitly do this, as if draw
+        // culling is enabled the background would be the culling fog color instead
+        HUDSolidBox(x, y, x + w, y + h, kRGBABlack);
     }
 
+    HUDSetAlpha(map_alpha);
+
     // Update various render values
-    map_alpha       = HUDGetAlpha();
     map_pulse_width = (float)(game_tic % 32);
     if (map_pulse_width >= 16.0f)
         map_pulse_width = 2.0 + (map_pulse_width * 0.1f);

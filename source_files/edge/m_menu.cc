@@ -354,7 +354,7 @@ static Menu EpisodeMenuDefinition = {
     &episode_style,
     MenuDrawEpisode,     // drawing routine ->
     48,
-    63,                  // x,y
+    43,                  // x,y
     0                    // last_on
 };
 
@@ -1399,7 +1399,7 @@ void MenuDrawEpisode(void)
             x = CenterMenuText(style, fontType, language["MenuWhichEpisode"]);
 
         HUDWriteText(style, fontType, x + style->definition_->text_[fontType].x_offset_,
-                     38 + style->definition_->text_[fontType].y_offset_, language["MenuWhichEpisode"]);
+                     18 + style->definition_->text_[fontType].y_offset_, language["MenuWhichEpisode"]);
     }
     else
     {
@@ -1412,7 +1412,7 @@ void MenuDrawEpisode(void)
         }
 
         const Colormap *colmap = style->definition_->text_[fontType].colmap_;
-        HUDStretchImage(x, 38 + style->definition_->text_[fontType].y_offset_,
+        HUDStretchImage(x, 18 + style->definition_->text_[fontType].y_offset_,
                         menu_episode->ScaledWidthActual() * txtscale, menu_episode->ScaledHeightActual() * txtscale,
                         menu_episode, 0.0, 0.0, colmap);
 

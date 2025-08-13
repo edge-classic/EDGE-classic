@@ -1403,7 +1403,7 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special, int tag, 
                     ConsoleMessage(kConsoleHUDCenter, "%s", language[special->failedmessage_.c_str()]);
 
                 if (special->failed_sfx_)
-                    StartSoundEffect(special->failed_sfx_, kCategoryLevel, thing);
+                    StartSoundEffect(special->failed_sfx_, GetSoundEffectCategory(thing), thing);
 
                 return false;
             }

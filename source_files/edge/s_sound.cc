@@ -44,7 +44,6 @@ extern float listen_x;
 extern float listen_y;
 extern float listen_z;
 
-static constexpr float kBossSoundClipDistance    = 1200.0f;
 static constexpr float kMaximumSoundClipDistance = 4000.0f;
 
 static constexpr uint8_t category_limit_table[kTotalCategories] = {
@@ -341,7 +340,7 @@ static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category,
 
     chan->boss_ = (flags & kSoundEffectBoss) ? true : false;
 
-    bool attenuate = (pos && category != kCategoryWeapon && category != kCategoryPlayer && category != kCategoryUi);
+    bool attenuate = (!chan->boss_ && pos && category != kCategoryWeapon && category != kCategoryPlayer && category != kCategoryUi);
 
     chan->ref_config_            = ma_audio_buffer_config_init(ma_format_f32, 2, buf->length_, buf->data_, NULL);
     chan->ref_config_.sampleRate = buf->frequency_;
@@ -358,8 +357,7 @@ static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category,
             ma_sound_set_min_distance(&chan->channel_sound_, kMinimumSoundClipDistance);
         else
             ma_sound_set_min_distance(&chan->channel_sound_, kMinimumOccludedSoundClipDistance);
-        ma_sound_set_max_distance(&chan->channel_sound_,
-                                  chan->boss_ ? kBossSoundClipDistance : kMaximumSoundClipDistance);
+        ma_sound_set_max_distance(&chan->channel_sound_, kMaximumSoundClipDistance);
         ma_sound_set_position(&chan->channel_sound_, pos->x, pos->z, -pos->y);
         if (pc_speaker_mode)
             ma_node_attach_output_bus(&chan->channel_sound_, 0, &sfx_node, 0);

@@ -51,7 +51,7 @@ jobs:
           ${{github.workspace}}/edge-classic
         retention-days: ${{env.RETENTION_DAYS}}
 
-  build-mingw32:
+  build-win32-legacy:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -77,7 +77,7 @@ jobs:
         run: copy-item -path ${{github.workspace}}\SDL2-2.32.6\i686-w64-mingw32\bin\SDL2.dll -destination ${{github.workspace}}
       - uses: actions/upload-artifact@v4
         with:
-          name: edge-classic-mingw32
+          name: edge-classic-win32-legacy
           path: |
             autoload
             crosshairs
@@ -90,7 +90,7 @@ jobs:
             *.dll
           retention-days: ${{env.RETENTION_DAYS}}
 
-  build-msvc:
+  build-win64-d3d11:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -100,7 +100,30 @@ jobs:
         run: cmake --build build --config ${{env.BUILD_TYPE}}
       - uses: actions/upload-artifact@v4
         with:
-          name: edge-classic-msvc
+          name: edge-classic-win64-d3d11
+          path: |
+            autoload
+            crosshairs
+            edge_base
+            edge_defs
+            edge_fixes
+            overlays
+            soundfont
+            edge-classic.exe
+            *.dll
+          retention-days: ${{env.RETENTION_DAYS}}
+
+  build-win64-gl33:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure CMake MSVC
+        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DEDGE_SOKOL_GL=ON
+      - name: Build MSVC
+        run: cmake --build build --config ${{env.BUILD_TYPE}}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: edge-classic-win64-gl33
           path: |
             autoload
             crosshairs

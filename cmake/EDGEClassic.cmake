@@ -30,7 +30,7 @@ set (EPK_BASE_SOURCE
 
 function( add_epk EPK_PATH )
     add_custom_command(
-        TARGET GenerateEPKS
+        TARGET GenerateEPKS POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E tar "cf" "${CMAKE_SOURCE_DIR}/${EPK_PATH}.epk" --format=zip "."
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/${EPK_PATH}"
     )

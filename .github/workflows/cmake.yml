@@ -77,7 +77,7 @@ jobs:
         run: copy-item -path ${{github.workspace}}\SDL2-2.32.6\i686-w64-mingw32\bin\SDL2.dll -destination ${{github.workspace}}
       - uses: actions/upload-artifact@v4
         with:
-          name: edge-classic-mingw32
+          name: edge-classic-win32-legacy
           path: |
             autoload
             crosshairs
@@ -100,7 +100,7 @@ jobs:
         run: cmake --build build --config ${{env.BUILD_TYPE}}
       - uses: actions/upload-artifact@v4
         with:
-          name: edge-classic-msvc
+          name: edge-classic-win64-d3d11
           path: |
             autoload
             crosshairs
@@ -123,7 +123,7 @@ jobs:
         run: cmake --build build --config ${{env.BUILD_TYPE}}
       - uses: actions/upload-artifact@v4
         with:
-          name: edge-classic-msvc
+          name: edge-classic-win64-gl33
           path: |
             autoload
             crosshairs

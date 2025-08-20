@@ -150,6 +150,7 @@ if (EDGE_CLASSIC)
     s_doom.cc
     s_m4p.cc
     s_midi_ec.cc
+    s_sid.cc
     vm_coal.cc
     vm_hud.cc
     vm_player.cc    
@@ -217,6 +218,7 @@ if (EDGE_CLASSIC)
     EDGE_LINK_LIBRARIES
     coal
     dehacked
+    libcRSID
     m4p
     opalmidi
   )

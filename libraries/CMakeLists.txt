@@ -19,6 +19,7 @@ endif()
 add_subdirectory(tracy)
 
 if (EDGE_CLASSIC)
+  add_subdirectory(libcRSID)
   add_subdirectory(m4p)
   add_subdirectory(opalmidi)
 endif()

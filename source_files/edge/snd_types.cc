@@ -76,6 +76,10 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
     {
         return kSoundM4P;
     }
+    if ((data[0] == 'P' || data[0] == 'R') && data[1] == 'S' && data[2] == 'I' && data[3] == 'D')
+    {
+        return kSoundSID;
+    }
     if (data[0] == 0x3)
     {
         return kSoundDoom;
@@ -110,6 +114,8 @@ SoundFormat SoundFilenameToFormat(std::string_view filename)
         return kSoundMIDI;
     if (ext == ".mod" || ext == ".s3m" || ext == ".xm" || ext == ".it" || ext == ".ft")
         return kSoundM4P;
+    if (ext == ".sid" || ext == ".psid")
+        return kSoundSID;
     // Not sure if these will ever be encountered in the wild, but according to
     // the VGMPF Wiki they are valid DMX file extensions
     if (ext == ".dsp" || ext == ".pcs" || ext == ".gsp" || ext == ".gsw")

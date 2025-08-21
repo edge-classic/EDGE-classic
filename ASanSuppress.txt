@@ -19,5 +19,4 @@
 # Ignore
 ##################################################
 
-leak:SDL_InitSubSystem_REAL
-leak:_dbus_*
+leak:libdbus-1*

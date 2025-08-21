@@ -16,6 +16,7 @@ Note: If none of the above options are selected, a default will be chosen based 
 -- COAL scripting language
 -- Dehacked patch parsing and application
 -- Tracker music (S3M/MOD/XM/IT/FT) playback
+-- C64 SID playback
 -- OPL emulation for MIDI playback
 -- MUS to MIDI track conversion
 -- IMF music playback

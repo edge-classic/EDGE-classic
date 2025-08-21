@@ -37,6 +37,7 @@ enum DDFMusicType
 #ifdef EDGE_CLASSIC
     kDDFMusicMUS,
     kDDFMusicM4P,
+    kDDFMusicSID,
     kDDFMusicIMF280,
     kDDFMusicIMF560,
     kDDFMusicIMF700,

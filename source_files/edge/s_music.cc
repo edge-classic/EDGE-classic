@@ -36,6 +36,7 @@
 #include "s_midi.h"
 #ifdef EDGE_CLASSIC
 #include "s_m4p.h"
+#include "s_sid.h"
 #endif
 #include "s_mp3.h"
 #include "s_ogg.h"
@@ -199,6 +200,10 @@ void ChangeMusic(int entry_number, bool loop)
     case kSoundM4P:
         delete F;
         music_player = PlayM4PMusic(data, length, loop);
+        break;
+    case kSoundSID:
+        delete F;
+        music_player = PlaySIDMusic(data, length, loop);
         break;
     case kSoundIMF:
         delete F;

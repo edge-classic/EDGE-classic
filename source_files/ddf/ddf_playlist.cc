@@ -36,6 +36,7 @@ static void InitializeMusicTypes()
 #ifdef EDGE_CLASSIC
     supported_music_types.push_back("MUS");
     supported_music_types.push_back("TRACKER");
+    supported_music_types.push_back("SID");
     supported_music_types.push_back("IMF280");
     supported_music_types.push_back("IMF560");
     supported_music_types.push_back("IMF700");

@@ -22,7 +22,7 @@ minivorbis library - Copyright (c) 2020 Eduardo Bart
 Mod4Play library - 	Copyright (c) 2024-2025 dashodanger
 					Copyright (c) 2022 Olav Sørensen
 
-OpalMIDI library - Copyright (c) 2025, Dashodanger
+OpalMIDI library - Copyright (c) 2025, dashodanger
 				   Copyright (c) 2021-2024, Devin Acker
 				   Opal Emulation released into Public Domain by Reality Productions
 
@@ -152,6 +152,13 @@ WidePix License
 ===========================================================================================
 
 WidePix (various assets) - Copyright (c) 2020-2021 Nash Muhandes
+
+===========================================================================================
+WTFPL v2 License
+===========================================================================================
+
+libcRSID -  dashodanger (single-header implementation)
+			Hermit (Mihaly Horvath) (original library)
 
 ===========================================================================================
 zlib License

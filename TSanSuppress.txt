@@ -1,7 +1,15 @@
 ##################################################
 # Setup Info
 ##################################################
-# Set EDGE_SANITIZE_THREADS cmake option 
+# Set EDGE_SANITIZE_THREADS cmake option
+# Dasho: If you get an immediate fatal error about
+# "unexpected memory mapping", you may need to reduce
+# the vm.mmap_rnd_bits value via sysctl, like so:
+# sudo sysctl vm.mmap_rnd_bits=28
+# I found that the Ubuntu 24.04 LTS default of 32
+# was too high and caused this issue. It is not
+# recommended to make this persistent for your
+# system.
 # export TSAN_OPTIONS=suppressions=TSanSuppress.txt
 
 ##################################################
@@ -21,7 +29,7 @@ called_from_lib:libgallium*
 
 # Usually triggered on shutdown on Linux; like
 # the above, not sure if it can be addressed
-deadlock:_dbus_*
+deadlock:libdbus-1*
 
 ##################################################
 # Ignore

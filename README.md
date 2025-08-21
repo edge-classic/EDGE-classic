@@ -70,7 +70,7 @@ An optional texture pack to enhance the experience can be found [here.](https://
 - Improved sound mixer with floating-point samples and OpenAL spatialization/attenuation models
 - A soundfont-capable MIDI player (SF2/SF3 support)
 - OPL emulation with external OP2/AIL/TMB/WOPL instrument support
-- Many more music and sound formats (PC Speaker, IMF, MP3, OGG, FLAC, IT/S3M/XM/MOD/FT)
+- Many more music and sound formats (PC Speaker, IMF, MP3, OGG, FLAC, IT/S3M/XM/MOD/FT, C64 PSID/RSID)
 - UMAPINFO compatibility
 - Migration from SDL1 to SDL2 (longevity and improved gamepad support)
 - Lua as the primary scripting language, with a COAL compatibility layer for ease of migration

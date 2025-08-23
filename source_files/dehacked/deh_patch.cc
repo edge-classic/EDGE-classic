@@ -1105,7 +1105,7 @@ void ReadBexTextString(char *dest) // upto kMaximumTextStringLength chars
 
 void ProcessBexString(void)
 {
-    LogPrint("BEX STRING REPLACE: %s\n", line_buf);
+    LogDebug("BEX STRING REPLACE: %s\n", line_buf);
 
     if (strlen(line_buf) >= 100)
         FatalError("Dehacked: Error - Bex string name too long !\nLine %d: %s\n", line_num, line_buf);
@@ -1120,7 +1120,7 @@ void ProcessBexString(void)
 
     ReadBexTextString(text_buf);
 
-    LogPrint("- Replacement <%s>\n", text_buf);
+    LogDebug("- Replacement <%s>\n", text_buf);
 
     if (!text_strings::ReplaceBexString(bex_field, text_buf))
         LogDebug("Dehacked: Warning - Line %d: unknown BEX string name: %s\n", line_num, bex_field);
@@ -1130,7 +1130,7 @@ void ProcessLine(void)
 {
     EPI_ASSERT(active_section >= 0);
 
-    LogPrint("Section %d Object %d : <%s>\n", active_section, active_obj, line_buf);
+    LogDebug("Section %d Object %d : <%s>\n", active_section, active_obj, line_buf);
 
     if (active_section == BEX_PARS || active_section == BEX_HELPER)
         return;

@@ -77,7 +77,7 @@ static Seg           *current_seg;
 
 extern unsigned int root_node;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(default_lighting, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(default_lighting, "1", kConsoleVariableFlagArchive)
 
 bool solid_mode;
 int  detail_level       = 1;

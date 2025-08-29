@@ -147,7 +147,7 @@ extern ConsoleVariable sector_brightness_correction;
 extern ConsoleVariable gamma_correction;
 extern ConsoleVariable title_scaling;
 extern ConsoleVariable sky_stretch_mode;
-extern ConsoleVariable force_flat_lighting;
+extern ConsoleVariable default_lighting;
 
 static int monitor_size;
 
@@ -402,8 +402,8 @@ static OptionMenuItem vidoptions[] = {
     {kOptionMenuItemTypeSwitch, "Sector Brightness", "-50/-40/-30/-20/-10/Default/+10/+20/+30/+40/+50", 11,
      &sector_brightness_correction.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr, &sector_brightness_correction,
      0, 0, 0, ""},
-    {kOptionMenuItemTypeBoolean, "Lighting Mode", "Indexed/Flat", 2, &force_flat_lighting.d_,
-     OptionMenuUpdateConsoleVariableFromInt, nullptr, &force_flat_lighting, 0, 0, 0, ""},
+    {kOptionMenuItemTypeSwitch, "Lighting Mode", "Indexed+Fake Contrast/Indexed/Flat", 3, &default_lighting.d_,
+     OptionMenuUpdateConsoleVariableFromInt, nullptr, &default_lighting, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Mipmapping", "Off/Bilinear/Trilinear", 3, &image_mipmapping, OptionMenuChangeMipMap,
      nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Smoothing", YesNo, 2, &image_smoothing, OptionMenuChangeMipMap, nullptr, nullptr, 0, 0,

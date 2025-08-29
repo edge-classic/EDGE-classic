@@ -132,17 +132,13 @@ class IntermissionAnimationInfoContainer : public std::vector<IntermissionAnimat
 
 enum LightingModel
 {
+    kLightingModelUnset = -1,
     // standard Doom shading
     kLightingModelDoom = 0,
     // Doom shading without the brighter N/S, darker E/W walls
     kLightingModelDoomish = 1,
     // flat lighting (no shading at all)
-    kLightingModelFlat = 2,
-    // vertex lighting
-    kLightingModelVertex = 3,
-    // Invalid (-ACB- 2003/10/06: MSVC wants the invalid value as part of the
-    // enum)
-    kLightingModelInvalid = 999
+    kLightingModelFlat = 2
 };
 
 class GameDefinition

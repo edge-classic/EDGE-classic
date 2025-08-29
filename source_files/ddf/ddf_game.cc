@@ -292,7 +292,6 @@ static void DDFGameGetPic(const char *info, void *storage)
 static DDFSpecialFlags lighting_names[] = {{"DOOM", kLightingModelDoom, 0},
                                            {"DOOMISH", kLightingModelDoomish, 0},
                                            {"FLAT", kLightingModelFlat, 0},
-                                           {"VERTEX", kLightingModelVertex, 0},
                                            {nullptr, 0, 0}};
 
 void DDFGameGetLighting(const char *info, void *storage)
@@ -777,7 +776,7 @@ void GameDefinition::Default()
     titletics_    = kTicRate * 4;
 
     special_music_ = 0;
-    lighting_      = kLightingModelDoomish;
+    lighting_      = kLightingModelUnset;
     description_.clear();
     default_damage_flash_ = kRGBARed;
 }

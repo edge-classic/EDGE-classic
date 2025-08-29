@@ -48,7 +48,7 @@
 #include "w_files.h"
 #include "w_wad.h"
 
-extern ConsoleVariable force_flat_lighting;
+extern ConsoleVariable default_lighting;
 
 // -AJA- 1999/06/30: added this
 uint8_t playpal_data[14][256][3];
@@ -597,7 +597,7 @@ class ColormapShader : public AbstractShader
 
         int cmap_idx;
 
-        if (lighting_model_ >= kLightingModelFlat)
+        if (lighting_model_ == kLightingModelFlat)
             cmap_idx = HMM_Clamp(0, 42 - light_level_ / 6, 31);
         else
             cmap_idx = DoomLightingEquation(light_level_ / 4, dist);
@@ -727,7 +727,7 @@ class ColormapShader : public AbstractShader
 
                 int index;
 
-                if (lighting_model_ >= kLightingModelFlat)
+                if (lighting_model_ == kLightingModelFlat)
                 {
                     // FLAT lighting
                     index = HMM_Clamp(0, 42 - (L * 2 / 3), 31);
@@ -762,18 +762,18 @@ class ColormapShader : public AbstractShader
   public:
     void Update()
     {
-        if (fade_texture_ == 0 || (force_flat_lighting.d_ && lighting_model_ != kLightingModelFlat) ||
-            (!force_flat_lighting.d_ && lighting_model_ != current_map->episode_->lighting_))
+        if (fade_texture_ == 0 || (current_map->episode_->lighting_ != kLightingModelUnset && lighting_model_ != current_map->episode_->lighting_) ||
+            (default_lighting.d_ != lighting_model_))
         {
             if (fade_texture_ != 0)
             {
                 render_state->DeleteTexture(&fade_texture_);
             }
 
-            if (force_flat_lighting.d_)
-                lighting_model_ = kLightingModelFlat;
-            else
+            if (current_map->episode_->lighting_ != kLightingModelUnset)
                 lighting_model_ = current_map->episode_->lighting_;
+            else
+                lighting_model_ = (LightingModel)default_lighting.d_;
 
             MakeColormapTexture();
         }

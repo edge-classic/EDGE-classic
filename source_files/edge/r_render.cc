@@ -77,7 +77,7 @@ static Seg           *current_seg;
 
 extern unsigned int root_node;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(force_flat_lighting, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(default_lighting, "1", kConsoleVariableFlagArchive)
 
 bool solid_mode;
 int  detail_level       = 1;
@@ -545,7 +545,7 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
     int lit_adjust = 0;
 
     // do the N/S/W/E bizzo...
-    if (!force_flat_lighting.d_ && current_map->episode_->lighting_ == kLightingModelDoom && props->light_level > 0)
+    if ((current_map->episode_->lighting_ == kLightingModelDoom || default_lighting.d_ == kLightingModelDoom) && props->light_level > 0)
     {
         if (AlmostEquals(current_seg->vertex_1->Y, current_seg->vertex_2->Y))
             lit_adjust -= 16;

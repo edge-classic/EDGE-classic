@@ -183,7 +183,7 @@ Sector *GetLineSectorAdjacent(const Line *line, const Sector *sec, bool ignore_s
 
 // Info Needs....
 float   FindSurroundingHeight(const TriggerHeightReference ref, const Sector *sec);
-float   FindRaiseToTexture(Sector *sec); // -KM- 1998/09/01 New func, old inline
+float   FindRaiseToTexture(const PlaneMoverDefinition *def, Sector *sec); // -KM- 1998/09/01 New func, old inline
 Sector *FindSectorFromTag(int tag);
 int     FindMinimumSurroundingLight(Sector *sector, int max);
 

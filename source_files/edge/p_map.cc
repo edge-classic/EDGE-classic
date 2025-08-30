@@ -2693,16 +2693,18 @@ static bool RadiusAttackCallback(MapObject *thing, void *data)
 
     MapObject *source = radius_attack_check.source;
 
-    if (source && source != thing && (thing->hyper_flags_ & kHyperFlagFriendlyFireImmune) &&
-        (thing->side_ & radius_attack_check.source->side_) != 0)
+    if (source && (thing->hyper_flags_ & kHyperFlagFriendlyFireImmune) &&
+        (thing->side_ & source->side_) != 0)
     {
         return true;
     }
 
     // MBF21: If in same splash group, don't damage it
-    if (source && source != thing && thing->info_->splash_group_ > 0 &&
-        radius_attack_check.source->info_->splash_group_ > 0 &&
-        (thing->info_->splash_group_ == radius_attack_check.source->info_->splash_group_))
+    // Dasho: Note, this checks the splash group of the actual
+    // bomb spot and not its source
+    if (thing->info_->splash_group_ > 0 &&
+        radius_attack_check.spot->info_->splash_group_ > 0 &&
+        (thing->info_->splash_group_ == radius_attack_check.spot->info_->splash_group_))
     {
         return true;
     }
@@ -2716,7 +2718,7 @@ static bool RadiusAttackCallback(MapObject *thing, void *data)
         if (!source)
             return true;
         // MBF21 FORCERADIUSDMG flag
-        if (source != thing && !(source->mbf21_flags_ & kMBF21FlagForceRadiusDamage))
+        if (!(source->mbf21_flags_ & kMBF21FlagForceRadiusDamage))
             return true;
     }
 

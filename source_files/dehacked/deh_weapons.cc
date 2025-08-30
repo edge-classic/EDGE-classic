@@ -210,7 +210,7 @@ void HandleSounds(const WeaponInfo *info, int w_num)
         if (info->readystate == kS_SAW)
             wad::Printf("IDLE_SOUND = \"%s\";\n", sounds::GetSound(ksfx_sawidl).c_str());
         if (info->atkstate == kS_SAW2)
-        wad::Printf("ENGAGED_SOUND = \"%s\";\n", sounds::GetSound(ksfx_sawful).c_str());
+            wad::Printf("ENGAGED_SOUND = \"%s\";\n", sounds::GetSound(ksfx_sawful).c_str());
         return;
     }
 
@@ -283,7 +283,9 @@ void HandleAttacks(const WeaponInfo *info, int w_num)
     // 2023.11.17 - Added SAWFUL ENGAGE_SOUND for non-chainsaw weapons using the
     // chainsaw attack Fixes, for instance, the Harmony Compatible knife swing
     // being silent
-    if (epi::StringCaseCompareASCII(atk, "PLAYER_SAW") == 0 && w_num != kwp_chainsaw)
+    // 2025.09.08 - Also added it for chainsaws using PLAYER_SAW but with the non-default
+    // attack state
+    if (epi::StringCaseCompareASCII(atk, "PLAYER_SAW") == 0 && (w_num != kwp_chainsaw || (info->atkstate != kS_SAW2)))
         wad::Printf("ENGAGED_SOUND = \"%s\";\n", sounds::GetSound(ksfx_sawful).c_str());
 }
 

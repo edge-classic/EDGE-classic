@@ -208,36 +208,72 @@ float FindSurroundingHeight(const TriggerHeightReference ref, const Sector *sec)
 //
 // -KM- 1998/09/01 Lines.ddf; used to be inlined in p_floors
 //
-float FindRaiseToTexture(Sector *sec)
+float FindRaiseToTexture(const PlaneMoverDefinition *def, Sector *sec)
 {
     int   i;
     Side *side;
     float minsize = (float)INT_MAX;
     int   secnum  = sec - level_sectors;
+    const TriggerHeightReference ref = def->destref_;
 
-    for (i = 0; i < sec->line_count; i++)
+    if (ref & kTriggerHeightReferenceCeiling)
     {
-        if (LineIsTwoSided(secnum, i))
+        for (i = 0; i < sec->line_count; i++)
         {
-            side = GetLineSidedef(secnum, i, 0);
-
-            if (side->bottom.image)
+            if (LineIsTwoSided(secnum, i))
             {
-                if (side->bottom.image->ScaledHeightActual() < minsize)
-                    minsize = side->bottom.image->ScaledHeightActual();
-            }
+                side = GetLineSidedef(secnum, i, 0);
 
-            side = GetLineSidedef(secnum, i, 1);
+                if (side->top.image)
+                {
+                    if (side->top.image->ScaledHeightActual() < minsize)
+                        minsize = side->top.image->ScaledHeightActual();
+                }
 
-            if (side->bottom.image)
-            {
-                if (side->bottom.image->ScaledHeightActual() < minsize)
-                    minsize = side->bottom.image->ScaledHeightActual();
+                side = GetLineSidedef(secnum, i, 1);
+
+                if (side->top.image)
+                {
+                    if (side->top.image->ScaledHeightActual() < minsize)
+                        minsize = side->top.image->ScaledHeightActual();
+                }
             }
         }
-    }
 
-    return sec->floor_height + minsize;
+        if (def->speed_down_ > 0)
+            return sec->ceiling_height - minsize;
+        else
+            return sec->ceiling_height + minsize;
+    }
+    else
+    {
+        for (i = 0; i < sec->line_count; i++)
+        {
+            if (LineIsTwoSided(secnum, i))
+            {
+                side = GetLineSidedef(secnum, i, 0);
+
+                if (side->bottom.image)
+                {
+                    if (side->bottom.image->ScaledHeightActual() < minsize)
+                        minsize = side->bottom.image->ScaledHeightActual();
+                }
+
+                side = GetLineSidedef(secnum, i, 1);
+
+                if (side->bottom.image)
+                {
+                    if (side->bottom.image->ScaledHeightActual() < minsize)
+                        minsize = side->bottom.image->ScaledHeightActual();
+                }
+            }
+        }
+
+        if (def->speed_down_ > 0)
+            return sec->floor_height - minsize;
+        else
+            return sec->floor_height + minsize;
+    }
 }
 
 //

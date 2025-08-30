@@ -397,7 +397,7 @@ static void MakeBoomCeiling(LineType *line, int number)
         break;
 
     case 5:                                                 // shorted texture
-        line->c_.destref_ = kTriggerHeightReferenceLowestLowTexture;
+        line->c_.destref_ = (TriggerHeightReference)(kTriggerHeightReferenceLowestLowTexture | kTriggerHeightReferenceCeiling);
         break;
 
     case 6: // 24

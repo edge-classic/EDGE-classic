@@ -117,8 +117,10 @@ static const Image *SECPIC(Sector *sec, bool is_ceiling, const Image *new_image)
 // -ACB- 1998/09/06 Remarked and Reformatted.
 // -ACB- 2001/02/04 Move to p_plane.c
 //
-static float GetSecHeightReference(TriggerHeightReference ref, Sector *sec, Sector *model)
+static float GetSecHeightReference(const PlaneMoverDefinition *def, Sector *sec, Sector *model)
 {
+    const TriggerHeightReference ref = def->destref_;
+
     switch (ref & kTriggerHeightReferenceMask)
     {
     case kTriggerHeightReferenceAbsolute:
@@ -137,7 +139,7 @@ static float GetSecHeightReference(TriggerHeightReference ref, Sector *sec, Sect
         return FindSurroundingHeight(ref, sec);
 
     case kTriggerHeightReferenceLowestLowTexture:
-        return FindRaiseToTexture(sec);
+        return FindRaiseToTexture(def, sec);
 
     default:
         FatalError("GetSecHeightReference: undefined reference %d\n", ref);
@@ -693,12 +695,12 @@ static PlaneMover *P_SetupSectorAction(Sector *sector, const PlaneMoverDefinitio
 
     float start = HEIGHT(sector, def->is_ceiling_);
 
-    float dest = GetSecHeightReference(def->destref_, sector, model);
+    float dest = GetSecHeightReference(def, sector, model);
     dest += def->dest_;
 
     if (def->type_ == kPlaneMoverPlatform || def->type_ == kPlaneMoverContinuous || def->type_ == kPlaneMoverToggle)
     {
-        start = GetSecHeightReference(def->otherref_, sector, model);
+        start = GetSecHeightReference(def, sector, model);
         start += def->other_;
     }
 

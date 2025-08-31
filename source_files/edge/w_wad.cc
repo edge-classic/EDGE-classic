@@ -2144,7 +2144,7 @@ int FindFlatSequence(const char *start, const char *end, int *s_offset, int *e_o
         int i;
         for (i = 0; i < (int)wad->flat_lumps_.size(); i++)
         {
-            if (strncmp(start, GetLumpNameFromIndex(wad->flat_lumps_[i]), 8) == 0)
+            if (epi::StringCaseCompareMaxASCII(start, GetLumpNameFromIndex(wad->flat_lumps_[i]), 8) == 0)
                 break;
         }
 
@@ -2156,7 +2156,7 @@ int FindFlatSequence(const char *start, const char *end, int *s_offset, int *e_o
         // look for end name
         for (i++; i < (int)wad->flat_lumps_.size(); i++)
         {
-            if (strncmp(end, GetLumpNameFromIndex(wad->flat_lumps_[i]), 8) == 0)
+            if (epi::StringCaseCompareMaxASCII(end, GetLumpNameFromIndex(wad->flat_lumps_[i]), 8) == 0)
             {
                 (*e_offset) = i;
                 return file;

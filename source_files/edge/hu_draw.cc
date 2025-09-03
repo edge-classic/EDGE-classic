@@ -835,7 +835,8 @@ void HUDDrawImageTitleWS(const Image *title_image)
     CenterX -= TempWidth / 2;
 
     // 3. Draw it.
-    HUDStretchImage(CenterX, -0.1f, TempWidth, TempHeight + 0.1f, title_image, 0.0, 0.0);
+    //Lobo 2025: we need to ignore offsets for TITLESCREENs to line up with what most other ports do
+    HUDStretchImageNoOffset(CenterX, -0.1f, TempWidth, TempHeight + 0.1f, title_image, 0.0, 0.0);
 }
 
 float HUDGetImageWidth(const Image *img)

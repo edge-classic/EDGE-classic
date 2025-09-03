@@ -831,11 +831,11 @@ void HUDDrawImageTitleWS(const Image *title_image)
     TempHeight = title_image->actual_height_ * TempScale;
 
     // 2. Calculate centering on screen.
-    CenterX = 160;
+    CenterX = 160 + title_image->ScaledOffsetX();
     CenterX -= TempWidth / 2;
 
     // 3. Draw it.
-    HUDStretchImage(CenterX, -0.1f, TempWidth, TempHeight + 0.1f, title_image, 0.0, 0.0);
+    HUDStretchImage(CenterX, -title_image->ScaledOffsetY() - 0.1f, TempWidth, TempHeight + 0.1f, title_image, 0.0, 0.0);
 }
 
 float HUDGetImageWidth(const Image *img)

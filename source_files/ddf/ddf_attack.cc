@@ -25,6 +25,7 @@
 
 #include "ddf_local.h"
 #include "epi_bitset.h"
+#include "epi_str_compare.h"
 #include "epi_str_util.h"
 #include "stb_sprintf.h"
 
@@ -363,11 +364,27 @@ void DDFAttackCleanUp(void)
 
         // lookup thing references
 
-        // This should only happen via MBF21 A_WeaponProjectile, as the
+        // This should only happen via MBF21, as the
         // atk_mobj_ref shouldn't be populated otherwise
         if (!a->atk_mobj_ref_.empty())
         {
-            a->atk_mobj_ = mobjtypes.Lookup(a->atk_mobj_ref_.c_str());
+            // This happens if an attack references a mobj that doesn't have a standalone definition in DDFTHING,
+            // but is created ad-hoc via DDFATK, like PLAYER_PLASMA
+            if (epi::StringPrefixCaseCompareASCII(a->atk_mobj_ref_, "deh_atk_") == 0)
+            {
+                std::string real_name = a->atk_mobj_ref_.substr(8);
+                for (std::vector<MapObjectDefinition *>::reverse_iterator iter = mobjtypes.dynamic_atk_mobjtypes.rbegin(), iter_end = mobjtypes.dynamic_atk_mobjtypes.rend(); iter != iter_end; ++iter)
+                {
+                    MapObjectDefinition *mobj = *iter;
+                    if (epi::StringCaseCompareASCII(real_name, mobj->name_.substr(4)) == 0)
+                    {
+                        a->atk_mobj_ = mobj;
+                        break;
+                    }
+                }
+            }   
+            else
+                a->atk_mobj_ = mobjtypes.Lookup(a->atk_mobj_ref_.c_str());
             if (a->atk_mobj_)
             {
                 a->damage_.nominal_          = a->atk_mobj_->proj_damage_.nominal_;

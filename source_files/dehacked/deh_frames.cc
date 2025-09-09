@@ -499,6 +499,7 @@ void frames::MarkState(int st_num)
         entry->action      = kA_NULL;
         entry->next_state  = st_num;
         entry->arg_pointer = 0;
+        entry->mbf21_flags = 0;
     }
 }
 
@@ -521,6 +522,7 @@ const State *frames::NewStateElseOld(int st_num)
             entry->action      = kA_NULL;
             entry->next_state  = st_num;
             entry->arg_pointer = 0;
+            entry->mbf21_flags = 0;
             new_states[st_num] = entry;
             return entry;
         }
@@ -541,6 +543,7 @@ const State *frames::NewStateElseOld(int st_num)
             entry->action      = kA_NULL;
             entry->next_state  = st_num;
             entry->arg_pointer = 0;
+            entry->mbf21_flags = 0;
             new_states[st_num] = entry;
             return entry;
         }
@@ -1157,7 +1160,7 @@ void frames::SpecialAction(char *act_name, const State *st, int cur)
         std::string name = things::GetMobjName(type);
 
         if (name[0] == '*')
-            name = name.substr(1);
+            name = "deh_atk_" + name.substr(1);
 
         stbsp_sprintf(act_name, "DEH_WEAPON_PROJECTILE(%s,%d,%d,%d,%d)", name.c_str(), angle, pitch, hoffset, voffset);
     }
@@ -1235,6 +1238,8 @@ void frames::SpecialAction(char *act_name, const State *st, int cur)
 
         std::string name = things::GetMobjName(type);
 
+        // Dasho: Not sure if spawning "attack things" is gonna work here, will check when I actually
+        // run into a test case
         if (name[0] == '*')
             name = name.substr(1);
 
@@ -1255,7 +1260,7 @@ void frames::SpecialAction(char *act_name, const State *st, int cur)
         std::string name = things::GetMobjName(type);
 
         if (name[0] == '*')
-            name = name.substr(1);
+            name = "deh_atk_" + name.substr(1);
 
         stbsp_sprintf(act_name, "DEH_MONSTER_PROJECTILE(%s,%d,%d,%d,%d)", name.c_str(), angle, pitch, hoffset, voffset);
     }

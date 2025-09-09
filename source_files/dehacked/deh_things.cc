@@ -450,6 +450,10 @@ void Attacks::ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num,
         wad::Printf("DAMAGE.MAX = %d;\n", info->damage * 8);
     }
 
+    if (info->splash_group >= 0)
+        wad::Printf("SPLASH_GROUP = %d;\n",
+                    info->splash_group + 1); // We don't want a '0' splash group when it hits DDF
+
     if (mt_num == kMT_BFG)
         wad::Printf("SPARE_ATTACK = BFG9000_SPRAY;\n");
 
@@ -699,7 +703,7 @@ bool things::IsSpawnable(int mt_num)
     if (info == nullptr)
         return false;
 
-    return info->doomednum > 0;
+    return (info->doomednum > 0 || mt_num >= kTotalDehackedMapObjectTypesPortCompatibility);
 }
 
 const char *things::AddScratchAttack(int damage, const std::string &sfx)

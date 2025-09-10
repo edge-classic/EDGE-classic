@@ -272,8 +272,11 @@ static ImageData *ReadTextureAsEpiBlock(Image *rim)
 
     // CW: Textures MUST tile! If actual size not total size, manually tile
     // [ AJA: this does not make them tile, just fills in the black gaps ]
-    img->FillMarginX(rim->actual_width_);
-    img->FillMarginY(rim->actual_height_);
+    if (rim->opacity_ == kOpacitySolid)
+    {
+        img->FillMarginX(rim->actual_width_);
+        img->FillMarginY(rim->actual_height_);
+    }
 
     return img;
 }
@@ -315,8 +318,11 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
             FatalError("Error loading image in lump: %s\n", packfile_name ? packfile_name : GetLumpNameFromIndex(lump));
 
         // Try and manually tile, or at least fill in the black gaps
-        img->FillMarginX(rim->actual_width_);
-        img->FillMarginY(rim->actual_height_);
+        if (rim->opacity_ == kOpacitySolid)
+        {
+            img->FillMarginX(rim->actual_width_);
+            img->FillMarginY(rim->actual_height_);
+        }
 
         return img;
     }
@@ -386,8 +392,11 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
 
 
     // Try and manually tile, or at least fill in the black gaps. Should catch stray textures-as-flats here
-    img->FillMarginX(rim->actual_width_);
-    img->FillMarginY(rim->actual_height_);
+    if (rim->opacity_ == kOpacitySolid)
+    {
+        img->FillMarginX(rim->actual_width_);
+        img->FillMarginY(rim->actual_height_);
+    }
 
     return img;
 }

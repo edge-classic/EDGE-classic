@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <unordered_map>
+
 #include "ddf_states.h"
 #include "ddf_types.h"
 
@@ -37,6 +39,8 @@ class WeaponDefinitionContainer : public std::vector<WeaponDefinition *>
     // Search Functions
     int               FindFirst(const char *name, size_t startpos = 0);
     WeaponDefinition *Lookup(const char *refname);
+
+    std::unordered_map<WeaponDefinition *, Benefit *> deh_ammo_replacements;
 };
 
 // -------EXTERNALISATIONS-------

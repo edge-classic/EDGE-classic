@@ -43,6 +43,11 @@ enum WeaponFlagMBF21
 
     // Cannot be switched to when ammo is picked up
     kMBF21_NOAUTOSWITCHTO = 32,
+
+    // Not a true MBF21 flag, but prevents modified weapons
+    // with an ammo_per_shot value of 0 from being switched
+    // to using the "noammo" ammo category
+    kMBF21_REALLYUSESAMMO = 64
 };
 
 // Weapon info: sprite frames, ammunition use.

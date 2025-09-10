@@ -465,6 +465,8 @@ enum WeaponFlag
     WeaponFlagPartialReload      = (1 << 11), // manual reload: allow partial refill
     // MBF21 flags:
     WeaponFlagNoAutofireOnReady = (1 << 12), // Do not autofire in A_WeaponReady
+    WeaponFlagEnforceAmmoType   = (1 << 13)  // Do not convert weapons that have a 0 ammo per shot
+                                             // to use the "no ammo" ammo type
 };
 
 constexpr WeaponFlag kDefaultWeaponFlags = (WeaponFlag)(WeaponFlagReloadWhileTrigger | WeaponFlagManualReload |

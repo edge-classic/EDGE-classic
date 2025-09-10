@@ -898,6 +898,43 @@ void DDFMobjCleanUp(void)
         m->spitspot_ = m->spitspot_ref_ != "" ? mobjtypes.Lookup(m->spitspot_ref_.c_str()) : nullptr;
 
         cur_ddf_entryname.clear();
+
+        if (!weapondefs.deh_ammo_replacements.empty())
+        {
+            if (!m->pickup_benefits_)
+                continue;
+            WeaponDefinition *weap_to_change = nullptr;
+            for (Benefit *B = m->pickup_benefits_; B != nullptr; B = B->next)
+            {
+                if (B->type == kBenefitTypeWeapon)
+                {
+                    if (weapondefs.deh_ammo_replacements.count(B->sub.weap))
+                    {
+                        if (B->sub.weap->ammo_[0] == weapondefs.deh_ammo_replacements[B->sub.weap]->sub.type)
+                        {
+                            weap_to_change = B->sub.weap;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (weap_to_change)
+            {
+                bool updated = false;
+                for (Benefit *B = m->pickup_benefits_; B != nullptr; B = B->next)
+                {
+                    if (B->type == kBenefitTypeAmmo)
+                    {
+                        B->sub.type = weapondefs.deh_ammo_replacements[weap_to_change]->sub.type;
+                        B->amount = HMM_MAX(B->amount, weapondefs.deh_ammo_replacements[weap_to_change]->amount);
+                        updated = true;
+                        break;
+                    }
+                }
+                if (!updated)
+                    BenefitAdd(&m->pickup_benefits_, weapondefs.deh_ammo_replacements[weap_to_change]);
+            }
+        }
     }
 
     mobjtypes.shrink_to_fit();
@@ -912,7 +949,7 @@ void DDFMobjCleanUp(void)
 // and the param buffer contains the stuff in brackets (normally the
 // param string will be empty).   FIXME: this interface is fucked.
 //
-static int ParseBenefitString(const char *info, char *name, char *param, float *value, float *limit)
+int ParseBenefitString(const char *info, char *name, char *param, float *value, float *limit)
 {
     int len = strlen(info);
 
@@ -1080,7 +1117,7 @@ static bool BenefitTryInventoryLimit(const char *name, Benefit *be, int num_vals
     return true;
 }
 
-static bool BenefitTryAmmo(const char *name, Benefit *be, int num_vals)
+bool BenefitTryAmmo(const char *name, Benefit *be, int num_vals)
 {
     if (kDDFCheckFlagPositive != DDFMainCheckSpecialFlag(name, ammo_types, &be->sub.type, false, false))
     {

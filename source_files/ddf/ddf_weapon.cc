@@ -32,6 +32,9 @@
 #include "epi_str_util.h"
 #include "p_action.h"
 
+extern int ParseBenefitString(const char *info, char *name, char *param, float *value, float *limit);
+extern bool BenefitTryAmmo(const char *name, Benefit *be, int num_vals);
+
 std::vector<std::string> flag_tests;
 
 static WeaponDefinition *dynamic_weapon;
@@ -46,6 +49,7 @@ static void DDFWStateGetDEHMelee(const char *arg, State *cur_state);
 static void DDFWStateGetDEHBullet(const char *arg, State *cur_state);
 static void DDFWStateGetDEHProjectile(const char *arg, State *cur_state);
 static void DDFWStateGetString(const char *arg, State *cur_state);
+static void DDFWReplacePickupAmmo(const char *info, void *storage);
 
 static WeaponDefinition dummy_weapon;
 
@@ -125,6 +129,8 @@ static const DDFCommandList weapon_commands[] = {
     DDF_FIELD("RENDER_INVERT", dummy_weapon, render_invert_, DDFMainGetBoolean),
     DDF_FIELD("Y_ADJUST", dummy_weapon, y_adjust_, DDFMainGetFloat),
     DDF_FIELD("IGNORE_CROSSHAIR_SCALING", dummy_weapon, ignore_crosshair_scaling_, DDFMainGetBoolean),
+
+    { "DEH_REPLACE_PICKUP_AMMO", DDFWReplacePickupAmmo, 0, nullptr },
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -484,9 +490,9 @@ static void WeaponFinishEntry(void)
                          dynamic_weapon->ammopershot_[ATK]);
             dynamic_weapon->ammopershot_[ATK] = 0;
         }
-
-        // zero values for ammopershot really mean infinite ammo
-        if (dynamic_weapon->ammopershot_[ATK] == 0)
+        
+        // zero values for ammopershot really mean infinite ammo (unless dealing with Dehacked or otherwise overruled)
+        if (dynamic_weapon->ammopershot_[ATK] == 0 && !(dynamic_weapon->specials_[ATK] & WeaponFlagEnforceAmmoType))
             dynamic_weapon->ammo_[ATK] = kAmmunitionTypeNoAmmo;
 
         if (dynamic_weapon->clip_size_[ATK] < 0)
@@ -660,6 +666,7 @@ static DDFSpecialFlags weapon_specials[] = {{"SILENT_TO_MONSTERS", WeaponFlagSil
                                             {"MANUAL", WeaponFlagManualReload, 0},
                                             {"PARTIAL", WeaponFlagPartialReload, 0},
                                             {"NOAUTOFIRE", WeaponFlagNoAutofireOnReady, 0},
+                                            {"REALLY_USES_AMMO", WeaponFlagEnforceAmmoType, 0},
                                             {nullptr, WeaponFlagNone, 0}};
 
 //
@@ -900,6 +907,44 @@ static void DDFWStateGetString(const char *arg, State *cur_state)
         return;
 
     cur_state->action_par = epi::CStringDuplicate(arg);
+}
+
+static void DDFWReplacePickupAmmo(const char *info, void *storage)
+{
+    EPI_UNUSED(storage);
+
+    char namebuf[200];
+    char parambuf[200];
+    int  num_vals;
+
+    Benefit *temp = new Benefit;
+
+    num_vals = ParseBenefitString(info, namebuf, parambuf, &temp->amount, &temp->limit);
+
+    // an error occurred ?
+    if (num_vals < 0)
+    {
+        delete temp;
+        return;
+    }
+
+    int idx = weapondefs.FindFirst(dynamic_weapon->name_.c_str(), 0);
+
+    WeaponDefinition *weap = nullptr;
+
+    if (idx >= 0)
+        weap = weapondefs[idx];
+
+    if (!weap)
+    {
+        delete temp;
+        return;
+    }
+
+    if (BenefitTryAmmo(namebuf, temp, num_vals))
+        weapondefs.deh_ammo_replacements[weap] = temp;
+    else
+        delete temp;
 }
 
 //
@@ -1185,11 +1230,17 @@ WeaponDefinitionContainer::WeaponDefinitionContainer()
 //
 WeaponDefinitionContainer::~WeaponDefinitionContainer()
 {
-    for (std::vector<WeaponDefinition *>::iterator iter = begin(), iter_end = end(); iter != iter_end; iter++)
+    for (std::vector<WeaponDefinition *>::iterator iter = begin(), iter_end = end(); iter != iter_end; ++iter)
     {
         WeaponDefinition *w = *iter;
         delete w;
         w = nullptr;
+    }
+    for (std::unordered_map<WeaponDefinition *, Benefit *>::iterator iter = deh_ammo_replacements.begin(), iter_end = deh_ammo_replacements.end(); iter != iter_end; ++iter)
+    {
+        Benefit *b = iter->second;
+        delete b;
+        b = nullptr;
     }
 }
 

@@ -55,17 +55,17 @@ static constexpr char kWeaponFlagNoThrust         = 't';
 static constexpr char kWeaponFlagFeedback         = 'b';
 
 WeaponInfo weapon_info[kTotalWeapons] = {
-    {"FIST", kAmmoTypeNoAmmo, 0, 1, 0, "f", kS_PUNCHUP, kS_PUNCHDOWN, kS_PUNCH, kS_PUNCH1, kS_NULL, 0},
-    {"PISTOL", kAmmoTypeBullet, 1, 2, 2, "fr", kS_PISTOLUP, kS_PISTOLDOWN, kS_PISTOL, kS_PISTOL1, kS_PISTOLFLASH, 0},
-    {"SHOTGUN", kAmmoTypeShell, 1, 3, 3, nullptr, kS_SGUNUP, kS_SGUNDOWN, kS_SGUN, kS_SGUN1, kS_SGUNFLASH1, 0},
-    {"CHAINGUN", kAmmoTypeBullet, 1, 4, 5, "r", kS_CHAINUP, kS_CHAINDOWN, kS_CHAIN, kS_CHAIN1, kS_CHAINFLASH1, 0},
-    {"ROCKET_LAUNCHER", kAmmoTypeRocket, 1, 5, 6, "d", kS_MISSILEUP, kS_MISSILEDOWN, kS_MISSILE, kS_MISSILE1,
+    {"FIST", kAmmoTypeNoAmmo, -1, 1, 0, "f", kS_PUNCHUP, kS_PUNCHDOWN, kS_PUNCH, kS_PUNCH1, kS_NULL, 0},
+    {"PISTOL", kAmmoTypeBullet, -1, 2, 2, "fr", kS_PISTOLUP, kS_PISTOLDOWN, kS_PISTOL, kS_PISTOL1, kS_PISTOLFLASH, 0},
+    {"SHOTGUN", kAmmoTypeShell, -1, 3, 3, nullptr, kS_SGUNUP, kS_SGUNDOWN, kS_SGUN, kS_SGUN1, kS_SGUNFLASH1, 0},
+    {"CHAINGUN", kAmmoTypeBullet, -1, 4, 5, "r", kS_CHAINUP, kS_CHAINDOWN, kS_CHAIN, kS_CHAIN1, kS_CHAINFLASH1, 0},
+    {"ROCKET_LAUNCHER", kAmmoTypeRocket, -1, 5, 6, "d", kS_MISSILEUP, kS_MISSILEDOWN, kS_MISSILE, kS_MISSILE1,
      kS_MISSILEFLASH1, 0},
-    {"PLASMA_RIFLE", kAmmoTypeCell, 1, 6, 7, nullptr, kS_PLASMAUP, kS_PLASMADOWN, kS_PLASMA, kS_PLASMA1,
+    {"PLASMA_RIFLE", kAmmoTypeCell, -1, 6, 7, nullptr, kS_PLASMAUP, kS_PLASMADOWN, kS_PLASMA, kS_PLASMA1,
      kS_PLASMAFLASH1, 0},
-    {"BFG_9000", kAmmoTypeCell, 40, 7, 8, "d", kS_BFGUP, kS_BFGDOWN, kS_BFG, kS_BFG1, kS_BFGFLASH1, 0},
-    {"CHAINSAW", kAmmoTypeNoAmmo, 0, 1, 1, "bt", kS_SAWUP, kS_SAWDOWN, kS_SAW, kS_SAW1, kS_NULL, 0},
-    {"SUPER_SHOTGUN", kAmmoTypeShell, 2, 3, 4, nullptr, kS_DSGUNUP, kS_DSGUNDOWN, kS_DSGUN, kS_DSGUN1, kS_DSGUNFLASH1,
+    {"BFG_9000", kAmmoTypeCell, -1, 7, 8, "d", kS_BFGUP, kS_BFGDOWN, kS_BFG, kS_BFG1, kS_BFGFLASH1, 0},
+    {"CHAINSAW", kAmmoTypeNoAmmo, -1, 1, 1, "bt", kS_SAWUP, kS_SAWDOWN, kS_SAW, kS_SAW1, kS_NULL, 0},
+    {"SUPER_SHOTGUN", kAmmoTypeShell, -1, 3, 4, nullptr, kS_DSGUNUP, kS_DSGUNDOWN, kS_DSGUN, kS_DSGUN1, kS_DSGUNFLASH1,
      0},
 };
 
@@ -116,6 +116,7 @@ const FlagName mbf21flagnamelist[] = {
     {kMBF21_FLEEMELEE, "FLEEMELEE", nullptr},
     {kMBF21_AUTOSWITCHFROM, "SWITCH", "AUTOSWITCHFROM"},
     {kMBF21_NOAUTOSWITCHTO, "DANGEROUS", "NOAUTOSWITCHTO"},
+    {kMBF21_REALLYUSESAMMO, "REALLY_USES_AMMO", nullptr},
 
     {0, nullptr, nullptr} // End sentinel
 };
@@ -305,18 +306,73 @@ void ConvertWeapon(int w_num)
 
     if (w_num == kwp_bfg)
     {
-        // Allow ammo per shot field to govern BFG if using the newest Dehacked versions
-        if ((patch::doom_ver == 21 || patch::doom_ver == 2021) && info->ammo_per_shot != 0)
-            wad::Printf("AMMOPERSHOT = %d;\n", info->ammo_per_shot);
+        if (info->ammo != kAmmoTypeNoAmmo)
+        {
+            // Allow ammo per shot field to govern BFG if using the newest Dehacked versions
+            if ((patch::doom_ver == 21 || patch::doom_ver == 2021) && info->ammo_per_shot >= 0)
+            {
+                wad::Printf("AMMOPERSHOT = %d;\n", info->ammo_per_shot);
+                if (info->ammo_per_shot == 0)
+                {
+                    WeaponInfo *add_flag = (WeaponInfo *)info;
+                    add_flag->mbf21_flags = (info->mbf21_flags | kMBF21_REALLYUSESAMMO);
+                }
+            }
+            else
+                wad::Printf("AMMOPERSHOT = %d;\n", miscellaneous::bfg_cells_per_shot);
+        }
         else
-            wad::Printf("AMMOPERSHOT = %d;\n", miscellaneous::bfg_cells_per_shot);
+            wad::Printf("AMMOPERSHOT = 0;\n");
     }
-    else if (info->ammo_per_shot != 0)
+    else if (info->ammo_per_shot >= 0)
+    {
         wad::Printf("AMMOPERSHOT = %d;\n", info->ammo_per_shot);
+        if (info->ammo_per_shot == 0 && info->ammo != kAmmoTypeNoAmmo)
+        {
+            WeaponInfo *add_flag = (WeaponInfo *)info;
+            add_flag->mbf21_flags = (info->mbf21_flags | kMBF21_REALLYUSESAMMO);
+        }
+    }
     else if (w_num == kwp_supershotgun)
-        wad::Printf("AMMOPERSHOT = 2;\n");
+    {
+        if (info->ammo != kAmmoTypeNoAmmo)
+            wad::Printf("AMMOPERSHOT = 2;\n");
+        else
+            wad::Printf("AMMOPERSHOT = 0;\n");
+    }
     else
-        wad::Printf("AMMOPERSHOT = 1;\n");
+    {
+        if (info->ammo != kAmmoTypeNoAmmo)
+            wad::Printf("AMMOPERSHOT = 1;\n");
+        else
+            wad::Printf("AMMOPERSHOT = 0;\n");
+    }
+
+    if ((w_num == kwp_bfg || w_num == kwp_plasma) && info->ammo != kAmmoTypeCell)
+    {
+        if (info->ammo != kAmmoTypeUnused && info->ammo != kAmmoTypeNoAmmo)
+            wad::Printf("DEH_REPLACE_PICKUP_AMMO = %s(%d);\n", ammo::GetAmmo(info->ammo), ammo::pickups[info->ammo] * 2);
+    }
+    else if (w_num == kwp_missile && info->ammo != kAmmoTypeRocket)
+    {
+        if (info->ammo != kAmmoTypeUnused && info->ammo != kAmmoTypeNoAmmo)
+            wad::Printf("DEH_REPLACE_PICKUP_AMMO = %s(%d);\n", ammo::GetAmmo(info->ammo), ammo::pickups[info->ammo] * 2);
+    }
+    else if ((w_num == kwp_supershotgun || w_num == kwp_shotgun) && info->ammo != kAmmoTypeShell)
+    {
+        if (info->ammo != kAmmoTypeUnused && info->ammo != kAmmoTypeNoAmmo)
+            wad::Printf("DEH_REPLACE_PICKUP_AMMO = %s(%d);\n", ammo::GetAmmo(info->ammo), ammo::pickups[info->ammo] * 2);
+    }
+    else if ((w_num == kwp_chaingun || w_num == kwp_pistol) && info->ammo != kAmmoTypeBullet)
+    {
+        if (info->ammo != kAmmoTypeUnused && info->ammo != kAmmoTypeNoAmmo)
+            wad::Printf("DEH_REPLACE_PICKUP_AMMO = %s(%d);\n", ammo::GetAmmo(info->ammo), ammo::pickups[info->ammo] * 2);
+    }
+    else if ((w_num == kwp_chainsaw) && info->ammo != kAmmoTypeNoAmmo)
+    {
+        if (info->ammo != kAmmoTypeUnused && info->ammo != kAmmoTypeNoAmmo)
+            wad::Printf("DEH_REPLACE_PICKUP_AMMO = %s(%d);\n", ammo::GetAmmo(info->ammo), ammo::pickups[info->ammo] * 2);
+    }
 
     wad::Printf("AUTOMATIC = TRUE;\n");
 

@@ -63,8 +63,8 @@ static inline uint8_t SpookyAlpha(int x, int y)
 
 static void CaptureScreenAsTexture(bool speckly, bool spooky)
 {
-    int total_w = MakeValidTextureSize(current_screen_width);
-    int total_h = MakeValidTextureSize(current_screen_height);
+    int total_w = current_screen_width;
+    int total_h = current_screen_height;
 
     ImageData img(total_w, total_h, 4);
 
@@ -106,8 +106,8 @@ static void CaptureScreenAsTexture(bool speckly, bool spooky)
 
 void BlackoutWipeTexture(void)
 {
-    int total_w = MakeValidTextureSize(current_screen_width);
-    int total_h = MakeValidTextureSize(current_screen_height);
+    int total_w = current_screen_width;
+    int total_h = current_screen_height;
 
     ImageData img(total_w, total_h, 4);
 

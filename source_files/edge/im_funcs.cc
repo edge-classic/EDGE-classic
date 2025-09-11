@@ -168,23 +168,12 @@ ImageData *LoadImageData(epi::File *file)
     int total_w = width;
     int total_h = height;
 
-    // round size up to the nearest power-of-two
-    if (true)
-    {
-        total_w = 1;
-        while (total_w < (int)width)
-            total_w <<= 1;
-        total_h = 1;
-        while (total_h < (int)height)
-            total_h <<= 1;
-    }
-
     ImageData *img = new ImageData(total_w, total_h, depth);
 
-    img->used_width_  = width;
-    img->used_height_ = height;
+    img->width_  = width;
+    img->height_ = height;
 
-    if (img->used_width_ != total_w || img->used_height_ != total_h)
+    if (img->width_ != total_w || img->height_ != total_h)
         img->Clear();
 
     // copy the image data, inverting it at the same time
@@ -215,8 +204,8 @@ ImageAtlas *PackImages(const std::unordered_map<int, ImageData *> &image_pack_da
             im.second->SetAlpha(255);
         stbrp_rect rect;
         rect.id         = im.first;
-        rect.w          = im.second->used_width_ + 2;
-        rect.h          = im.second->used_height_ + 2;
+        rect.w          = im.second->width_ + 2;
+        rect.h          = im.second->height_ + 2;
         rect.x          = 0;
         rect.y          = 0;
         rect.was_packed = false;
@@ -257,9 +246,9 @@ ImageAtlas *PackImages(const std::unordered_map<int, ImageData *> &image_pack_da
         int        rect_x = rects[i].x + 1;
         int        rect_y = rects[i].y + 1;
         ImageData *im     = image_pack_data.at(rects[i].id);
-        for (int16_t x = 0; x < im->used_width_; x++)
+        for (int16_t x = 0; x < im->width_; x++)
         {
-            for (int16_t y = 0; y < im->used_height_; y++)
+            for (int16_t y = 0; y < im->height_; y++)
             {
                 memcpy(atlas->data_->PixelAt(rect_x + x, rect_y + y), im->PixelAt(x, y), 4);
             }
@@ -267,10 +256,10 @@ ImageAtlas *PackImages(const std::unordered_map<int, ImageData *> &image_pack_da
         ImageAtlasRectangle atlas_rect;
         atlas_rect.texture_coordinate_x      = (float)rect_x / atlas_w;
         atlas_rect.texture_coordinate_y      = (float)rect_y / atlas_h;
-        atlas_rect.texture_coordinate_width  = (float)im->used_width_ / atlas_w;
-        atlas_rect.texture_coordinate_height = (float)im->used_height_ / atlas_h;
-        atlas_rect.image_width               = im->used_width_ * im->scale_x_;
-        atlas_rect.image_height              = im->used_height_ * im->scale_y_;
+        atlas_rect.texture_coordinate_width  = (float)im->width_ / atlas_w;
+        atlas_rect.texture_coordinate_height = (float)im->height_ / atlas_h;
+        atlas_rect.image_width               = im->width_ * im->scale_x_;
+        atlas_rect.image_height              = im->height_ * im->scale_y_;
         atlas_rect.offset_x                  = im->offset_x_;
         atlas_rect.offset_y                  = im->offset_y_;
         atlas->rectangles_.try_emplace(rects[i].id, atlas_rect);

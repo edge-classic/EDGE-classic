@@ -86,9 +86,8 @@ static void DrawColumnIntoEpiBlock(const Image *rim, const ImageData *img, const
 {
     EPI_ASSERT(patchcol);
 
-    int w1 = rim->actual_width_;
-    int h1 = rim->actual_height_;
-    int w2 = rim->total_width_;
+    int w1 = rim->width_;
+    int h1 = rim->height_;
 
     // clip horizontally
     if (x < 0 || x >= w1)
@@ -122,9 +121,9 @@ static void DrawColumnIntoEpiBlock(const Image *rim, const ImageData *img, const
                 continue;
 
             if (*src == kTransparentPixelIndex)
-                dest[(h1 - 1 - y2) * w2] = playpal_black;
+                dest[(h1 - 1 - y2) * w1] = playpal_black;
             else
-                dest[(h1 - 1 - y2) * w2] = *src;
+                dest[(h1 - 1 - y2) * w1] = *src;
         }
 
         // jump to next column
@@ -148,11 +147,11 @@ static ImageData *ReadFlatAsEpiBlock(Image *rim)
 {
     EPI_ASSERT(rim->source_type_ == kImageSourceFlat || rim->source_type_ == kImageSourceRawBlock);
 
-    int tw = HMM_MAX(rim->total_width_, 1);
-    int th = HMM_MAX(rim->total_height_, 1);
+    int tw = HMM_MAX(rim->width_, 1);
+    int th = HMM_MAX(rim->height_, 1);
 
-    int w = rim->actual_width_;
-    int h = rim->actual_height_;
+    int w = rim->width_;
+    int h = rim->height_;
 
     ImageData *img = new ImageData(tw, th, 1);
 
@@ -193,11 +192,6 @@ static ImageData *ReadFlatAsEpiBlock(Image *rim)
 
     delete[] src;
 
-    // CW: Textures MUST tile! If actual size not total size, manually tile
-    // [ AJA: this does not make them tile, just fills in the black gaps ]
-    img->FillMarginX(rim->actual_width_);
-    img->FillMarginY(rim->actual_height_);
-
     return img;
 }
 
@@ -217,8 +211,8 @@ static ImageData *ReadTextureAsEpiBlock(Image *rim)
     TextureDefinition *tdef = rim->source_.texture.tdef;
     EPI_ASSERT(tdef);
 
-    int tw = rim->total_width_;
-    int th = rim->total_height_;
+    int tw = rim->width_;
+    int th = rim->height_;
 
     ImageData *img = new ImageData(tw, th, 1);
 
@@ -270,14 +264,6 @@ static ImageData *ReadTextureAsEpiBlock(Image *rim)
         delete[] realpatch;
     }
 
-    // CW: Textures MUST tile! If actual size not total size, manually tile
-    // [ AJA: this does not make them tile, just fills in the black gaps ]
-    if (rim->opacity_ == kOpacitySolid)
-    {
-        img->FillMarginX(rim->actual_width_);
-        img->FillMarginY(rim->actual_height_);
-    }
-
     return img;
 }
 
@@ -317,18 +303,11 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
         if (!img)
             FatalError("Error loading image in lump: %s\n", packfile_name ? packfile_name : GetLumpNameFromIndex(lump));
 
-        // Try and manually tile, or at least fill in the black gaps
-        if (rim->opacity_ == kOpacitySolid)
-        {
-            img->FillMarginX(rim->actual_width_);
-            img->FillMarginY(rim->actual_height_);
-        }
-
         return img;
     }
 
-    int tw = rim->total_width_;
-    int th = rim->total_height_;
+    int tw = rim->width_;
+    int th = rim->height_;
 
     ImageData *img = new ImageData(tw, th, 1);
 
@@ -367,16 +346,16 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
     }
 
     EPI_ASSERT(realpatch);
-    EPI_ASSERT(rim->actual_width_ == AlignedLittleEndianS16(realpatch->width));
-    EPI_ASSERT(rim->actual_height_ == AlignedLittleEndianS16(realpatch->height));
+    EPI_ASSERT(rim->width_ == AlignedLittleEndianS16(realpatch->width));
+    EPI_ASSERT(rim->height_ == AlignedLittleEndianS16(realpatch->height));
 
     // 2023.11.07 - These were previously left as total_w/h, which accounts
     // for power-of-two sizing and was messing up patch font atlas generation.
     // Not sure if there are any bad side effects yet - Dasho
-    img->used_width_  = rim->actual_width_;
-    img->used_height_ = rim->actual_height_;
+    img->width_  = rim->width_;
+    img->height_ = rim->height_;
 
-    for (int x = 0; x < rim->actual_width_; x++)
+    for (int x = 0; x < rim->width_; x++)
     {
         int offset = AlignedLittleEndianS32(realpatch->column_offset[x]);
 
@@ -390,14 +369,6 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
 
     delete[] realpatch;
 
-
-    // Try and manually tile, or at least fill in the black gaps. Should catch stray textures-as-flats here
-    if (rim->opacity_ == kOpacitySolid)
-    {
-        img->FillMarginX(rim->actual_width_);
-        img->FillMarginY(rim->actual_height_);
-    }
-
     return img;
 }
 
@@ -409,10 +380,8 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
 static ImageData *ReadDummyAsEpiBlock(Image *rim)
 {
     EPI_ASSERT(rim->source_type_ == kImageSourceDummy);
-    EPI_ASSERT(rim->actual_width_ == rim->total_width_);
-    EPI_ASSERT(rim->actual_height_ == rim->total_height_);
-    EPI_ASSERT(rim->total_width_ == kDummyImageSize);
-    EPI_ASSERT(rim->total_height_ == kDummyImageSize);
+    EPI_ASSERT(rim->width_ == kDummyImageSize);
+    EPI_ASSERT(rim->height_ == kDummyImageSize);
 
     ImageData *img = new ImageData(kDummyImageSize, kDummyImageSize, 4);
 
@@ -450,8 +419,8 @@ static ImageData *ReadDummyAsEpiBlock(Image *rim)
 
 static ImageData *CreateUserColourImage(Image *rim, ImageDefinition *def)
 {
-    int tw = HMM_MAX(rim->total_width_, 1);
-    int th = HMM_MAX(rim->total_height_, 1);
+    int tw = HMM_MAX(rim->width_, 1);
+    int th = HMM_MAX(rim->height_, 1);
 
     ImageData *img = new ImageData(tw, th, 3);
 
@@ -517,16 +486,8 @@ static ImageData *CreateUserFileImage(Image *rim, ImageDefinition *def)
     if (def->fix_trans_ == kTransparencyFixBlacken)
         BlackenClearAreas(img);
 
-    EPI_ASSERT(rim->total_width_ == img->width_);
-    EPI_ASSERT(rim->total_height_ == img->height_);
-
-    // CW: Textures MUST tile! If actual size not total size, manually tile
-    // [ AJA: this does not make them tile, just fills in the black gaps ]
-    if (rim->opacity_ == kOpacitySolid)
-    {
-        img->FillMarginX(rim->actual_width_);
-        img->FillMarginY(rim->actual_height_);
-    }
+    EPI_ASSERT(rim->width_ == img->width_);
+    EPI_ASSERT(rim->height_ == img->height_);
 
     return img;
 }

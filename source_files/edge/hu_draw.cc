@@ -757,8 +757,8 @@ void HUDStretchFromImageData(float x, float y, float w, float h, const ImageData
     float y1 = HUDToRealCoordinatesY(y + h);
     float y2 = HUDToRealCoordinatesY(y);
 
-    HUDRawFromTexID(x1, y1, x2, y2, tex_id, opacity, 0, 0, (float)img->used_width_ / img->width_,
-                    (float)img->used_height_ / img->height_, current_alpha);
+    HUDRawFromTexID(x1, y1, x2, y2, tex_id, opacity, 0, 0, (float)img->width_ / img->width_,
+                    (float)img->height_ / img->height_, current_alpha);
 }
 
 void HUDStretchImage(float x, float y, float w, float h, const Image *img, float sx, float sy, const Colormap *colmap)
@@ -787,7 +787,7 @@ void HUDStretchImage(float x, float y, float w, float h, const Image *img, float
 
     // HUDRawImage(x1, y1, x2, y2, img, 0, 0, img->Right(), img->Top(),
     // current_alpha, text_col, colmap, sx, sy);
-    HUDRawImage(x1, y1, x2, y2, img, 0, 0, img->Right(), img->Top(), current_alpha, text_col, sx, sy);
+    HUDRawImage(x1, y1, x2, y2, img, 0, 0, 1.0f, 1.0f, current_alpha, text_col, sx, sy);
 }
 
 void HUDStretchImageNoOffset(float x, float y, float w, float h, const Image *img, float sx, float sy)
@@ -807,7 +807,7 @@ void HUDStretchImageNoOffset(float x, float y, float w, float h, const Image *im
     float y1 = HUDToRealCoordinatesY(y + h);
     float y2 = HUDToRealCoordinatesY(y);
 
-    HUDRawImage(x1, y1, x2, y2, img, 0, 0, img->Right(), img->Top(), current_alpha, kRGBANoValue, sx, sy);
+    HUDRawImage(x1, y1, x2, y2, img, 0, 0, 1.0f, 1.0f, current_alpha, kRGBANoValue, sx, sy);
 }
 
 void HUDDrawImageTitleWS(const Image *title_image)
@@ -825,10 +825,10 @@ void HUDDrawImageTitleWS(const Image *title_image)
     // 1. Calculate scaling to apply.
 
     TempScale = 200;
-    TempScale /= title_image->actual_height_;
+    TempScale /= title_image->height_;
 
-    TempWidth  = title_image->ScaledWidthActual() * TempScale; // respect ASPECT in images.ddf at least
-    TempHeight = title_image->actual_height_ * TempScale;
+    TempWidth  = title_image->ScaledWidth() * TempScale; // respect ASPECT in images.ddf at least
+    TempHeight = title_image->height_ * TempScale;
 
     // 2. Calculate centering on screen.
     CenterX = 160;
@@ -841,42 +841,42 @@ void HUDDrawImageTitleWS(const Image *title_image)
 
 float HUDGetImageWidth(const Image *img)
 {
-    return (img->ScaledWidthActual() * current_scale);
+    return (img->ScaledWidth() * current_scale);
 }
 
 float HUDGetImageHeight(const Image *img)
 {
-    return (img->ScaledHeightActual() * current_scale);
+    return (img->ScaledHeight() * current_scale);
 }
 
 void HUDDrawImage(float x, float y, const Image *img, const Colormap *colmap)
 {
-    float w = img->ScaledWidthActual() * current_scale;
-    float h = img->ScaledHeightActual() * current_scale;
+    float w = img->ScaledWidth() * current_scale;
+    float h = img->ScaledHeight() * current_scale;
 
     HUDStretchImage(x, y, w, h, img, 0.0, 0.0, colmap);
 }
 
 void HUDDrawImageNoOffset(float x, float y, const Image *img)
 {
-    float w = img->ScaledWidthActual() * current_scale;
-    float h = img->ScaledHeightActual() * current_scale;
+    float w = img->ScaledWidth() * current_scale;
+    float h = img->ScaledHeight() * current_scale;
 
     HUDStretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
 }
 
 void HUDScrollImage(float x, float y, const Image *img, float sx, float sy)
 {
-    float w = img->ScaledWidthActual() * current_scale;
-    float h = img->ScaledHeightActual() * current_scale;
+    float w = img->ScaledWidth() * current_scale;
+    float h = img->ScaledHeight() * current_scale;
 
     HUDStretchImage(x, y, w, h, img, sx, sy);
 }
 
 void HUDScrollImageNoOffset(float x, float y, const Image *img, float sx, float sy)
 {
-    float w = img->ScaledWidthActual() * current_scale;
-    float h = img->ScaledHeightActual() * current_scale;
+    float w = img->ScaledWidth() * current_scale;
+    float h = img->ScaledHeight() * current_scale;
 
     HUDStretchImageNoOffset(x, y, w, h, img, sx, sy);
 }
@@ -892,8 +892,8 @@ void HUDTileImage(float x, float y, float w, float h, const Image *img, float of
     offset_x /= w;
     offset_y /= -h;
 
-    float tx_scale = w / img->ScaledWidthTotal() / current_scale;
-    float ty_scale = h / img->ScaledHeightTotal() / current_scale;
+    float tx_scale = w / img->ScaledWidth() / current_scale;
+    float ty_scale = h / img->ScaledHeight() / current_scale;
 
     float x1 = HUDToRealCoordinatesX(x);
     float x2 = HUDToRealCoordinatesX(x + w);
@@ -1265,14 +1265,14 @@ void HUDDrawChar(float left_x, float top_y, char ch, float size)
         h      = (size > 0 ? size : cur_font->image_character_height_) * sc_y;
         int px = (uint8_t)ch % 16;
         int py = 15 - (uint8_t)ch / 16;
-        tx1    = (px)*cur_font->font_image_->width_ratio_;
-        tx2    = (px + 1) * cur_font->font_image_->width_ratio_;
+        tx1    = (float)(px) * 0.0625f;
+        tx2    = (float)(px + 1) * 0.0625f;
         float char_texcoord_adjust =
             ((tx2 - tx1) - ((tx2 - tx1) * (cur_font->CharWidth(ch) / cur_font->image_character_width_))) / 2;
         tx1 += char_texcoord_adjust;
         tx2 -= char_texcoord_adjust;
-        ty1 = (py)*cur_font->font_image_->height_ratio_;
-        ty2 = (py + 1) * cur_font->font_image_->height_ratio_;
+        ty1 = (float)(py) * 0.0625f;
+        ty2 = (float)(py + 1) * 0.0625f;
     }
 
     float x1 = HUDToRealCoordinatesX(x);
@@ -1514,10 +1514,10 @@ void HUDDrawQuitScreen()
 
                 uint8_t px = character % 16;
                 uint8_t py = 15 - character / 16;
-                tx1        = (px)*en_font->font_image_->width_ratio_;
-                tx2        = (px + 1) * en_font->font_image_->width_ratio_;
-                ty1        = (py)*en_font->font_image_->height_ratio_;
-                ty2        = (py + 1) * en_font->font_image_->height_ratio_;
+                tx1        = (float)(px) * 0.0625f;
+                tx2        = (float)(px + 1) * 0.0625f;
+                ty1        = (float)(py) * 0.0625f;
+                ty2        = (float)(py + 1) * 0.0625f;
 
                 float width_adjust = FNX / 2 + .5;
 

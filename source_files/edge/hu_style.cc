@@ -115,7 +115,7 @@ void Style::DrawBackground()
         float CenterX = 0;
 
         CenterX = 160;
-        CenterX -= (background_image_->actual_width_ * background_image_->scale_x_) / 2;
+        CenterX -= (background_image_->width_ * background_image_->scale_x_) / 2;
 
         HUDSetScale(definition_->bg_.scale_);
         // HUDStretchImage(0, 0, 320, 200, background_image_);

@@ -842,8 +842,8 @@ static void CastDrawer(void)
     scale_x *= cast_order->scale_ * cast_order->aspect_;
     scale_y *= cast_order->scale_;
 
-    float width  = image->ScaledWidthActual();
-    float height = image->ScaledHeightActual();
+    float width  = image->ScaledWidth();
+    float height = image->ScaledHeight();
 
     float offset_x = image->ScaledOffsetX();
     float offset_y = image->ScaledOffsetY();
@@ -858,7 +858,7 @@ static void CastDrawer(void)
     height *= scale_y;
 
     HUDRawImage(pos_x - offset_x, pos_y + offset_y, pos_x - offset_x + width, pos_y + offset_y + height, image,
-                flip ? image->Right() : 0, 0, flip ? 0 : image->Right(), image->Top(), 1.0f, kRGBANoValue);
+                flip ? 1.0f : 0, 0, flip ? 0 : 1.0f, 1.0f, 1.0f, kRGBANoValue);
 }
 
 //
@@ -885,12 +885,12 @@ static void BunnyScroll(void)
     float CenterX    = 0;
     // 1. Calculate scaling to apply.
     TempScale = 200;
-    TempScale /= p1->actual_height_;
-    TempWidth  = p1->actual_width_ * TempScale;
-    TempHeight = p1->actual_height_ * TempScale;
+    TempScale /= p1->height_;
+    TempWidth  = p1->width_ * TempScale;
+    TempHeight = p1->height_ * TempScale;
     // 2. Calculate centering on screen.
     CenterX = 160;
-    CenterX -= (p1->actual_width_ * TempScale) / 2;
+    CenterX -= (p1->width_ * TempScale) / 2;
 
     scrolled = (TempWidth + CenterX) - (finale_count - 230) / 2;
     if (scrolled > (TempWidth + CenterX))

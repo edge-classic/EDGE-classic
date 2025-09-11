@@ -226,16 +226,16 @@ float FindRaiseToTexture(const PlaneMoverDefinition *def, Sector *sec)
 
                 if (side->top.image)
                 {
-                    if (side->top.image->ScaledHeightActual() < minsize)
-                        minsize = side->top.image->ScaledHeightActual();
+                    if (side->top.image->ScaledHeight() < minsize)
+                        minsize = side->top.image->ScaledHeight();
                 }
 
                 side = GetLineSidedef(secnum, i, 1);
 
                 if (side->top.image)
                 {
-                    if (side->top.image->ScaledHeightActual() < minsize)
-                        minsize = side->top.image->ScaledHeightActual();
+                    if (side->top.image->ScaledHeight() < minsize)
+                        minsize = side->top.image->ScaledHeight();
                 }
             }
         }
@@ -255,16 +255,16 @@ float FindRaiseToTexture(const PlaneMoverDefinition *def, Sector *sec)
 
                 if (side->bottom.image)
                 {
-                    if (side->bottom.image->ScaledHeightActual() < minsize)
-                        minsize = side->bottom.image->ScaledHeightActual();
+                    if (side->bottom.image->ScaledHeight() < minsize)
+                        minsize = side->bottom.image->ScaledHeight();
                 }
 
                 side = GetLineSidedef(secnum, i, 1);
 
                 if (side->bottom.image)
                 {
-                    if (side->bottom.image->ScaledHeightActual() < minsize)
-                        minsize = side->bottom.image->ScaledHeightActual();
+                    if (side->bottom.image->ScaledHeight() < minsize)
+                        minsize = side->bottom.image->ScaledHeight();
                 }
             }
         }
@@ -442,7 +442,7 @@ static void AdjustStretchParts(Side *side, bool left, ScrollingPart parts, float
     if (parts & (left ? kScrollingPartLeftUpper : kScrollingPartRightUpper))
     {
         if (side->top.image)
-            factor = side->top.image->ScaledWidthActual() / linelength;
+            factor = side->top.image->ScaledWidth() / linelength;
 
         if (widthOnly)
             side->top.x_matrix.X *= factor;
@@ -453,7 +453,7 @@ static void AdjustStretchParts(Side *side, bool left, ScrollingPart parts, float
     if (parts & (left ? kScrollingPartLeftMiddle : kScrollingPartRightMiddle))
     {
         if (side->middle.image)
-            factor = side->middle.image->ScaledWidthActual() / linelength;
+            factor = side->middle.image->ScaledWidth() / linelength;
 
         if (widthOnly)
             side->middle.x_matrix.X *= factor;
@@ -464,7 +464,7 @@ static void AdjustStretchParts(Side *side, bool left, ScrollingPart parts, float
     if (parts & (left ? kScrollingPartLeftLower : kScrollingPartRightLower))
     {
         if (side->bottom.image)
-            factor = side->bottom.image->ScaledWidthActual() / linelength;
+            factor = side->bottom.image->ScaledWidth() / linelength;
 
         if (widthOnly)
             side->bottom.x_matrix.X *= factor;
@@ -513,9 +513,9 @@ static void AdjustLightParts(Side *side, bool left, ScrollingPart parts, RegionP
 static float ScaleFactorForPlane(MapSurface &surf, float line_len, bool use_height)
 {
     if (use_height)
-        return surf.image->ScaledHeightActual() / line_len;
+        return surf.image->ScaledHeight() / line_len;
     else
-        return surf.image->ScaledWidthActual() / line_len;
+        return surf.image->ScaledWidth() / line_len;
 }
 
 static void P_EFTransferTrans(Sector *ctrl, Sector *sec, Line *line, const ExtraFloorDefinition *ef, float trans)

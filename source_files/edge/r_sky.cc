@@ -368,8 +368,8 @@ static void RenderSkyCylinder(void)
                                   // projection Calculate some stuff based on sky height
     float sky_h_ratio;
     float solid_sky_h;
-    if (sky_image->ScaledHeightActual() > 128 && current_sky_stretch != kSkyStretchStretch)
-        sky_h_ratio = (float)sky_image->ScaledHeightActual() / 256;
+    if (sky_image->ScaledHeight() > 128 && current_sky_stretch != kSkyStretchStretch)
+        sky_h_ratio = (float)sky_image->ScaledHeight() / 256;
     else if (current_sky_stretch == kSkyStretchVanilla)
         sky_h_ratio = 0.5f;
     else
@@ -449,8 +449,8 @@ static void RenderSkyCylinder(void)
     float ty   = 2.0f;
     float offx = 0;
     float offy = 0;
-    if (sky_image->ScaledWidthActual() > 256)
-        tx = 0.125f / ((float)sky_image->ScaledWidthActual() / 256.0f);
+    if (sky_image->ScaledWidth() > 256)
+        tx = 0.125f / ((float)sky_image->ScaledWidth() / 256.0f);
 
     // Set scrolling...I guess MBF transfers should take precedence since part of their purpose is to
     // override the normal sky - Dasho
@@ -464,10 +464,10 @@ static void RenderSkyCylinder(void)
             if (!console_active && !paused && !menu_active && !time_stop_active && !erraticism_active)
             {
                 offy = (HMM_Lerp(sky_ref->old_offset.Y, fractional_tic, sky_ref->offset.Y) - kMBFSkyYShift) /
-                       sky_image->ScaledHeightActual();
+                       sky_image->ScaledHeight();
             }
             else
-                offy = (sky_ref->offset.Y - kMBFSkyYShift) / sky_image->ScaledHeightActual();
+                offy = (sky_ref->offset.Y - kMBFSkyYShift) / sky_image->ScaledHeight();
         }
         else
             offy = sky_ref->offset.Y - kMBFSkyYShift;
@@ -499,7 +499,7 @@ static void RenderSkyCylinder(void)
 
     if (current_sky_stretch == kSkyStretchMirror)
     {
-        if (sky_image->ScaledHeightActual() > 128)
+        if (sky_image->ScaledHeight() > 128)
         {
             RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use); // Top Fade
@@ -525,7 +525,7 @@ static void RenderSkyCylinder(void)
     }
     else if (current_sky_stretch == kSkyStretchRepeat)
     {
-        if (sky_image->ScaledHeightActual() > 128)
+        if (sky_image->ScaledHeight() > 128)
         {
             RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use); // Top Fade
@@ -548,9 +548,9 @@ static void RenderSkyCylinder(void)
     }
     else if (current_sky_stretch == kSkyStretchStretch)
     {
-        if (sky_image->ScaledHeightActual() > 128)
+        if (sky_image->ScaledHeight() > 128)
         {
-            ty = ((float)sky_image->ScaledHeightActual() / 256.0f);
+            ty = ((float)sky_image->ScaledHeight() / 256.0f);
             RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist, tx, ty, offx, offy, sky_tex_id, blend, fc_to_use,
                            fd_to_use); // Top Fade
             RenderSkySlice(solid_sky_h, -solid_sky_h, 1.0f, 1.0f, dist, tx, ty, offx, offy, sky_tex_id, blend,
@@ -574,7 +574,7 @@ static void RenderSkyCylinder(void)
     else                               // Vanilla (or sane value if somehow this gets set out of expected
                                        // range)
     {
-        if (sky_image->ScaledHeightActual() > 128)
+        if (sky_image->ScaledHeight() > 128)
         {
             RenderSkySlice(sky_h_ratio, solid_sky_h, 0.0f, 1.0f, dist / 2, tx, ty, offx, offy, sky_tex_id, blend,
                            fc_to_use,
@@ -970,9 +970,9 @@ int UpdateSkyboxTextures(void)
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
-    culling_fog_color = tmp_img_data->AverageColor(0, sky_image->actual_width_, 0, sky_image->actual_height_ / 2);
-    sky_cap_color     = tmp_img_data->AverageColor(0, sky_image->actual_width_, sky_image->actual_height_ * 3 / 4,
-                                                   sky_image->actual_height_);
+    culling_fog_color = tmp_img_data->AverageColor(0, sky_image->width_, 0, sky_image->height_ / 2);
+    sky_cap_color     = tmp_img_data->AverageColor(0, sky_image->width_, sky_image->height_ * 3 / 4,
+                                                   sky_image->height_);
     delete tmp_img_data;
 
     if (what_palette)
@@ -982,7 +982,7 @@ int UpdateSkyboxTextures(void)
     {
         custom_skybox = true;
 
-        info->face_size = info->face[kSkyboxNorth]->total_width_;
+        info->face_size = info->face[kSkyboxNorth]->width_;
 
         for (int i = kSkyboxEast; i < 6; i++)
             info->face[i] = ImageLookup(UserSkyFaceName(sky_image->name_.c_str(), i), kImageNamespaceTexture);

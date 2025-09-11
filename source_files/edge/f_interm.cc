@@ -418,8 +418,8 @@ static void DrawLevelFinished(void)
     {
         if (IsLumpInPwad(level_names[0]->name_.c_str()))
         {
-            w1 = level_names[0]->ScaledWidthActual();
-            h1 = level_names[0]->ScaledHeightActual();
+            w1 = level_names[0]->ScaledWidth();
+            h1 = level_names[0]->ScaledHeight();
             HUDSetAlignment(-1, -1); // center it
             if (w1 > 320)            // Too big? Shrink it to fit the screen
                 HUDStretchImage(0, y, 320, h1, level_names[0], 0.0, 0.0);
@@ -492,8 +492,8 @@ static void DrawLevelFinished(void)
     // If we have a custom Finished graphic e.g.WIF then use that
     if (IsLumpInPwad(finished->name_.c_str()))
     {
-        w1 = finished->ScaledWidthActual();
-        h1 = finished->ScaledHeightActual();
+        w1 = finished->ScaledWidth();
+        h1 = finished->ScaledHeight();
         HUDSetAlignment(-1, -1); // center it
         HUDDrawImage(160 - w1 / 2, y * 5 / 4, finished);
     }
@@ -520,8 +520,8 @@ static void DrawOnLnode(IntermissionMapPosition *mappos, const Image *images[2])
         float left = mappos->info->x_ - images[i]->ScaledOffsetX();
         float top  = mappos->info->y_ - images[i]->ScaledOffsetY();
 
-        float right  = left + images[i]->ScaledWidthActual();
-        float bottom = top + images[i]->ScaledHeightActual();
+        float right  = left + images[i]->ScaledWidth();
+        float bottom = top + images[i]->ScaledHeight();
 
         if (left >= 0 && right < 320 && top >= 0 && bottom < 200)
         {
@@ -585,8 +585,8 @@ static void DrawEnteringLevel(void)
     // If we have a custom Entering graphic e.g.WIENTER then use that
     if (IsLumpInPwad(entering->name_.c_str()))
     {
-        w1 = entering->ScaledWidthActual();
-        h1 = entering->ScaledHeightActual();
+        w1 = entering->ScaledWidth();
+        h1 = entering->ScaledHeight();
         HUDSetAlignment(-1, -1); // center it
         HUDDrawImage(160 - w1 / 2, y, entering);
     }
@@ -621,8 +621,8 @@ static void DrawEnteringLevel(void)
     {
         if (IsLumpInPwad(level_names[1]->name_.c_str()))
         {
-            w1 = level_names[1]->ScaledWidthActual();
-            h1 = level_names[1]->ScaledHeightActual();
+            w1 = level_names[1]->ScaledWidth();
+            h1 = level_names[1]->ScaledHeight();
             HUDSetAlignment(-1, -1); // center it
             if (w1 > 320)            // Too big? Shrink it to fit the screen
                 HUDStretchImage(0, y * 5 / 4, 320, h1, level_names[1], 0.0, 0.0);
@@ -686,11 +686,11 @@ static float PercentWidth(std::string &s)
     {
         if (c == '%')
         {
-            perc_width += percent->ScaledWidthActual();
+            perc_width += percent->ScaledWidth();
         }
         else if (epi::IsDigitASCII(c))
         {
-            perc_width += digits[c - 48]->ScaledWidthActual();
+            perc_width += digits[c - 48]->ScaledWidth();
         }
     }
     return perc_width;
@@ -703,12 +703,12 @@ static void DrawPercent(float x, float y, std::string &s)
         if (c == '%')
         {
             HUDDrawImage(x, y, percent);
-            x += percent->ScaledWidthActual();
+            x += percent->ScaledWidth();
         }
         else if (epi::IsDigitASCII(c))
         {
             HUDDrawImage(x, y, digits[c - 48]);
-            x += digits[c - 48]->ScaledWidthActual();
+            x += digits[c - 48]->ScaledWidth();
         }
     }
 }
@@ -774,7 +774,7 @@ static float TimeWidth(int t, bool drawText = false)
         {
             // "sucks"
             if ((sucks) && (IsLumpInPwad(sucks->name_.c_str())))
-                return sucks->ScaledWidthActual();
+                return sucks->ScaledWidth();
             else
                 return single_player_intermission_style->fonts_[StyleDefinition::kTextSectionAlternate]->StringWidth(
                     "Sucks");
@@ -786,11 +786,11 @@ static float TimeWidth(int t, bool drawText = false)
             {
                 if (c == ':')
                 {
-                    time_width += colon->ScaledWidthActual();
+                    time_width += colon->ScaledWidth();
                 }
                 else if (epi::IsDigitASCII(c))
                 {
-                    time_width += digits[c - 48]->ScaledWidthActual();
+                    time_width += digits[c - 48]->ScaledWidth();
                 }
             }
             return time_width;
@@ -864,12 +864,12 @@ static void DrawTime(float x, float y, int t, bool drawText = false)
                 if (c == ':')
                 {
                     HUDDrawImage(x, y, colon);
-                    x += colon->ScaledWidthActual();
+                    x += colon->ScaledWidth();
                 }
                 else if (epi::IsDigitASCII(c))
                 {
                     HUDDrawImage(x, y, digits[c - 48]);
-                    x += digits[c - 48]->ScaledWidthActual();
+                    x += digits[c - 48]->ScaledWidth();
                 }
             }
         }
@@ -1569,7 +1569,7 @@ static void UpdateSinglePlayerStats(void)
 static void DrawSinglePlayerStats(void)
 {
     // line height
-    float lh = digits[0]->ScaledHeightActual() * 3 / 2;
+    float lh = digits[0]->ScaledHeight() * 3 / 2;
 
     DrawLevelFinished();
 

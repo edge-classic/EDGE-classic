@@ -34,10 +34,6 @@ class ImageData
     // 4 = format is RGBA
     int16_t depth_;
 
-    // for image loading, these will be the actual image size
-    int16_t used_width_;
-    int16_t used_height_;
-
     // in case offset/scaling from a parent image_c need to be stored (atlases)
     float offset_x_;
     float offset_y_;
@@ -145,12 +141,6 @@ class ImageData
 
     // SMMU-style swirling
     void Swirl(int level_time, int thickness);
-
-    // fill the margins of non-power-of-two images with a copy of the
-    // left and/or top parts of the image.  This doesn't make it tile
-    // properly, but it looks better than having areas of black.
-    void FillMarginX(int actual_width);
-    void FillMarginY(int actual_height);
 
     // Change various HSV color values if needed
     void SetHSV(int rotation, int saturation, int value);

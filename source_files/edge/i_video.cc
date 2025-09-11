@@ -320,6 +320,9 @@ static bool InitializeWindow(DisplayMode *mode)
     if (!version || (GLAD_VERSION_MAJOR(version) && GLAD_VERSION_MINOR(version) < 3))
         FatalError("System only supports GL %d.%d. Minimum GL version 1.3 required!\n", GLAD_VERSION_MAJOR(version),
                    GLAD_VERSION_MINOR(version));
+
+    if (GLAD_GL_ARB_texture_non_power_of_two == 0)
+        FatalError("System GL implementation does not support non-power-of-two textures!\n");
 #endif
 
     return true;

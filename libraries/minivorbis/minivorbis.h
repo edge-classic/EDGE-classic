@@ -2,7 +2,7 @@
   minivorbis.h -- libvorbis decoder in a single header
   Project URL: https://github.com/edubart/minivorbis
 
-  This is libogg 1.3.5 + libvorbis 1.3.7 contained in a single header
+  This is libogg 1.3.6 + libvorbis 1.3.7 contained in a single header
   to be bundled in C/C++ applications with ease for decoding OGG sound files.
   Ogg Vorbis is a open general-purpose compressed audio format
   for mid to high quality audio and music at fixed and variable bitrates.
@@ -887,6 +887,8 @@ static const unsigned int mask8B[]=
 void oggpack_writeinit(oggpack_buffer *b){
   memset(b,0,sizeof(*b));
   b->ptr=b->buffer=_ogg_malloc(BUFFER_INCREMENT);
+  if (!b->buffer)
+    return;
   b->buffer[0]='\0';
   b->storage=BUFFER_INCREMENT;
 }
@@ -1132,13 +1134,13 @@ long oggpack_look(oggpack_buffer *b,int bits){
 
   ret=b->ptr[0]>>b->endbit;
   if(bits>8){
-    ret|=b->ptr[1]<<(8-b->endbit);
+    ret|=(unsigned long)b->ptr[1]<<(8-b->endbit);
     if(bits>16){
-      ret|=b->ptr[2]<<(16-b->endbit);
+      ret|=(unsigned long)b->ptr[2]<<(16-b->endbit);
       if(bits>24){
-        ret|=b->ptr[3]<<(24-b->endbit);
+        ret|=(unsigned long)b->ptr[3]<<(24-b->endbit);
         if(bits>32 && b->endbit)
-          ret|=b->ptr[4]<<(32-b->endbit);
+          ret|=(unsigned long)b->ptr[4]<<(32-b->endbit);
       }
     }
   }
@@ -1161,13 +1163,13 @@ long oggpackB_look(oggpack_buffer *b,int bits){
     else if(!bits)return(0L);
   }
 
-  ret=b->ptr[0]<<(24+b->endbit);
+  ret=(unsigned long)b->ptr[0]<<(24+b->endbit);
   if(bits>8){
-    ret|=b->ptr[1]<<(16+b->endbit);
+    ret|=(unsigned long)b->ptr[1]<<(16+b->endbit);
     if(bits>16){
-      ret|=b->ptr[2]<<(8+b->endbit);
+      ret|=(unsigned long)b->ptr[2]<<(8+b->endbit);
       if(bits>24){
-        ret|=b->ptr[3]<<(b->endbit);
+        ret|=(unsigned long)b->ptr[3]<<(b->endbit);
         if(bits>32 && b->endbit)
           ret|=b->ptr[4]>>(8-b->endbit);
       }
@@ -1237,13 +1239,13 @@ long oggpack_read(oggpack_buffer *b,int bits){
 
   ret=b->ptr[0]>>b->endbit;
   if(bits>8){
-    ret|=b->ptr[1]<<(8-b->endbit);
+    ret|=(unsigned long)b->ptr[1]<<(8-b->endbit);
     if(bits>16){
-      ret|=b->ptr[2]<<(16-b->endbit);
+      ret|=(unsigned long)b->ptr[2]<<(16-b->endbit);
       if(bits>24){
-        ret|=b->ptr[3]<<(24-b->endbit);
+        ret|=(unsigned long)b->ptr[3]<<(24-b->endbit);
         if(bits>32 && b->endbit){
-          ret|=b->ptr[4]<<(32-b->endbit);
+          ret|=(unsigned long)b->ptr[4]<<(32-b->endbit);
         }
       }
     }
@@ -1278,13 +1280,13 @@ long oggpackB_read(oggpack_buffer *b,int bits){
     else if(!bits)return(0L);
   }
 
-  ret=b->ptr[0]<<(24+b->endbit);
+  ret=(unsigned long)b->ptr[0]<<(24+b->endbit);
   if(bits>8){
-    ret|=b->ptr[1]<<(16+b->endbit);
+    ret|=(unsigned long)b->ptr[1]<<(16+b->endbit);
     if(bits>16){
-      ret|=b->ptr[2]<<(8+b->endbit);
+      ret|=(unsigned long)b->ptr[2]<<(8+b->endbit);
       if(bits>24){
-        ret|=b->ptr[3]<<(b->endbit);
+        ret|=(unsigned long)b->ptr[3]<<(b->endbit);
         if(bits>32 && b->endbit)
           ret|=b->ptr[4]>>(8-b->endbit);
       }
@@ -1413,17 +1415,17 @@ void cliptest(unsigned long *b,int vals,int bits,int *comp,int compsize){
     int tbit=bits?bits:ilog(b[i]);
     if(oggpack_look(&r,tbit)==-1)
       report("out of data!\n");
-    if(oggpack_look(&r,tbit)!=(b[i]&mask[tbit]))
+    if((unsigned long)oggpack_look(&r,tbit)!=(b[i]&mask[tbit]))
       report("looked at incorrect value!\n");
     if(tbit==1)
-      if(oggpack_look1(&r)!=(b[i]&mask[tbit]))
+      if((unsigned long)oggpack_look1(&r)!=(b[i]&mask[tbit]))
         report("looked at single bit incorrect value!\n");
     if(tbit==1){
-      if(oggpack_read1(&r)!=(b[i]&mask[tbit]))
+      if((unsigned long)oggpack_read1(&r)!=(b[i]&mask[tbit]))
         report("read incorrect single bit value!\n");
     }else{
-    if(oggpack_read(&r,tbit)!=(b[i]&mask[tbit]))
-      report("read incorrect value!\n");
+      if((unsigned long)oggpack_read(&r,tbit)!=(b[i]&mask[tbit]))
+	report("read incorrect value!\n");
     }
   }
   if(oggpack_bytes(&r)!=bytes)report("leftover bytes after read!\n");
@@ -1448,16 +1450,16 @@ void cliptestB(unsigned long *b,int vals,int bits,int *comp,int compsize){
     int tbit=bits?bits:ilog(b[i]);
     if(oggpackB_look(&r,tbit)==-1)
       report("out of data!\n");
-    if(oggpackB_look(&r,tbit)!=(b[i]&mask[tbit]))
+    if((unsigned long)oggpackB_look(&r,tbit)!=(b[i]&mask[tbit]))
       report("looked at incorrect value!\n");
     if(tbit==1)
-      if(oggpackB_look1(&r)!=(b[i]&mask[tbit]))
+      if((unsigned long)oggpackB_look1(&r)!=(b[i]&mask[tbit]))
         report("looked at single bit incorrect value!\n");
     if(tbit==1){
-      if(oggpackB_read1(&r)!=(b[i]&mask[tbit]))
+      if((unsigned long)oggpackB_read1(&r)!=(b[i]&mask[tbit]))
         report("read incorrect single bit value!\n");
     }else{
-    if(oggpackB_read(&r,tbit)!=(b[i]&mask[tbit]))
+    if((unsigned long)oggpackB_read(&r,tbit)!=(b[i]&mask[tbit]))
       report("read incorrect value!\n");
     }
   }
@@ -1736,7 +1738,7 @@ int main(void){
   oggpack_readinit(&r,buffer,bytes);
   for(i=0;i<test2size;i++){
     if(oggpack_look(&r,32)==-1)report("out of data. failed!");
-    if(oggpack_look(&r,32)!=large[i]){
+    if((unsigned long)oggpack_look(&r,32)!=large[i]){
       fprintf(stderr,"%ld != %lu (%lx!=%lx):",oggpack_look(&r,32),large[i],
               oggpack_look(&r,32),large[i]);
       report("read incorrect value!\n");
@@ -1846,7 +1848,7 @@ int main(void){
   oggpackB_readinit(&r,buffer,bytes);
   for(i=0;i<test2size;i++){
     if(oggpackB_look(&r,32)==-1)report("out of data. failed!");
-    if(oggpackB_look(&r,32)!=large[i]){
+    if((unsigned long)oggpackB_look(&r,32)!=large[i]){
       fprintf(stderr,"%ld != %lu (%lx!=%lx):",oggpackB_look(&r,32),large[i],
               oggpackB_look(&r,32),large[i]);
       report("read incorrect value!\n");
@@ -2562,12 +2564,13 @@ int ogg_stream_packetin(ogg_stream_state *os,ogg_packet *op){
 static int ogg_stream_flush_i(ogg_stream_state *os,ogg_page *og, int force, int nfill){
   int i;
   int vals=0;
-  int maxvals=(os->lacing_fill>255?255:os->lacing_fill);
+  int maxvals;
   int bytes=0;
   long acc=0;
   ogg_int64_t granule_pos=-1;
 
   if(ogg_stream_check(os)) return(0);
+  maxvals=(os->lacing_fill>255?255:os->lacing_fill);
   if(maxvals==0) return(0);
 
   /* construct a page */
@@ -2852,11 +2855,14 @@ int ogg_sync_wrote(ogg_sync_state *oy, long bytes){
 */
 
 long ogg_sync_pageseek(ogg_sync_state *oy,ogg_page *og){
-  unsigned char *page=oy->data+oy->returned;
+  unsigned char *page;
   unsigned char *next;
-  long bytes=oy->fill-oy->returned;
+  long bytes;
 
   if(ogg_sync_check(oy))return 0;
+
+  page=oy->data+oy->returned;
+  bytes=oy->fill-oy->returned;
 
   if(oy->headerbytes==0){
     int headerbytes,i;
@@ -3299,11 +3305,11 @@ void print_header(ogg_page *og){
           (int)og->header[4],(int)og->header[5]);
 
   fprintf(stderr,"  granulepos: %d  serialno: %d  pageno: %ld\n",
-          (og->header[9]<<24)|(og->header[8]<<16)|
+          ((unsigned)og->header[9]<<24)|(og->header[8]<<16)|
           (og->header[7]<<8)|og->header[6],
-          (og->header[17]<<24)|(og->header[16]<<16)|
+          ((unsigned)og->header[17]<<24)|(og->header[16]<<16)|
           (og->header[15]<<8)|og->header[14],
-          ((long)(og->header[21])<<24)|(og->header[20]<<16)|
+          ((long)((unsigned)og->header[21])<<24)|(og->header[20]<<16)|
           (og->header[19]<<8)|og->header[18]);
 
   fprintf(stderr,"  checksum: %02x:%02x:%02x:%02x\n  segments: %d (",
@@ -3316,19 +3322,26 @@ void print_header(ogg_page *og){
   fprintf(stderr,")\n\n");
 }
 
-void copy_page(ogg_page *og){
+static int copy_page(ogg_page *og){
   unsigned char *temp=_ogg_malloc(og->header_len);
+  if (!temp)
+    return -1;
   memcpy(temp,og->header,og->header_len);
   og->header=temp;
 
   temp=_ogg_malloc(og->body_len);
+  if (!temp)
+    return -1;
   memcpy(temp,og->body,og->body_len);
   og->body=temp;
+  return 0;
 }
 
-void free_page(ogg_page *og){
+static void free_page(ogg_page *og){
   _ogg_free (og->header);
+  og->header=NULL;
   _ogg_free (og->body);
+  og->body=NULL;
 }
 
 void error(void){
@@ -3711,6 +3724,11 @@ void test_pack(const int *pl, const int **headers, int byteskip,
 
   int byteskipcount=0;
 
+  if (!data) {
+    fprintf(stderr,"unable to allocate requried data buffer!\n");
+    exit(1);
+  }
+
   ogg_stream_reset(&os_en);
   ogg_stream_reset(&os_de);
   ogg_sync_reset(&oy);
@@ -4022,6 +4040,11 @@ int main(void){
     int inptr=0,i,j;
     ogg_page og[5];
 
+    if (!data) {
+      fprintf(stderr,"unable to allocate requried packet data buffer!\n");
+      exit(1);
+    }
+
     ogg_stream_reset(&os_en);
 
     for(i=0;pl[i]!=-1;i++){
@@ -4045,7 +4068,10 @@ int main(void){
         fprintf(stderr,"Too few pages output building sync tests!\n");
         exit(1);
       }
-      copy_page(&og[i]);
+      if (-1 == copy_page(&og[i])) {
+        fprintf(stderr,"unable to copy page building sync tests!\n");
+        exit(1);
+      }
     }
 
     /* Test lost pages on pagein/packetout: no rollback */

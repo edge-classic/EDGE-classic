@@ -418,14 +418,13 @@ static void AddChar(float x, float y, char ch, RendererVertex *&glvert, RGBAColo
     }
     else // spritesheet font
     {
-        ImageFont *con_font = (ImageFont *)console_font;
         uint8_t    px       = (uint8_t)ch % 16;
         uint8_t    py       = 15 - (uint8_t)ch / 16;
 
-        float tx1 = (px)*con_font->font_image_->width_ratio_;
-        float tx2 = (px + 1) * con_font->font_image_->width_ratio_;
-        float ty1 = (py)*con_font->font_image_->height_ratio_;
-        float ty2 = (py + 1) * con_font->font_image_->height_ratio_;
+        float tx1 = (float)(px) * 0.0625f;
+        float tx2 = (float)(px + 1) * 0.0625f;
+        float ty1 = (float)(py) * 0.0625f;
+        float ty2 = (float)(py + 1) * 0.0625f;
 
         glvert->rgba                     = col;
         glvert->position                 = {{x, y, 0}};
@@ -546,7 +545,7 @@ void ConsoleDrawer(void)
     {
         const Image *img = console_style->background_image_;
 
-        HUDRawImage(0, y, current_screen_width, y + CON_GFX_HT, img, 0.0, 0.0, img->Right(), img->Top(),
+        HUDRawImage(0, y, current_screen_width, y + CON_GFX_HT, img, 0.0, 0.0, 1.0f, 1.0f,
                     console_style->definition_->bg_.translucency_, kRGBANoValue, 0, 0);
     }
     else
@@ -658,11 +657,11 @@ void ConsoleDrawer(void)
                     uint8_t px = ch % 16;
                     uint8_t py = 15 - ch / 16;
 
-                    float tx1 = (px)*en_font->font_image_->width_ratio_;
-                    float tx2 = (px + 1) * en_font->font_image_->width_ratio_;
+                    float tx1 = (float)(px) * 0.0625f;
+                    float tx2 = (float)(px + 1) * 0.0625f;
 
-                    float ty1 = (py)*en_font->font_image_->height_ratio_;
-                    float ty2 = (py + 1) * en_font->font_image_->height_ratio_;
+                    float ty1 = (float)(py) * 0.0625f;
+                    float ty2 = (float)(py + 1) * 0.0625f;
 
                     console_glvert->rgba                   = col;
                     console_glvert->texture_coordinates[0] = {{tx1, ty1}};

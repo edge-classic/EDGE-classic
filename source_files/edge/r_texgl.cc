@@ -44,48 +44,14 @@
 extern std::unordered_map<GLuint, GLint> texture_clamp_s;
 extern std::unordered_map<GLuint, GLint> texture_clamp_t;
 
-int MakeValidTextureSize(int value)
-{
-    EPI_ASSERT(value > 0);
-
-    if (value <= 1)
-        return 1;
-    if (value <= 2)
-        return 2;
-    if (value <= 4)
-        return 4;
-    if (value <= 8)
-        return 8;
-    if (value <= 16)
-        return 16;
-    if (value <= 32)
-        return 32;
-    if (value <= 64)
-        return 64;
-    if (value <= 128)
-        return 128;
-    if (value <= 256)
-        return 256;
-    if (value <= 512)
-        return 512;
-    if (value <= 1024)
-        return 1024;
-    if (value <= 2048)
-        return 2048;
-    if (value <= 4096)
-        return 4096;
-
-    FatalError("Texture size (%d) too large !\n", value);
-}
-
 ImageData *RGBFromPalettised(ImageData *src, const uint8_t *palette, int opacity)
 {
     if (src->depth_ == 1)
     {
         int        bpp     = (opacity == kOpacitySolid) ? 3 : 4;
         ImageData *dest    = new ImageData(src->width_, src->height_, bpp);
-        dest->used_width_  = src->used_width_;
-        dest->used_height_ = src->used_height_;
+        dest->width_  = src->width_;
+        dest->height_ = src->height_;
         for (int y = 0; y < src->height_; y++)
             for (int x = 0; x < src->width_; x++)
             {
@@ -332,8 +298,8 @@ int DetermineOpacity(const ImageData *img, bool *is_empty_)
         ImageOpacity opacity = kOpacitySolid;
         bool         empty   = true;
 
-        for (int y = 0; y < img->used_height_; y++)
-            for (int x = 0; x < img->used_width_; x++)
+        for (int y = 0; y < img->height_; y++)
+            for (int x = 0; x < img->width_; x++)
             {
                 uint8_t pix = img->PixelAt(x, y)[0];
 
@@ -354,8 +320,8 @@ int DetermineOpacity(const ImageData *img, bool *is_empty_)
         bool         is_masked = false;
         bool         empty     = true;
 
-        for (int y = 0; y < img->used_height_; y++)
-            for (int x = 0; x < img->used_width_; x++)
+        for (int y = 0; y < img->height_; y++)
+            for (int x = 0; x < img->width_; x++)
             {
                 uint8_t alpha = img->PixelAt(x, y)[3];
 

@@ -85,7 +85,7 @@ class GLRenderBackend : public RenderBackend
         // read implementation limits
         glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size_);
 
-        LogPrint("OpenGL: Tex: %d\n", max_texture_size_);
+        LogPrint("OpenGL Max Texture Size: %d\n", max_texture_size_);
 
         RenderBackend::Init();
     }

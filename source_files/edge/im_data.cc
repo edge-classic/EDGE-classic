@@ -28,7 +28,7 @@
 #include "swirl_table.h"
 
 ImageData::ImageData(int width, int height, int depth)
-    : width_(width), height_(height), depth_(depth), used_width_(width), used_height_(height)
+    : width_(width), height_(height), depth_(depth)
 {
     pixels_   = new uint8_t[width * height * depth];
     offset_x_ = offset_y_ = 0;
@@ -68,13 +68,13 @@ void ImageData::Whiten()
 
 void ImageData::Invert()
 {
-    int line_size = used_width_ * depth_;
+    int line_size = width_ * depth_;
 
     uint8_t *line_data = new uint8_t[line_size + 1];
 
-    for (int y = 0; y < used_height_ / 2; y++)
+    for (int y = 0; y < height_ / 2; y++)
     {
-        int y2 = used_height_ - 1 - y;
+        int y2 = height_ - 1 - y;
 
         memcpy(line_data, PixelAt(0, y), line_size);
         memcpy(PixelAt(0, y), PixelAt(0, y2), line_size);
@@ -86,15 +86,15 @@ void ImageData::Invert()
 
 void ImageData::Flip()
 {
-    int line_size = used_width_ * depth_;
+    int line_size = width_ * depth_;
 
     uint8_t *line_data  = new uint8_t[line_size];
 
-    for (int y = 0; y < used_height_; y++)
+    for (int y = 0; y < height_; y++)
     {
-        for (int x = 0; x < used_width_; x++)
+        for (int x = 0; x < width_; x++)
         {
-            memcpy(line_data + (x * depth_), PixelAt(used_width_ - x, y), depth_);
+            memcpy(line_data + (x * depth_), PixelAt(width_ - x, y), depth_);
         }
         memcpy(PixelAt(0, y), line_data, line_size);
     }
@@ -184,8 +184,8 @@ void ImageData::Shrink(int new_w, int new_h)
             }
     }
 
-    used_width_  = HMM_MAX(1, used_width_ * new_w / width_);
-    used_height_ = HMM_MAX(1, used_height_ * new_h / height_);
+    width_  = HMM_MAX(1, width_ * new_w / width_);
+    height_ = HMM_MAX(1, height_ * new_h / height_);
 
     width_  = new_w;
     height_ = new_h;
@@ -246,8 +246,8 @@ void ImageData::ShrinkMasked(int new_w, int new_h)
             }
         }
 
-    used_width_  = HMM_MAX(1, used_width_ * new_w / width_);
-    used_height_ = HMM_MAX(1, used_height_ * new_h / height_);
+    width_  = HMM_MAX(1, width_ * new_w / width_);
+    height_ = HMM_MAX(1, height_ * new_h / height_);
 
     width_  = new_w;
     height_ = new_h;
@@ -275,8 +275,8 @@ void ImageData::Grow(int new_w, int new_h)
 
     delete[] pixels_;
 
-    used_width_  = used_width_ * new_w / width_;
-    used_height_ = used_height_ * new_h / height_;
+    width_  = width_ * new_w / width_;
+    height_ = height_ * new_h / height_;
 
     pixels_ = new_pixels_;
     width_  = new_w;
@@ -422,9 +422,9 @@ void ImageData::DetermineRealBounds(uint16_t *bottom, uint16_t *left, uint16_t *
                                     RGBAColor background_color, int from_x, int to_x, int from_y, int to_y)
 {
     from_x = HMM_MAX(0, from_x);
-    to_x   = HMM_MIN(to_x, used_width_ - 1);
+    to_x   = HMM_MIN(to_x, width_ - 1);
     from_y = HMM_MAX(0, from_y);
-    to_y   = HMM_MIN(to_y, used_height_ - 1);
+    to_y   = HMM_MIN(to_y, height_ - 1);
 
     EPI_ASSERT(bottom || left || right || top);
 
@@ -557,7 +557,7 @@ void ImageData::DetermineRealBounds(uint16_t *bottom, uint16_t *left, uint16_t *
 RGBAColor ImageData::AverageHue(int from_x, int to_x, int from_y, int to_y)
 {
     // make sure we don't overflow
-    EPI_ASSERT(used_width_ * used_height_ <= 2048 * 2048);
+    EPI_ASSERT(width_ * height_ <= 2048 * 2048);
 
     int r_sum = 0;
     int g_sum = 0;
@@ -568,10 +568,10 @@ RGBAColor ImageData::AverageHue(int from_x, int to_x, int from_y, int to_y)
     uint8_t hue[3] = {0, 0, 0};
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
-    from_x = HMM_Clamp(0, from_x, used_width_ - 1);
-    to_x   = HMM_Clamp(1, to_x, used_width_);
-    from_y = HMM_Clamp(0, from_y, used_height_ - 1);
-    to_y   = HMM_Clamp(1, to_y, used_height_);
+    from_x = HMM_Clamp(0, from_x, width_ - 1);
+    to_x   = HMM_Clamp(1, to_x, width_);
+    from_y = HMM_Clamp(0, from_y, height_ - 1);
+    to_y   = HMM_Clamp(1, to_y, height_);
 
     for (int y = from_y; y < to_y; y++)
     {
@@ -636,15 +636,15 @@ RGBAColor ImageData::AverageHue(int from_x, int to_x, int from_y, int to_y)
 RGBAColor ImageData::AverageColor(int from_x, int to_x, int from_y, int to_y)
 {
     // make sure we don't overflow
-    EPI_ASSERT(used_width_ * used_height_ <= 2048 * 2048);
+    EPI_ASSERT(width_ * height_ <= 2048 * 2048);
 
     std::unordered_map<RGBAColor, unsigned int> seen_colors;
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
-    from_x = HMM_Clamp(0, from_x, used_width_ - 1);
-    to_x   = HMM_Clamp(1, to_x, used_width_);
-    from_y = HMM_Clamp(0, from_y, used_height_ - 1);
-    to_y   = HMM_Clamp(1, to_y, used_height_);
+    from_x = HMM_Clamp(0, from_x, width_ - 1);
+    to_x   = HMM_Clamp(1, to_x, width_);
+    from_y = HMM_Clamp(0, from_y, height_ - 1);
+    to_y   = HMM_Clamp(1, to_y, height_);
 
     for (int y = from_y; y < to_y; y++)
     {
@@ -685,7 +685,7 @@ RGBAColor ImageData::AverageColor(int from_x, int to_x, int from_y, int to_y)
 RGBAColor ImageData::LightestColor(int from_x, int to_x, int from_y, int to_y)
 {
     // make sure we don't overflow
-    EPI_ASSERT(used_width_ * used_height_ <= 2048 * 2048);
+    EPI_ASSERT(width_ * height_ <= 2048 * 2048);
 
     int lightest_total = 0;
     int lightest_r     = 0;
@@ -693,10 +693,10 @@ RGBAColor ImageData::LightestColor(int from_x, int to_x, int from_y, int to_y)
     int lightest_b     = 0;
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
-    from_x = HMM_Clamp(0, from_x, used_width_ - 1);
-    to_x   = HMM_Clamp(1, to_x, used_width_);
-    from_y = HMM_Clamp(0, from_y, used_height_ - 1);
-    to_y   = HMM_Clamp(1, to_y, used_height_);
+    from_x = HMM_Clamp(0, from_x, width_ - 1);
+    to_x   = HMM_Clamp(1, to_x, width_);
+    from_y = HMM_Clamp(0, from_y, height_ - 1);
+    to_y   = HMM_Clamp(1, to_y, height_);
 
     for (int y = from_y; y < to_y; y++)
     {
@@ -723,7 +723,7 @@ RGBAColor ImageData::LightestColor(int from_x, int to_x, int from_y, int to_y)
 RGBAColor ImageData::DarkestColor(int from_x, int to_x, int from_y, int to_y)
 {
     // make sure we don't overflow
-    EPI_ASSERT(used_width_ * used_height_ <= 2048 * 2048);
+    EPI_ASSERT(width_ * height_ <= 2048 * 2048);
 
     int darkest_total = 765;
     int darkest_r     = 0;
@@ -731,10 +731,10 @@ RGBAColor ImageData::DarkestColor(int from_x, int to_x, int from_y, int to_y)
     int darkest_b     = 0;
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
-    from_x = HMM_Clamp(0, from_x, used_width_ - 1);
-    to_x   = HMM_Clamp(1, to_x, used_width_);
-    from_y = HMM_Clamp(0, from_y, used_height_ - 1);
-    to_y   = HMM_Clamp(1, to_y, used_height_);
+    from_x = HMM_Clamp(0, from_x, width_ - 1);
+    to_x   = HMM_Clamp(1, to_x, width_);
+    from_y = HMM_Clamp(0, from_y, height_ - 1);
+    to_y   = HMM_Clamp(1, to_y, height_);
 
     for (int y = from_y; y < to_y; y++)
     {
@@ -805,31 +805,6 @@ void ImageData::Swirl(int leveltime, int thickness)
     }
     delete[] pixels_;
     pixels_ = new_pixels_;
-}
-
-void ImageData::FillMarginX(int actual_w)
-{
-    if (actual_w >= width_)
-        return;
-
-    for (int x = 0; x < (width_ - actual_w); x++)
-    {
-        for (int y = 0; y < height_; y++)
-        {
-            memcpy(pixels_ + (y * width_ + x + actual_w) * depth_, pixels_ + (y * width_ + x) * depth_, depth_);
-        }
-    }
-}
-
-void ImageData::FillMarginY(int actual_h)
-{
-    if (actual_h >= height_)
-        return;
-
-    for (int y = 0; y < (height_ - actual_h); y++)
-    {
-        memcpy(pixels_ + (y + actual_h) * width_ * depth_, pixels_ + y * width_ * depth_, width_ * depth_);
-    }
 }
 
 void ImageData::SetHSV(int rotation, int saturation, int value)

@@ -234,7 +234,7 @@ static void AddImageToMap(ImageMap &map, const char *name, Image *image)
 //
 
 Image::Image()
-    : actual_width_(0), actual_height_(0), total_width_(0), total_height_(0), width_ratio_(0.0), height_ratio_(0.0),
+    : width_(0), height_(0),
       name_("_UNINIT_"), source_type_(kImageSourceDummy), source_palette_(-1), cache_()
 {
     EPI_CLEAR_MEMORY(&source_, ImageSource, 1);
@@ -253,23 +253,19 @@ void StoreBlurredImage(const Image *image)
     {
         img->blurred_version_                     = new Image;
         img->blurred_version_->name_              = std::string(img->name_).append("_BLURRED");
-        img->blurred_version_->actual_height_     = img->actual_height_;
-        img->blurred_version_->actual_width_      = img->actual_width_;
+        img->blurred_version_->height_     = img->height_;
+        img->blurred_version_->width_      = img->width_;
         img->blurred_version_->is_empty_          = img->is_empty_;
         img->blurred_version_->is_font_           = img->is_font_;
         img->blurred_version_->liquid_type_       = img->liquid_type_;
         img->blurred_version_->offset_x_          = img->offset_x_;
         img->blurred_version_->offset_y_          = img->offset_y_;
         img->blurred_version_->opacity_           = img->opacity_;
-        img->blurred_version_->height_ratio_      = img->height_ratio_;
-        img->blurred_version_->width_ratio_       = img->width_ratio_;
         img->blurred_version_->scale_x_           = img->scale_x_;
         img->blurred_version_->scale_y_           = img->scale_y_;
         img->blurred_version_->source_            = img->source_;
         img->blurred_version_->source_palette_    = img->source_palette_;
         img->blurred_version_->source_type_       = img->source_type_;
-        img->blurred_version_->total_height_      = img->total_height_;
-        img->blurred_version_->total_width_       = img->total_width_;
         img->blurred_version_->animation_.current = img->blurred_version_;
         img->blurred_version_->animation_.next    = nullptr;
         img->blurred_version_->animation_.count   = 0;
@@ -290,12 +286,8 @@ static Image *NewImage(int width, int height, int opacity = kOpacityUnknown)
 {
     Image *rim = new Image;
 
-    rim->actual_width_  = width;
-    rim->actual_height_ = height;
-    rim->total_width_   = MakeValidTextureSize(width);
-    rim->total_height_  = MakeValidTextureSize(height);
-    rim->width_ratio_   = (float)width / (float)rim->total_width_ * 0.0625;
-    rim->height_ratio_  = (float)height / (float)rim->total_height_ * 0.0625;
+    rim->width_  = width;
+    rim->height_ = height;
     rim->offset_x_ = rim->offset_y_ = 0;
     rim->scale_x_ = rim->scale_y_ = 1.0f;
     rim->opacity_                 = opacity;
@@ -455,8 +447,8 @@ static Image *AddPackImageSmartInternal(const char *name, ImageSource type, cons
 
     if (replaces)
     {
-        rim->scale_x_ = replaces->actual_width_ / (float)width;
-        rim->scale_y_ = replaces->actual_height_ / (float)height;
+        rim->scale_x_ = replaces->width_ / (float)width;
+        rim->scale_y_ = replaces->height_ / (float)height;
 
         if (!is_patch && replaces->source_type_ == kImageSourceSprite)
         {
@@ -594,8 +586,8 @@ static Image *AddImage_SmartInternal(const char *name, ImageSource type, int lum
 
     if (replaces)
     {
-        rim->scale_x_ = replaces->actual_width_ / (float)width;
-        rim->scale_y_ = replaces->actual_height_ / (float)height;
+        rim->scale_x_ = replaces->width_ / (float)width;
+        rim->scale_y_ = replaces->height_ / (float)height;
 
         if (!is_patch && replaces->source_type_ == kImageSourceSprite)
         {
@@ -769,7 +761,7 @@ static Image *AddImage_DOOM(ImageDefinition *def, bool user_defined = false)
 
     if (def->special_ & kImageSpecialCrosshair)
     {
-        float dy = (200.0f - rim->actual_height_ * rim->scale_y_) / 2.0f; // - WEAPONTOP;
+        float dy = (200.0f - rim->height_ * rim->scale_y_) / 2.0f; // - WEAPONTOP;
         rim->offset_y_ += int(dy / rim->scale_y_);
     }
 
@@ -890,7 +882,7 @@ static Image *AddImageUser(ImageDefinition *def)
 
     if (def->special_ & kImageSpecialCrosshair)
     {
-        float dy = (200.0f - rim->actual_height_ * rim->scale_y_) / 2.0f; // - WEAPONTOP;
+        float dy = (200.0f - rim->height_ * rim->scale_y_) / 2.0f; // - WEAPONTOP;
         rim->offset_y_ += int(dy / rim->scale_y_);
     }
 
@@ -985,14 +977,14 @@ const Image *CreateSprite(const char *name, int lump, bool is_weapon)
     // adjust sprite offsets so that (0,0) is normal
     if (is_weapon)
     {
-        rim->offset_x_ += (320.0f / 2.0f - rim->actual_width_ / 2.0f); // loss of accuracy
-        rim->offset_y_ += (200.0f - 32.0f - rim->actual_height_);
+        rim->offset_x_ += (320.0f / 2.0f - rim->width_ / 2.0f); // loss of accuracy
+        rim->offset_y_ += (200.0f - 32.0f - rim->height_);
     }
     else
     {
-        // rim->offset_x_ -= rim->actual_width_ / 2;   // loss of accuracy
-        rim->offset_x_ -= ((float)rim->actual_width_) / 2.0f; // Lobo 2023: dancing eye fix
-        rim->offset_y_ -= rim->actual_height_;
+        // rim->offset_x_ -= rim->width_ / 2;   // loss of accuracy
+        rim->offset_x_ -= ((float)rim->width_) / 2.0f; // Lobo 2023: dancing eye fix
+        rim->offset_y_ -= rim->height_;
     }
 
     return rim;
@@ -1010,13 +1002,13 @@ const Image *CreatePackSprite(const std::string &packname, const PackFile *pack,
     // adjust sprite offsets so that (0,0) is normal
     if (is_weapon)
     {
-        rim->offset_x_ += (320.0f / 2.0f - rim->actual_width_ / 2.0f);
-        rim->offset_y_ += (200.0f - 32.0f - rim->actual_height_);
+        rim->offset_x_ += (320.0f / 2.0f - rim->width_ / 2.0f);
+        rim->offset_y_ += (200.0f - 32.0f - rim->height_);
     }
     else
     {
-        rim->offset_x_ -= ((float)rim->actual_width_) / 2.0f; // Lobo 2023: dancing eye fix
-        rim->offset_y_ -= rim->actual_height_;
+        rim->offset_x_ -= ((float)rim->width_) / 2.0f; // Lobo 2023: dancing eye fix
+        rim->offset_y_ -= rim->height_;
     }
 
     return rim;
@@ -1423,8 +1415,8 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
     {
         rim->real_left_   = 0;
         rim->real_bottom_ = 0;
-        rim->real_top_    = rim->actual_height_;
-        rim->real_right_  = rim->actual_width_;
+        rim->real_top_    = rim->height_;
+        rim->real_right_  = rim->width_;
     }
 
     GLuint tex_id =
@@ -2174,8 +2166,8 @@ void AnimateImageSet(const Image **images, int number, int speed)
         {
             Image *dupe_image           = new Image;
             dupe_image->name_           = rim->name_;
-            dupe_image->actual_height_  = rim->actual_height_;
-            dupe_image->actual_width_   = rim->actual_width_;
+            dupe_image->height_  = rim->height_;
+            dupe_image->width_   = rim->width_;
             dupe_image->cache_          = rim->cache_;
             dupe_image->is_empty_       = rim->is_empty_;
             dupe_image->is_font_        = rim->is_font_;
@@ -2183,15 +2175,11 @@ void AnimateImageSet(const Image **images, int number, int speed)
             dupe_image->offset_x_       = rim->offset_x_;
             dupe_image->offset_y_       = rim->offset_y_;
             dupe_image->opacity_        = rim->opacity_;
-            dupe_image->height_ratio_   = rim->height_ratio_;
-            dupe_image->width_ratio_    = rim->width_ratio_;
             dupe_image->scale_x_        = rim->scale_x_;
             dupe_image->scale_y_        = rim->scale_y_;
             dupe_image->source_         = rim->source_;
             dupe_image->source_palette_ = rim->source_palette_;
             dupe_image->source_type_    = rim->source_type_;
-            dupe_image->total_height_   = rim->total_height_;
-            dupe_image->total_width_    = rim->total_width_;
             rim                         = dupe_image;
         }
 

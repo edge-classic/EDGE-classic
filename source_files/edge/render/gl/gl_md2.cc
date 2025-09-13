@@ -1122,8 +1122,8 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
                               : is_weapon                 ? nullptr
                                                           : mo->info_->palremap_);
 
-        data.image_right_ = skin_img->Right();
-        data.image_top_   = skin_img->Top();
+        data.image_right_ = 1.0f;
+        data.image_top_   = 1.0f;
 
         AbstractShader *shader =
             GetColormapShader(props, mo->info_->force_fullbright_ ? 255 : mo->state_->bright, mo->subsector_->sector);
@@ -1373,8 +1373,8 @@ void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, f
 
     GLuint skin_tex = ImageCache(skin_img, false, info->palremap_);
 
-    float im_right = skin_img->Right();
-    float im_top   = skin_img->Top();
+    float im_right = 1.0f;
+    float im_top   = 1.0f;
 
     xscale = yscale * info->model_scale_ * info->model_aspect_;
     yscale = yscale * info->model_scale_;

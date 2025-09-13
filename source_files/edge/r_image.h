@@ -60,15 +60,8 @@ enum LiquidImageType
 class Image
 {
   public:
-    // actual image size.  Images that are smaller than their total size
-    // are located in the bottom left corner, cannot tile, and are padded
-    // with black pixels if solid, or transparent pixels otherwise.
-    uint16_t actual_width_;
-    uint16_t actual_height_;
-
-    // total image size, must be a power of two on each axis.
-    uint16_t total_width_;
-    uint16_t total_height_;
+    uint16_t width_;
+    uint16_t height_;
 
     // bounds of the "real", i.e. visible pixels within the
     // image. Used for sprite clipping, font patch atlas characters, etc
@@ -76,10 +69,6 @@ class Image
     uint16_t real_top_;
     uint16_t real_left_;
     uint16_t real_right_;
-
-    // ratio of actual w/h to total w/h of the image for calculating texcoords
-    float width_ratio_;
-    float height_ratio_;
 
     // offset values.  Only used for sprites and on-screen patches.
     float offset_x_;
@@ -187,34 +176,14 @@ class Image
     Image();
     ~Image();
 
-    float Right() const
+    float ScaledWidth() const
     {
-        return (float(actual_width_) / total_width_);
+        return (width_ * scale_x_);
     }
 
-    float Top() const
+    float ScaledHeight() const
     {
-        return (float(actual_height_) / total_height_);
-    }
-
-    float ScaledWidthActual() const
-    {
-        return (actual_width_ * scale_x_);
-    }
-
-    float ScaledHeightActual() const
-    {
-        return (actual_height_ * scale_y_);
-    }
-
-    float ScaledWidthTotal() const
-    {
-        return (total_width_ * scale_x_);
-    }
-
-    float ScaledHeightTotal() const
-    {
-        return (total_height_ * scale_y_);
+        return (height_ * scale_y_);
     }
 
     float ScaledOffsetX() const
@@ -297,9 +266,6 @@ void   ImagePrecache(const Image *image);
 
 // this only needed during initialisation -- r_things.cpp
 const Image **GetUserSprites(int *count);
-
-// internal routines -- only needed by rgl_wipe.c
-int MakeValidTextureSize(int value);
 
 // Store a duplicate version of the image_c with smoothing forced
 void StoreBlurredImage(const Image *image);

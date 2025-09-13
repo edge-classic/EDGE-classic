@@ -452,15 +452,15 @@ static void FillSpriteFramesUser()
                 // adjust sprite offsets so that (0,0) is normal
                 if (sprite_map[S]->HasWeapon())
                 {
-                    change_img->offset_x_ += (320.0f / 2.0f - change_img->actual_width_ / 2.0f); // loss of accuracy
-                    change_img->offset_y_ += (200.0f - 32.0f - change_img->actual_height_);
+                    change_img->offset_x_ += (320.0f / 2.0f - change_img->width_ / 2.0f); // loss of accuracy
+                    change_img->offset_y_ += (200.0f - 32.0f - change_img->height_);
                 }
                 else
                 {
-                    // rim->offset_x_ -= rim->actual_width_ / 2;   // loss of
+                    // rim->offset_x_ -= rim->width_ / 2;   // loss of
                     // accuracy
-                    change_img->offset_x_ -= ((float)change_img->actual_width_) / 2.0f; // Lobo 2023: dancing eye fix
-                    change_img->offset_y_ -= change_img->actual_height_;
+                    change_img->offset_x_ -= ((float)change_img->width_) / 2.0f; // Lobo 2023: dancing eye fix
+                    change_img->offset_y_ -= change_img->height_;
                 }
             }
 

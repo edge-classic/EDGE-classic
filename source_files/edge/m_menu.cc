@@ -590,7 +590,7 @@ void MenuReadSaveStrings(void)
 int CenterMenuImage(const Image *img)
 {
     float CenterX = 160;
-    CenterX -= img->ScaledWidthActual() / 2;
+    CenterX -= img->ScaledWidth() / 2;
 
     return CenterX;
 }
@@ -604,7 +604,7 @@ int CenterMenuImage2(Style *style, int text_type, const Image *img)
     float txtscale = style->definition_->text_[text_type].scale_;
     float gfxWidth = 0;
 
-    gfxWidth = img->ScaledWidthActual() * txtscale;
+    gfxWidth = img->ScaledWidth() * txtscale;
     CenterX -= gfxWidth / 2;
     CenterX += style->definition_->text_[text_type].x_offset_;
 
@@ -782,7 +782,7 @@ static void MenuDrawSaveLoadCommon(Style *style, float LineHeight)
 
     if (info->save_image_data && info->save_texture_id)
     {
-        float height = 95.0f * info->save_image_data->used_height_ / info->save_image_data->used_width_;
+        float height = 95.0f * info->save_image_data->height_ / info->save_image_data->width_;
         HUDStretchFromImageData(
             x - 3,
             y + ((style->definition_->text_[text_type].y_offset_ + style->definition_->entry_spacing_ + 114) - y -
@@ -1257,7 +1257,7 @@ void MenuDrawNewGame(void)
             x = CenterMenuImage2(style, fontType, menu_new_game);
 
         HUDStretchImage(x, 14 + style->definition_->text_[fontType].y_offset_,
-                        menu_new_game->ScaledWidthActual() * txtscale, menu_new_game->ScaledHeightActual() * txtscale,
+                        menu_new_game->ScaledWidth() * txtscale, menu_new_game->ScaledHeight() * txtscale,
                         menu_new_game, 0.0, 0.0, colmap);
 
         // HUDDrawImage(x + style->definition_->text[fontType].x_offset,
@@ -1279,7 +1279,7 @@ void MenuDrawNewGame(void)
         }
         colmap = style->definition_->text_[fontType].colmap_;
         HUDStretchImage(x, 38 + style->definition_->text_[fontType].y_offset_,
-                        menu_skill->ScaledWidthActual() * txtscale, menu_skill->ScaledHeightActual() * txtscale,
+                        menu_skill->ScaledWidth() * txtscale, menu_skill->ScaledHeight() * txtscale,
                         menu_skill, 0.0, 0.0, colmap);
 
         // HUDDrawImage(x + style->definition_->text[fontType].x_offset,
@@ -1413,7 +1413,7 @@ void MenuDrawEpisode(void)
 
         const Colormap *colmap = style->definition_->text_[fontType].colmap_;
         HUDStretchImage(x, 18 + style->definition_->text_[fontType].y_offset_,
-                        menu_episode->ScaledWidthActual() * txtscale, menu_episode->ScaledHeightActual() * txtscale,
+                        menu_episode->ScaledWidth() * txtscale, menu_episode->ScaledHeight() * txtscale,
                         menu_episode, 0.0, 0.0, colmap);
 
         // HUDDrawImage(x + episode_style->definition_->text[fontType].x_offset,
@@ -1734,17 +1734,17 @@ void DrawMenuSlider(int x, int y, float slider_position, float increment, int di
 
         int i = 0;
 
-        HUDStretchImage(x, y, step + 1, therm_l->ScaledHeightActual() / div, therm_l, 0.0, 0.0);
+        HUDStretchImage(x, y, step + 1, therm_l->ScaledHeight() / div, therm_l, 0.0, 0.0);
 
         for (x += step; i < (50 / step); i++, x += step)
         {
-            HUDStretchImage(x, y, step + 1, therm_m->ScaledHeightActual() / div, therm_m, 0.0, 0.0);
+            HUDStretchImage(x, y, step + 1, therm_m->ScaledHeight() / div, therm_m, 0.0, 0.0);
         }
 
-        HUDStretchImage(x, y, step + 1, therm_r->ScaledHeightActual() / div, therm_r, 0.0, 0.0);
+        HUDStretchImage(x, y, step + 1, therm_r->ScaledHeight() / div, therm_r, 0.0, 0.0);
 
         HUDStretchImage(basex + ((slider_position - min) / increment) * scale_step + 1, y, step + 1,
-                        therm_o->ScaledHeightActual() / div, therm_o, 0.0, 0.0);
+                        therm_o->ScaledHeight() / div, therm_o, 0.0, 0.0);
 
         if (!actual_val.empty())
             HUDWriteText(opt_style, StyleDefinition::kTextSectionAlternate,
@@ -2508,13 +2508,13 @@ void MenuDrawCursor(Style *style, bool graphical_item)
                 y_shift      = style->fonts_[StyleDefinition::kTextSectionText]->GetYShift() * txtscale;
             }
         }
-        TempScale = ShortestLine / cursor->ScaledHeightActual();
-        TempWidth = cursor->ScaledWidthActual() * TempScale;
+        TempScale = ShortestLine / cursor->ScaledHeight();
+        TempWidth = cursor->ScaledWidth() * TempScale;
         if (!style->definition_->cursor_.scaling_)
         {
-            current_menu->menu_items[item_on].y -= (cursor->ScaledHeightActual() - ShortestLine) / 2;
-            ShortestLine = cursor->ScaledHeightActual();
-            TempWidth    = cursor->ScaledWidthActual();
+            current_menu->menu_items[item_on].y -= (cursor->ScaledHeight() - ShortestLine) / 2;
+            ShortestLine = cursor->ScaledHeight();
+            TempWidth    = cursor->ScaledWidth();
         }
     }
 
@@ -2529,7 +2529,7 @@ void MenuDrawCursor(Style *style, bool graphical_item)
                                current_menu->menu_items[item_on].name) *
                            txtscale;
             else
-                txtWidth = current_menu->menu_items[item_on].image->ScaledWidthActual() * txtscale;
+                txtWidth = current_menu->menu_items[item_on].image->ScaledWidth() * txtscale;
 
             TempX = current_menu->menu_items[item_on].x + WidestLine - TempSpacer;
             TempX -= txtWidth;
@@ -2609,7 +2609,7 @@ void MenuDrawCursor(Style *style, bool graphical_item)
                                current_menu->menu_items[item_on].name) *
                            txtscale;
             else
-                txtWidth = current_menu->menu_items[item_on].image->ScaledWidthActual() * txtscale;
+                txtWidth = current_menu->menu_items[item_on].image->ScaledWidth() * txtscale;
 
             TempX = current_menu->menu_items[item_on].x + txtWidth + TempSpacer;
             TempY = current_menu->menu_items[item_on].y + y_shift;
@@ -2678,7 +2678,7 @@ void MenuDrawCursor(Style *style, bool graphical_item)
                                current_menu->menu_items[item_on].name) *
                            txtscale;
             else
-                txtWidth = current_menu->menu_items[item_on].image->ScaledWidthActual() * txtscale;
+                txtWidth = current_menu->menu_items[item_on].image->ScaledWidth() * txtscale;
 
             TempX = current_menu->menu_items[item_on].x + txtWidth + TempSpacer;
         }
@@ -2803,8 +2803,8 @@ void MenuDrawItems(Style *style, bool graphical_item)
 
             const Image *image = current_menu->menu_items[i].image;
 
-            current_menu->menu_items[i].height = image->ScaledHeightActual() * txtscale;
-            current_menu->menu_items[i].width  = image->ScaledWidthActual() * txtscale;
+            current_menu->menu_items[i].height = image->ScaledHeight() * txtscale;
+            current_menu->menu_items[i].width  = image->ScaledWidth() * txtscale;
 
             if (!image->is_empty_)
             {

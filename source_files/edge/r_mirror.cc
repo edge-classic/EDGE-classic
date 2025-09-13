@@ -93,8 +93,8 @@ static void DrawPortalPolygon(DrawMirror *mir)
     render_mirror_set.Coordinate(x2, y2);
 
     // get texture coordinates
-    float total_w = surf->image->ScaledWidthTotal();
-    float total_h = surf->image->ScaledHeightTotal();
+    float total_w = surf->image->ScaledWidth();
+    float total_h = surf->image->ScaledHeight();
 
     float tx1 = mir->seg->offset;
     float tx2 = tx1 + mir->seg->length;

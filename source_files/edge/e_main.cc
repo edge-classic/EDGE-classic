@@ -267,8 +267,8 @@ class StartupProgress
             unsigned int tex_id  = available_overlays[video_overlay.s_].second;
             if (ov_data && tex_id)
                 HUDRawFromTexID(0, 0, current_screen_width, current_screen_height, tex_id, kOpacityComplex, 0, 0,
-                                (float)current_screen_width / ov_data->used_width_,
-                                (float)current_screen_height / ov_data->used_height_, HUDGetAlpha());
+                                (float)current_screen_width / ov_data->width_,
+                                (float)current_screen_height / ov_data->height_, HUDGetAlpha());
         }
 
         if (gamma_correction.f_ < 0)
@@ -593,8 +593,8 @@ static void DisplayPauseImage(void)
 
     // make sure image is centered horizontally
 
-    float w = pause_image->ScaledWidthActual();
-    float h = pause_image->ScaledHeightActual();
+    float w = pause_image->ScaledWidth();
+    float h = pause_image->ScaledHeight();
 
     float x = 160 - w / 2;
     float y = 10;
@@ -755,8 +755,8 @@ void EdgeDisplay(void)
             unsigned int tex_id  = available_overlays[video_overlay.s_].second;
             if (ov_data && tex_id)
                 HUDRawFromTexID(0, 0, current_screen_width, current_screen_height, tex_id, kOpacityComplex, 0, 0,
-                                (float)current_screen_width / ov_data->used_width_,
-                                (float)current_screen_height / ov_data->used_height_, HUDGetAlpha());
+                                (float)current_screen_width / ov_data->width_,
+                                (float)current_screen_height / ov_data->height_, HUDGetAlpha());
         }
     }
 
@@ -1058,8 +1058,8 @@ static void PickMenuBackdrop(void)
         title_pic                        = 29999;
         Image *new_backdrop              = new Image;
         new_backdrop->name_              = menu_image->name_;
-        new_backdrop->actual_height_     = menu_image->actual_height_;
-        new_backdrop->actual_width_      = menu_image->actual_width_;
+        new_backdrop->height_     = menu_image->height_;
+        new_backdrop->width_      = menu_image->width_;
         new_backdrop->cache_             = menu_image->cache_;
         new_backdrop->is_empty_          = menu_image->is_empty_;
         new_backdrop->is_font_           = menu_image->is_font_;
@@ -1067,15 +1067,11 @@ static void PickMenuBackdrop(void)
         new_backdrop->offset_x_          = menu_image->offset_x_;
         new_backdrop->offset_y_          = menu_image->offset_y_;
         new_backdrop->opacity_           = menu_image->opacity_;
-        new_backdrop->height_ratio_      = menu_image->height_ratio_;
-        new_backdrop->width_ratio_       = menu_image->width_ratio_;
         new_backdrop->scale_x_           = menu_image->scale_x_;
         new_backdrop->scale_y_           = menu_image->scale_y_;
         new_backdrop->source_            = menu_image->source_;
         new_backdrop->source_palette_    = menu_image->source_palette_;
         new_backdrop->source_type_       = menu_image->source_type_;
-        new_backdrop->total_height_      = menu_image->total_height_;
-        new_backdrop->total_width_       = menu_image->total_width_;
         new_backdrop->animation_.current = new_backdrop;
         new_backdrop->grayscale_         = true;
         menu_backdrop                    = new_backdrop;
@@ -1089,8 +1085,8 @@ static void PickMenuBackdrop(void)
     {
         Image *new_backdrop              = new Image;
         new_backdrop->name_              = loading_image->name_;
-        new_backdrop->actual_height_     = loading_image->actual_height_;
-        new_backdrop->actual_width_      = loading_image->actual_width_;
+        new_backdrop->height_     = loading_image->height_;
+        new_backdrop->width_      = loading_image->width_;
         new_backdrop->cache_             = loading_image->cache_;
         new_backdrop->is_empty_          = loading_image->is_empty_;
         new_backdrop->is_font_           = loading_image->is_font_;
@@ -1098,15 +1094,11 @@ static void PickMenuBackdrop(void)
         new_backdrop->offset_x_          = loading_image->offset_x_;
         new_backdrop->offset_y_          = loading_image->offset_y_;
         new_backdrop->opacity_           = loading_image->opacity_;
-        new_backdrop->height_ratio_      = loading_image->height_ratio_;
-        new_backdrop->width_ratio_       = loading_image->width_ratio_;
         new_backdrop->scale_x_           = loading_image->scale_x_;
         new_backdrop->scale_y_           = loading_image->scale_y_;
         new_backdrop->source_            = loading_image->source_;
         new_backdrop->source_palette_    = loading_image->source_palette_;
         new_backdrop->source_type_       = loading_image->source_type_;
-        new_backdrop->total_height_      = loading_image->total_height_;
-        new_backdrop->total_width_       = loading_image->total_width_;
         new_backdrop->animation_.current = new_backdrop;
         new_backdrop->grayscale_         = true;
         menu_backdrop                    = new_backdrop;

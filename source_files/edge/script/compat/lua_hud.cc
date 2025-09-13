@@ -926,8 +926,8 @@ static int HD_get_average_top_border_color(lua_State *L)
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
-    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, tmp_img_c->actual_height_ - 1,
-                                               tmp_img_c->actual_height_);
+    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->width_, tmp_img_c->height_ - 1,
+                                               tmp_img_c->height_);
     rgb.X         = epi::GetRGBARed(col);
     rgb.Y         = epi::GetRGBAGreen(col);
     rgb.Z         = epi::GetRGBABlue(col);
@@ -953,7 +953,7 @@ static int HD_get_average_bottom_border_color(lua_State *L)
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
-    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, 0, 1);
+    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->width_, 0, 1);
     rgb.X         = epi::GetRGBARed(col);
     rgb.Y         = epi::GetRGBAGreen(col);
     rgb.Z         = epi::GetRGBABlue(col);

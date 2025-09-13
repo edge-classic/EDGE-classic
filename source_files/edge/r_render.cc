@@ -553,8 +553,8 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
             lit_adjust += 16;
     }
 
-    float total_w = image->ScaledWidthTotal();
-    float total_h = image->ScaledHeightTotal();
+    float total_w = image->ScaledWidth();
+    float total_h = image->ScaledHeight();
 
     /* convert tex_x1 and tex_x2 from world coords to texture coords */
     tex_x1 = (tex_x1 * surf->x_matrix.X) / total_w;
@@ -566,7 +566,7 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
     render_mirror_set.Height(tex_top_h);
 
     float ty_mul = surf->y_matrix.Y / (total_h * render_mirror_set.ZScale());
-    float ty0    = image->Top() - tex_top_h * ty_mul;
+    float ty0    = 1.0f - tex_top_h * ty_mul;
 
 #if (DEBUG >= 3)
     LogDebug("WALL (%d,%d,%d) -> (%d,%d,%d)\n", (int)x1, (int)y1, (int)top, (int)x2, (int)y2, (int)bottom);
@@ -710,7 +710,7 @@ static void DrawSlidingDoor(DrawFloor *dfloor, float c, float f, float tex_top_h
 
     Line *ld = current_seg->linedef;
 
-    /// float im_width = wt->surface->image->ScaledWidthActual();
+    /// float im_width = wt->surface->image->ScaledWidth();
 
     int num_parts = 1;
     if (current_seg->linedef->slide_door->s_.type_ == kSlidingDoorTypeCenter)
@@ -878,12 +878,12 @@ static void DrawTile(Seg *seg, DrawFloor *dfloor, float lz1, float lz2, float rz
 
     if (!AlmostEquals(surf->old_offset.X, surf->offset.X) && !console_active && !paused && !menu_active &&
         !time_stop_active && !erraticism_active)
-        offx = fmod(HMM_Lerp(surf->old_offset.X, fractional_tic, surf->offset.X), surf->image->actual_width_);
+        offx = fmod(HMM_Lerp(surf->old_offset.X, fractional_tic, surf->offset.X), surf->image->width_);
     else
         offx = surf->offset.X;
     if (!AlmostEquals(surf->old_offset.Y, surf->offset.Y) && !console_active && !paused && !menu_active &&
         !time_stop_active && !erraticism_active)
-        offy = fmod(HMM_Lerp(surf->old_offset.Y, fractional_tic, surf->offset.Y), surf->image->actual_height_);
+        offy = fmod(HMM_Lerp(surf->old_offset.Y, fractional_tic, surf->offset.Y), surf->image->height_);
     else
         offy = surf->offset.Y;
 
@@ -971,7 +971,7 @@ static inline void AddWallTile2(Seg *seg, DrawFloor *dfloor, MapSurface *surf, f
 static inline float SafeImageHeight(const Image *image)
 {
     if (image)
-        return image->ScaledHeightActual();
+        return image->ScaledHeight();
     else
         return 0;
 }
@@ -1328,12 +1328,12 @@ static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_m
         else if (ld->flags & kLineFlagLowerUnpegged)
         {
             f2 = f1 + sd->middle_mask_offset;
-            c2 = f2 + (sd->middle.image->ScaledHeightActual() / sd->middle.y_matrix.Y);
+            c2 = f2 + (sd->middle.image->ScaledHeight() / sd->middle.y_matrix.Y);
         }
         else
         {
             c2 = c1 + sd->middle_mask_offset;
-            f2 = c2 - (sd->middle.image->ScaledHeightActual() / sd->middle.y_matrix.Y);
+            f2 = c2 - (sd->middle.image->ScaledHeight() / sd->middle.y_matrix.Y);
         }
 
         tex_z = c2;
@@ -1678,16 +1678,16 @@ static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_d
     data.R = data.G = data.B = 255;
     if (!AlmostEquals(surf->old_offset.X, surf->offset.X) && !console_active && !paused && !menu_active &&
         !time_stop_active && !erraticism_active)
-        data.tx0 = fmod(HMM_Lerp(surf->old_offset.X, fractional_tic, surf->offset.X), surf->image->actual_width_);
+        data.tx0 = fmod(HMM_Lerp(surf->old_offset.X, fractional_tic, surf->offset.X), surf->image->width_);
     else
         data.tx0 = surf->offset.X;
     if (!AlmostEquals(surf->old_offset.Y, surf->offset.Y) && !console_active && !paused && !menu_active &&
         !time_stop_active && !erraticism_active)
-        data.ty0 = fmod(HMM_Lerp(surf->old_offset.Y, fractional_tic, surf->offset.Y), surf->image->actual_height_);
+        data.ty0 = fmod(HMM_Lerp(surf->old_offset.Y, fractional_tic, surf->offset.Y), surf->image->height_);
     else
         data.ty0 = surf->offset.Y;
-    data.image_w    = surf->image->ScaledWidthActual();
-    data.image_h    = surf->image->ScaledHeightActual();
+    data.image_w    = surf->image->ScaledWidth();
+    data.image_h    = surf->image->ScaledHeight();
     data.x_mat      = surf->x_matrix;
     data.y_mat      = surf->y_matrix;
     float mir_scale = render_mirror_set.XYScale();
@@ -2453,8 +2453,8 @@ void EmulateFloodPlane(const DrawFloor *dfloor, const Sector *flood_ref, int fac
     // I don't think we need interpolation here...are there Boom scrollers which are also flat flooding hacks? - Dasho
     data.tx0     = surf->offset.X;
     data.ty0     = surf->offset.Y;
-    data.image_w = surf->image->ScaledWidthActual();
-    data.image_h = surf->image->ScaledHeightActual();
+    data.image_w = surf->image->ScaledWidth();
+    data.image_h = surf->image->ScaledHeight();
 
     data.x_mat = surf->x_matrix;
     data.y_mat = surf->y_matrix;

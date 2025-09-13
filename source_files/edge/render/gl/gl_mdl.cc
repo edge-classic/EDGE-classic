@@ -483,10 +483,6 @@ class MDLCoordinateData
     float z_scale_;
     float bias_;
 
-    // image size
-    float image_right_;
-    float image_top_;
-
     // fuzzy info
     float    fuzz_multiplier_;
     HMM_Vec2 fuzz_add_;
@@ -759,9 +755,6 @@ void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float 
         data.fuzz_multiplier_ = 0.8;
         data.fuzz_add_        = {{0, 0}};
 
-        data.image_right_ = 1.0;
-        data.image_top_   = 1.0;
-
         if (!data.is_weapon && !view_is_zoomed)
         {
             float dist = ApproximateDistance(mo->x - view_x, mo->y - view_y, mo->z - view_z);
@@ -794,9 +787,6 @@ void MDLRenderModel(MDLModel *md, bool is_weapon, int frame1, int frame2, float 
 
         if (skin_tex == 0)
             FatalError("MDL Frame %s missing skins?\n", md->frames_[frame1].name);
-
-        data.image_right_ = (float)md->skin_width_ / (float)MakeValidTextureSize(md->skin_width_);
-        data.image_top_   = (float)md->skin_height_ / (float)MakeValidTextureSize(md->skin_height_);
 
         AbstractShader *shader =
             GetColormapShader(props, mo->info_->force_fullbright_ ? 255 : mo->state_->bright, mo->subsector_->sector);

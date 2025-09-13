@@ -329,10 +329,10 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
 
     GLuint tex_id = ImageCache(image, false, (which == kPlayerSpriteCrosshair) ? nullptr : render_view_effect_colormap);
 
-    float w     = image->ScaledWidthActual();
-    float h     = image->ScaledHeightActual();
-    float right = image->Right();
-    float top   = image->Top();
+    float w     = image->ScaledWidth();
+    float h     = image->ScaledHeight();
+    float right = 1.0f;
+    float top   = 1.0f;
     float ratio = 1.0f;
 
     bool is_fuzzy = (player->map_object_->flags_ & kMapObjectFlagFuzzy) ? true : false;
@@ -399,7 +399,7 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
     float tx1 = (coord_W - w) / 2.0 + psp_x - image->ScaledOffsetX();
     float tx2 = tx1 + w;
 
-    float ty1 = -psp_y + image->ScaledOffsetY() - ((h - image->ScaledHeightActual()) * 0.5f);
+    float ty1 = -psp_y + image->ScaledOffsetY() - ((h - image->ScaledHeight()) * 0.5f);
 #ifdef EDGE_CLASSIC
     if (LuaUseLuaHUD())
     {
@@ -1244,8 +1244,8 @@ static bool RenderThing(DrawThing *dthing, bool solid)
         image, false, render_view_effect_colormap ? render_view_effect_colormap : dthing->map_object->info_->palremap_);
 
     // calculate edges of the shape
-    float sprite_width  = image->ScaledWidthActual();
-    float sprite_height = image->ScaledHeightActual();
+    float sprite_width  = image->ScaledWidth();
+    float sprite_height = image->ScaledHeight();
     float side_offset   = image->ScaledOffsetX();
     float top_offset    = image->ScaledOffsetY();
 
@@ -1353,9 +1353,9 @@ static bool RenderThing(DrawThing *dthing, bool solid)
         }
     }
 
-    float h     = image->ScaledHeightActual();
-    float right = image->Right();
-    float top   = image->Top();
+    float h     = image->ScaledHeight();
+    float right = 1.0f;
+    float top   = 1.0f;
 
     float x1b, y1b, z1b, x1t, y1t, z1t;
     float x2b, y2b, z2b, x2t, y2t, z2t;

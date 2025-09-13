@@ -818,7 +818,7 @@ static void DrawKeys()
 
                 if (epi::StringCaseCompareASCII("DUMMY_SPRITE", img->name_) != 0)
                     HUDStretchImageNoOffset(key.x, key.y,
-                                            2 * map_scale * ((float)img->actual_width_ / img->actual_height_),
+                                            2 * map_scale * ((float)img->width_ / img->height_),
                                             2 * map_scale, img, 0, 0);
             }
         }

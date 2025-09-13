@@ -66,8 +66,8 @@ ImageFont::ImageFont(FontDefinition *definition)
         FatalError("LoadFontImage: Image %s not found for font %s!", definition_->image_name_.c_str(),
                    definition_->name_.c_str());
 
-    int char_height = font_image_->actual_height_ / 16;
-    int char_width  = font_image_->actual_width_ / 16;
+    int char_height = font_image_->height_ / 16;
+    int char_width  = font_image_->width_ / 16;
     image_character_height_ =
         (definition_->default_size_ == 0.0 ? char_height : definition_->default_size_) * font_image_->scale_y_;
     image_character_width_ =

@@ -945,8 +945,8 @@ static void HD_get_average_top_border_color(coal::VM *vm, int argc)
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
-    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, tmp_img_c->actual_height_ - 1,
-                                               tmp_img_c->actual_height_);
+    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->width_, tmp_img_c->height_ - 1,
+                                               tmp_img_c->height_);
     rgb[0]        = epi::GetRGBARed(col);
     rgb[1]        = epi::GetRGBAGreen(col);
     rgb[2]        = epi::GetRGBABlue(col);
@@ -973,7 +973,7 @@ static void HD_get_average_bottom_border_color(coal::VM *vm, int argc)
         delete tmp_img_data;
         tmp_img_data = rgb_img_data;
     }
-    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, 0, 1);
+    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->width_, 0, 1);
     rgb[0]        = epi::GetRGBARed(col);
     rgb[1]        = epi::GetRGBAGreen(col);
     rgb[2]        = epi::GetRGBABlue(col);

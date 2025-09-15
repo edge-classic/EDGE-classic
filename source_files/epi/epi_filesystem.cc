@@ -108,6 +108,14 @@ bool FileDelete(std::string_view name)
     std::wstring wname = epi::UTF8ToWString(name);
     return _wremove(wname.c_str()) == 0;
 }
+std::string CurrentDirectoryGet()
+{
+    std::string    directory;
+    const wchar_t *dir = _wgetcwd(nullptr, 0);
+    if (dir)
+        directory = epi::WStringToUTF8(dir);
+    return directory; // can be empty
+}
 bool IsDirectory(std::string_view dir)
 {
     EPI_ASSERT(!dir.empty());
@@ -283,6 +291,16 @@ bool FileDelete(std::string_view name)
     EPI_ASSERT(!name.empty());
     return remove(std::string(name).c_str()) == 0;
 }
+#ifndef EDGE_WEB
+std::string CurrentDirectoryGet()
+{
+    std::string directory;
+    const char *dir = getcwd(nullptr, 0);
+    if (dir)
+        directory = dir;
+    return directory;
+}
+#endif
 bool IsDirectory(std::string_view dir)
 {
     EPI_ASSERT(!dir.empty());

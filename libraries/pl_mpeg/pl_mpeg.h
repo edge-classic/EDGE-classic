@@ -144,6 +144,7 @@ See below for detailed the API documentation.
 #define PL_MPEG_H
 
 #include <stdint.h>
+#include <stdlib.h>
 
 
 #ifdef __cplusplus
@@ -826,7 +827,6 @@ plm_samples_t *plm_audio_decode(plm_audio_t *self);
 #ifdef PL_MPEG_IMPLEMENTATION
 
 #include <string.h>
-#include <stdlib.h>
 #ifndef PLM_NO_STDIO
 #include <stdio.h>
 #endif

@@ -1399,19 +1399,12 @@ static void CollectSearchPaths()
     if (check && epi::IsDirectory(check))
         load_file_search_paths.push_back(check);
 
-    if (check)
-    {
-        SDL_free(check);
-        check = NULL;
-    }
-
     check = SDL_getenv("DOOMWADPATH");
 
     if (check)
     {
         for (const std::string &dir : epi::SeparatedStringVector(check, ':'))
             load_file_search_paths.push_back(dir);
-        SDL_free(check);
     }
 }
 

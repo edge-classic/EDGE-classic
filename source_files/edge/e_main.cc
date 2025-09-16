@@ -1385,6 +1385,8 @@ static int CheckPackForGameFiles(std::string_view check_pack, FileKind check_kin
     }
 }
 
+// This list will be used to search for both IWADs and arbitrary files added
+// through the -file parameter
 static void CollectSearchPaths()
 {
 #ifndef EDGE_WEB
@@ -1394,7 +1396,7 @@ static void CollectSearchPaths()
     if (home_directory != game_directory)
         load_file_search_paths.push_back(game_directory);
 
-    char *check = SDL_getenv("DOOMWADDIR");
+    const char *check = SDL_getenv("DOOMWADDIR");
 
     if (check && epi::IsDirectory(check))
         load_file_search_paths.push_back(check);
@@ -1406,6 +1408,38 @@ static void CollectSearchPaths()
         for (const std::string &dir : epi::SeparatedStringVector(check, ':'))
             load_file_search_paths.push_back(dir);
     }
+}
+
+// This list of locations will only be used to search for IWADs; they are treated
+// like locations that a regular user would not have access to in order to
+// place arbitrary mods, PWADs, etc. These paths are checked after the
+// regular search paths collected above.
+static void CollectInstallSearchPaths(std::vector<std::string> &paths)
+{
+#if defined(EDGE_WEB)
+    return;
+#elif defined(_WIN32)
+    return;
+#else
+    const char *check = SDL_getenv("XDG_DATA_HOME");
+    if (check)
+    {
+        paths.push_back(epi::PathAppend(check, "games/doom"));
+    }
+    check = SDL_getenv("XDG_DATA_DIRS");
+    if (check)
+    {
+        for (const std::string &dir : epi::SeparatedStringVector(check, ':'))
+            paths.push_back(epi::PathAppend(dir, "games/doom"));
+    }
+    else
+    {
+        paths.push_back("/usr/local/share/games/doom");
+        paths.push_back("/usr/local/share/doom");
+        paths.push_back("/usr/share/games/doom");
+        paths.push_back("/usr/share/doom");
+    }
+#endif
 }
 
 //
@@ -1558,6 +1592,10 @@ static void IdentifyVersion(void)
         }
     }
 
+    std::vector<std::string> iwad_paths = load_file_search_paths;
+    // Append the normal search list with iwad-specific paths
+    CollectInstallSearchPaths(iwad_paths);
+
     // Should the IWAD Parameter not be empty then it means
     // that one was given which is not a directory. Therefore
     // we assume it to be a name
@@ -1578,9 +1616,9 @@ static void IdentifyVersion(void)
         if (!epi::TestFileAccess(iwad_file))
         {
             // Check DOOMWADPATH directories if present
-            for (size_t i = 0; i < load_file_search_paths.size(); i++)
+            for (size_t i = 0; i < iwad_paths.size(); i++)
             {
-                iwad_file = epi::PathAppend(load_file_search_paths[i], fn);
+                iwad_file = epi::PathAppend(iwad_paths[i], fn);
                 if (epi::TestFileAccess(iwad_file))
                     goto foundindoomwadpath;
             }
@@ -1595,9 +1633,9 @@ static void IdentifyVersion(void)
         if (!epi::TestFileAccess(iwad_file))
         {
             // Check DOOMWADPATH directories if present
-            for (size_t i = 0; i < load_file_search_paths.size(); i++)
+            for (size_t i = 0; i < iwad_paths.size(); i++)
             {
-                iwad_file = epi::PathAppend(load_file_search_paths[i], fn);
+                iwad_file = epi::PathAppend(iwad_paths[i], fn);
                 if (epi::TestFileAccess(iwad_file))
                     goto foundindoomwadpath;
             }
@@ -1644,9 +1682,9 @@ static void IdentifyVersion(void)
         std::vector<SDL_MessageBoxButtonData>                     game_buttons;
         std::unordered_map<int, std::pair<std::string, FileKind>> game_paths;
 
-        for (size_t i = 0; i < load_file_search_paths.size(); i++)
+        for (size_t i = 0; i < iwad_paths.size(); i++)
         {
-            location = load_file_search_paths[i].c_str();
+            location = iwad_paths[i].c_str();
 
             std::vector<epi::DirectoryEntry> fsd;
 
@@ -1859,8 +1897,11 @@ static void SetupLogAndDebugFiles(void)
     }
 }
 
-static void AddSingleCommandLineFile(const std::string &name, bool ignore_unknown)
+static void AddSingleCommandLineFile(const std::string &name, bool ignore_unknown, bool try_extensions = false)
 {
+    if (name == "$@") // part of our installed Linux launch script; need to catch
+        return;
+
     if (epi::IsDirectory(name))
     {
         AddDataFile(name, kFileKindFolder);
@@ -1886,7 +1927,7 @@ static void AddSingleCommandLineFile(const std::string &name, bool ignore_unknow
         kind = kFileKindDDF;
     else if (ext == ".deh" || ext == ".bex")
         kind = kFileKindDehacked;
-    else
+    else if (!ext.empty() || !try_extensions)
     {
         if (!ignore_unknown)
             FatalError("unknown file type: %s\n", name.c_str());
@@ -1902,6 +1943,31 @@ static void AddSingleCommandLineFile(const std::string &name, bool ignore_unknow
             {
                 AddDataFile(test, kind);
                 return;
+            }
+            else if (ext.empty() && try_extensions)
+            {
+                static std::vector<std::pair<std::string, FileKind>> supported_types = 
+                {
+                    {".wad", kFileKindPWAD},
+                    {".pk3", kFileKindEPK},
+                    {".epk", kFileKindEPK},
+                    {".zip", kFileKindEPK},
+                    {".rts", kFileKindRTS},
+                    {".ddf", kFileKindDDF},
+                    {".ldf", kFileKindDDF},
+                    {".deh", kFileKindDehacked},
+                    {".bex", kFileKindDehacked}
+                };
+
+                for (const std::pair<std::string, FileKind> &type : supported_types)
+                {
+                    epi::ReplaceExtension(test, type.first);
+                    if (epi::TestFileAccess(test))
+                    {
+                        AddDataFile(test, type.second);
+                        return;
+                    }
+                }
             }
         }
     }
@@ -1928,7 +1994,7 @@ static void AddCommandLineFiles(void)
     {
         // go until end of parms or another '-' preceded parm
         if (!ArgumentIsOption(p))
-            AddSingleCommandLineFile(program_argument_list[p], false);
+            AddSingleCommandLineFile(program_argument_list[p], false, true);
 
         p++;
     }

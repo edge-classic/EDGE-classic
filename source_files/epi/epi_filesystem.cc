@@ -291,6 +291,7 @@ bool FileDelete(std::string_view name)
     EPI_ASSERT(!name.empty());
     return remove(std::string(name).c_str()) == 0;
 }
+#ifndef EDGE_WEB
 std::string CurrentDirectoryGet()
 {
     std::string directory;
@@ -299,6 +300,7 @@ std::string CurrentDirectoryGet()
         directory = dir;
     return directory;
 }
+#endif
 bool IsDirectory(std::string_view dir)
 {
     EPI_ASSERT(!dir.empty());

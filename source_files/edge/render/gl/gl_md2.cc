@@ -811,10 +811,6 @@ class MD2CoordinateData
     float z_scale_;
     float bias_;
 
-    // image size
-    float image_right_;
-    float image_top_;
-
     // fuzzy info
     float    fuzz_multiplier_;
     HMM_Vec2 fuzz_add_;
@@ -969,7 +965,7 @@ static inline void ModelCoordFunc(MD2CoordinateData *data, int v_idx)
         return;
     }
 
-    render_texture_coordinates = {{point->skin_s * data->image_right_, point->skin_t * data->image_top_}};
+    render_texture_coordinates = {{point->skin_s, point->skin_t}};
 
     ColorMixer *col = &data->normal_colors_[(data->lerp_ < 0.5) ? vert1->normal_idx : vert2->normal_idx];
 
@@ -1098,9 +1094,6 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
         data.fuzz_multiplier_ = 0.8;
         data.fuzz_add_        = {{0, 0}};
 
-        data.image_right_ = 1.0;
-        data.image_top_   = 1.0;
-
         if (!data.is_weapon && !view_is_zoomed)
         {
             float dist = ApproximateDistance(mo->x - view_x, mo->y - view_y, mo->z - view_z);
@@ -1121,9 +1114,6 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
                               render_view_effect_colormap ? render_view_effect_colormap
                               : is_weapon                 ? nullptr
                                                           : mo->info_->palremap_);
-
-        data.image_right_ = 1.0f;
-        data.image_top_   = 1.0f;
 
         AbstractShader *shader =
             GetColormapShader(props, mo->info_->force_fullbright_ ? 255 : mo->state_->bright, mo->subsector_->sector);
@@ -1373,9 +1363,6 @@ void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, f
 
     GLuint skin_tex = ImageCache(skin_img, false, info->palremap_);
 
-    float im_right = 1.0f;
-    float im_top   = 1.0f;
-
     xscale = yscale * info->model_scale_ * info->model_aspect_;
     yscale = yscale * info->model_scale_;
 
@@ -1410,7 +1397,7 @@ void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, f
 
                 const MD2Point  *point = &md->points_[strip->first + v_idx];
                 const MD2Vertex *vert  = &frame_ptr->vertices[point->vert_idx];
-                const HMM_Vec2   texc  = {{point->skin_s * im_right, point->skin_t * im_top}};
+                const HMM_Vec2   texc  = {{point->skin_s, point->skin_t}};
 
                 render_state->MultiTexCoord(GL_TEXTURE0, &texc);
 

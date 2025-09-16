@@ -3382,7 +3382,7 @@ void ShutdownLevel(void)
 
     P_RemoveSectorStuff();
 
-    StopLevelSoundEffects();
+    StopAllSoundEffects();
 
     DestroyAllForces();
     DestroyAllLights();

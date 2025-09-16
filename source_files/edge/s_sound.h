@@ -84,7 +84,7 @@ void ShutdownSound(void);
 void StartSoundEffect(const SoundEffect *sfx, int category = kCategoryUi, const Position *pos = nullptr, int flags = 0);
 
 void StopSoundEffect(const Position *pos);
-void StopLevelSoundEffects(void);
+void StopSoundEffect(const SoundEffect *sfx);
 void StopAllSoundEffects(void);
 
 void ResumeSound(void);

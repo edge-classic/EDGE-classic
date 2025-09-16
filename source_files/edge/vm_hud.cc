@@ -781,6 +781,22 @@ static void HD_play_sound(coal::VM *vm, int argc)
         LogWarning("hud.play_sound: unknown sfx '%s'\n", name);
 }
 
+// hud.kill_sound(name)
+//
+static void HD_kill_sound(coal::VM *vm, int argc)
+{
+    EPI_UNUSED(argc);
+
+    const char *name = vm->AccessParamString(0);
+
+    SoundEffect *fx = sfxdefs.GetEffect(name);
+
+    if (fx)
+        StopSoundEffect(fx);
+    else
+        LogWarning("hud.kill_sound: unknown sfx '%s'\n", name);
+}
+
 // hud.screen_aspect()
 //
 static void HD_screen_aspect(coal::VM *vm, int argc)
@@ -1129,6 +1145,7 @@ void COALRegisterHUD()
 
     // sound functions
     ui_vm->AddNativeFunction("hud.play_sound", HD_play_sound);
+    ui_vm->AddNativeFunction("hud.kill_sound", HD_kill_sound);
 
     // image color functions
     ui_vm->AddNativeFunction("hud.get_average_color", HD_get_average_color);

@@ -775,6 +775,28 @@ static int HD_play_sound(lua_State *L)
     return 1;
 }
 
+// hud.kill_sound(name)
+//
+static int HD_kill_sound(lua_State *L)
+{
+    const char *name = luaL_checkstring(L, 1);
+
+    SoundEffect *fx = sfxdefs.GetEffect(name);
+
+    if (fx)
+    {
+        StopSoundEffect(fx);
+        lua_pushboolean(L, 1);
+    }
+    else
+    {
+        LogWarning("hud.kill_sound: unknown sfx '%s'\n", name);
+        lua_pushboolean(L, 0);
+    }
+
+    return 1;
+}
+
 // hud.screen_aspect()
 //
 static int HD_screen_aspect(lua_State *L)
@@ -1095,6 +1117,7 @@ static const luaL_Reg hudlib[] = {{"game_mode", HD_game_mode},
 
                                   // sound functions
                                   {"play_sound", HD_play_sound},
+                                  {"kill_sound", HD_kill_sound},
 
                                   // image color functions
                                   {"get_average_color", HD_get_average_color},

@@ -2056,7 +2056,7 @@ void IntermissionStart(void)
     // Lobo 2025: if we have a camera set up we probably don't mind still hearing level sfx, otherwise nuke 'em ;)
     if (!background_camera_map_object)
     {
-        StopLevelSoundEffects();
+        StopAllSoundEffects();
         DestroyAllAmbientSounds();
     }
 }

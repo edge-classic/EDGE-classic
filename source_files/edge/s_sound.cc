@@ -518,16 +518,19 @@ void StopSoundEffect(const Position *pos)
     }
 }
 
-void StopLevelSoundEffects(void)
+void StopSoundEffect(const SoundEffect *sfx)
 {
     if (no_sound)
         return;
+
+    SoundEffectDefinition *def = LookupEffectDef(sfx);
+    EPI_ASSERT(def);
 
     for (int i = 0; i < total_channels; i++)
     {
         const SoundChannel *chan = mix_channels[i];
 
-        if (chan->state_ != kChannelEmpty && chan->category_ != kCategoryUi)
+        if (chan->state_ == kChannelPlaying && chan->definition_ == def)
         {
             KillSoundChannel(i);
         }

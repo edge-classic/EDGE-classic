@@ -1428,7 +1428,7 @@ void MD2RenderModel2D(MD2Model *md, const Image *skin_img, int frame, float x, f
 
                 const MD2Point  *point = &md->points_[strip->first + v_idx];
                 const MD2Vertex *vert  = &frame_ptr->vertices[point->vert_idx];
-                const HMM_Vec2   texc  = {{point->skin_s * im_right, point->skin_t * im_top}};
+                const HMM_Vec2   texc  = {{point->skin_s, point->skin_t}};
 
                 render_state->MultiTexCoord(GL_TEXTURE0, &texc);
 

@@ -954,9 +954,9 @@ void RecomputeGapsAroundSector(Sector *sec)
         if ((ref & kTriggerHeightReferenceMask) == kTriggerHeightReferenceCurrent)
         {
            if ((ref & kTriggerHeightReferenceCeiling) && !pl->is_ceiling)
-                pl->destination_height = sec->ceiling_height;
+                pl->destination_height = sec->ceiling_height + pl->type->dest_;
             else if (!(ref & kTriggerHeightReferenceCeiling) && pl->is_ceiling)
-                pl->destination_height = sec->floor_height; 
+                pl->destination_height = sec->floor_height + pl->type->dest_; 
         }
     }
 }

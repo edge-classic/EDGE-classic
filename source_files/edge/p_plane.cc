@@ -119,7 +119,12 @@ static const Image *SECPIC(Sector *sec, bool is_ceiling, const Image *new_image)
 //
 static float GetSecHeightReference(const PlaneMoverDefinition *def, Sector *sec, Sector *model)
 {
-    const TriggerHeightReference ref = def->destref_;
+    TriggerHeightReference ref;
+
+    if (def->type_ == kPlaneMoverPlatform || def->type_ == kPlaneMoverContinuous || def->type_ == kPlaneMoverToggle)
+        ref = def->otherref_;
+    else
+        ref = def->destref_;
 
     switch (ref & kTriggerHeightReferenceMask)
     {

@@ -52,7 +52,7 @@ jobs:
         retention-days: ${{env.RETENTION_DAYS}}
 
   build-win32-legacy:
-    runs-on: windows-latest
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
       - name: Download w64devkit
@@ -91,7 +91,7 @@ jobs:
           retention-days: ${{env.RETENTION_DAYS}}
 
   build-win64-d3d11:
-    runs-on: windows-latest
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
       - name: Configure CMake MSVC
@@ -114,7 +114,7 @@ jobs:
           retention-days: ${{env.RETENTION_DAYS}}
 
   build-win64-gl33:
-    runs-on: windows-latest
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
       - name: Configure CMake MSVC

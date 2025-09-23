@@ -425,8 +425,6 @@ void FinishFrame(void)
     EDGE_TracyPlot("draw_wall_parts", (int64_t)ec_frame_stats.draw_wall_parts);
     EDGE_TracyPlot("draw_planes", (int64_t)ec_frame_stats.draw_planes);
     EDGE_TracyPlot("draw_things", (int64_t)ec_frame_stats.draw_things);
-    EDGE_TracyPlot("draw_light_iterator", (int64_t)ec_frame_stats.draw_light_iterator);
-    EDGE_TracyPlot("draw_sector_glow_iterator", (int64_t)ec_frame_stats.draw_sector_glow_iterator);
 
     {
         EDGE_ZoneNamedN(ZoneHandleCursor, "HandleCursor", true);

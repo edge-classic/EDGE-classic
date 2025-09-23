@@ -9,7 +9,7 @@ if (EDGE_PROFILING)
   FetchContent_Declare (
     tracy
     GIT_REPOSITORY https://github.com/wolfpld/tracy.git
-    GIT_TAG 5d542dc09f3d9378d005092a4ad446bd405f819a
+    GIT_TAG c556831ddc6fe26d2fce01c14c97205a9dad46d5
     GIT_SHALLOW TRUE
     GIT_PROGRESS TRUE
   )

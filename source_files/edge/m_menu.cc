@@ -2860,6 +2860,13 @@ void MenuDrawItems(Style *style, bool graphical_item)
             {
                 textstyle = StyleDefinition::kTextSectionSelected;
                 txtscale  = style->definition_->text_[textstyle].scale_;
+
+                //Lobo: need to recalculate center because the size could be different
+                if (style->definition_->entry_alignment_ == StyleDefinition::kAlignmentCenter)
+                {
+                    current_menu->menu_items[j].x =
+                    CenterMenuText(style, textstyle, current_menu->menu_items[j].name);
+                }
             }
         }
 

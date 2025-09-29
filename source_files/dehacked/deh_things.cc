@@ -1805,17 +1805,6 @@ void things::ConvertTHING(void)
 
     CollectTheCast();
 
-    if (all_mode)
-    {
-        for (int i = 0; i < kTotalDehackedMapObjectTypesPortCompatibility; i++)
-            MarkThing(i);
-
-        /* this is debatable...
-        for (int i = kMT_EXTRA00 ; i <= kMT_EXTRA99 ; i++)
-            MarkThing(i);
-        */
-    }
-
     bool got_one = false;
 
     for (int i = 0; i < (int)new_mobjinfo.size(); i++)
@@ -1852,8 +1841,6 @@ void things::ConvertATK()
     {
         Attacks::ConvertScratch(&Attacks::scratchers[k]);
     }
-
-    // Note: all_mode was handled by ConvertTHING
 
     for (int i = 0; i < (int)new_mobjinfo.size(); i++)
     {

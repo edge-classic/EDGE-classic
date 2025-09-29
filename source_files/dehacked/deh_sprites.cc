@@ -30,6 +30,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <map>
+
 #include "deh_buffer.h"
 #include "deh_edge.h"
 #include "deh_frames.h"
@@ -69,8 +71,7 @@ const char *sprnames_orig[kTotalSpritesDEHEXTRA] = {
     "SP84", "SP85", "SP86", "SP87", "SP88", "SP89", "SP90", "SP91", "SP92", "SP93", "SP94", "SP95", "SP96", "SP97",
     "SP98", "SP99"};
 
-// elements here can be "" for unmodified names
-std::vector<std::string> sprnames;
+std::map<int, std::string> sprnames;
 
 //------------------------------------------------------------------------
 
@@ -91,23 +92,19 @@ void sprites::Shutdown()
 
 void sprites::MarkEntry(int num)
 {
-    // fill any missing slots with "", including the one we want.
-    while ((int)sprnames.size() < num + 1)
-        sprnames.push_back("");
+    if (sprnames.count(num))
+        return;
 
     // for the modified sprite, copy the original name
-    if (sprnames[num].empty())
-        sprnames[num] = GetOriginalName(num);
+    sprnames[num] = GetOriginalName(num);
 }
 
 void sprites::SpriteDependencies()
 {
-    for (size_t i = 0; i < sprnames.size(); i++)
+    for (std::map<int, std::string>::iterator iter = sprnames.begin(), iter_end = sprnames.end(); iter != iter_end; ++iter)
     {
-        if (sprnames[i] != "" && sprnames[i] != GetOriginalName(i))
-        {
-            frames::MarkStatesWithSprite((int)i);
-        }
+        if (iter->second != GetOriginalName(iter->first))
+            frames::MarkStatesWithSprite(iter->first);
     }
 }
 
@@ -144,7 +141,7 @@ void sprites::AlterBexSprite(const char *new_val)
     if (epi::IsDigitASCII(old_val[0]))
     {
         int num = atoi(old_val);
-        if (num < 0 || num > 32767)
+        if (num < 0)
         {
             LogDebug("Dehacked: Warning - Line %d: illegal sprite entry '%s'.\n", patch::line_num, old_val);
         }
@@ -168,12 +165,12 @@ void sprites::AlterBexSprite(const char *new_val)
 
 const char *sprites::GetSprite(int spr_num)
 {
-    if (spr_num < 0 || spr_num > 32767)
+    if (spr_num < 0)
         return "XXXX";
 
     const char *name = "";
 
-    if (spr_num < (int)sprnames.size())
+    if (sprnames.count(spr_num))
         name = sprnames[spr_num].c_str();
 
     if (strlen(name) == 0)

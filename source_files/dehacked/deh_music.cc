@@ -30,6 +30,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <map>
+
 #include "deh_buffer.h"
 #include "deh_edge.h"
 #include "deh_patch.h"
@@ -133,7 +135,7 @@ const MusicInfo S_music_orig[kTotalMusicTypes] = {
 // all the modified entries.
 // NOTE: some pointers may be nullptr!
 //
-std::vector<MusicInfo *> S_music;
+std::map<int, MusicInfo *> S_music;
 
 //------------------------------------------------------------------------
 
@@ -147,15 +149,19 @@ void WriteEntry(int num);
 
 void music::Init()
 {
+    for (std::map<int, MusicInfo *>::iterator iter = S_music.begin(), iter_end = S_music.end(); iter != iter_end; ++iter)
+    {
+        delete iter->second;
+    }
     S_music.clear();
 }
 
 void music::Shutdown()
 {
-    for (size_t i = 0; i < S_music.size(); i++)
-        if (S_music[i] != nullptr)
-            delete S_music[i];
-
+    for (std::map<int, MusicInfo *>::iterator iter = S_music.begin(), iter_end = S_music.end(); iter != iter_end; ++iter)
+    {
+        delete iter->second;
+    }
     S_music.clear();
 }
 
@@ -164,14 +170,8 @@ void music::MarkEntry(int num)
     if (num == kmus_None)
         return;
 
-    // fill any missing slots with nullptrs, including the one we want
-    while ((int)S_music.size() < num + 1)
-    {
-        S_music.push_back(nullptr);
-    }
-
     // already have a modified entry?
-    if (S_music[num] != nullptr)
+    if (S_music.count(num))
         return;
 
     MusicInfo *entry = new MusicInfo;
@@ -214,15 +214,11 @@ void music::WriteEntry(int num)
 
 void music::ConvertMUS()
 {
-    if (all_mode)
-        for (int i = 1; i < kTotalMusicTypes; i++)
-            MarkEntry(i);
-
     bool got_one = false;
 
-    for (int i = 1; i < (int)S_music.size(); i++)
+    for (std::map<int, MusicInfo *>::iterator iter = S_music.begin(), iter_end = S_music.end(); iter != iter_end; ++iter)
     {
-        if (S_music[i] == nullptr)
+        if (iter->second == nullptr)
             continue;
 
         if (!got_one)
@@ -231,7 +227,7 @@ void music::ConvertMUS()
             got_one = true;
         }
 
-        WriteEntry(i);
+        WriteEntry(iter->first);
     }
 
     if (got_one)
@@ -269,7 +265,7 @@ void music::AlterBexMusic(const char *new_val)
     if (epi::IsDigitASCII(old_val[0]))
     {
         int num = atoi(old_val);
-        if (num < 1 || num > 32767)
+        if (num < 1)
         {
             LogDebug("Dehacked: Warning - Line %d: illegal music entry '%s'.\n", patch::line_num, old_val);
         }

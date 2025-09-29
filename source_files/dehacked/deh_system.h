@@ -22,7 +22,6 @@ namespace dehacked
 {
 
 extern bool quiet_mode;
-extern bool all_mode;
 
 void System_Startup(void);
 

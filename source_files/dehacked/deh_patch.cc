@@ -28,6 +28,7 @@
 #include "deh_patch.h"
 
 #include <ctype.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -886,16 +887,16 @@ bool ValidateObject(void)
 
         // for DSDehacked, allow very high values
         case kDEH_FRAME:
-            max_obj = 32767;
+            max_obj = INT_MAX;
             break;
         case kDEH_PTR:
-            max_obj = 32767;
+            max_obj = INT_MAX;
             break;
         case kDEH_SOUND:
-            max_obj = 32767;
+            max_obj = INT_MAX;
             break;
         case kDEH_THING:
-            max_obj = 32767;
+            max_obj = INT_MAX;
             min_obj = 1;
             break;
 

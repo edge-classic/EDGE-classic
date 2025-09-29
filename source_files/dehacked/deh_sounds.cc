@@ -30,6 +30,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <map>
+
 #include "deh_buffer.h"
 #include "deh_edge.h"
 #include "deh_patch.h"
@@ -239,7 +241,7 @@ const SoundEffectInfo S_sfx_dehextra[200] = {
 // all the modified entries.
 // NOTE: some pointers may be nullptr!
 //
-std::vector<SoundEffectInfo *> S_sfx;
+std::map<int, SoundEffectInfo *> S_sfx;
 
 //------------------------------------------------------------------------
 
@@ -256,15 +258,19 @@ void                   WriteSound(int s_num);
 
 void sounds::Init()
 {
+    for (std::map<int, SoundEffectInfo *>::iterator iter = S_sfx.begin(), iter_end = S_sfx.end(); iter != iter_end; ++iter)
+    {
+        delete iter->second;
+    }
     S_sfx.clear();
 }
 
 void sounds::Shutdown()
 {
-    for (size_t i = 0; i < S_sfx.size(); i++)
-        if (S_sfx[i] != nullptr)
-            delete S_sfx[i];
-
+    for (std::map<int, SoundEffectInfo *>::iterator iter = S_sfx.begin(), iter_end = S_sfx.end(); iter != iter_end; ++iter)
+    {
+        delete iter->second;
+    }
     S_sfx.clear();
 }
 
@@ -298,14 +304,8 @@ void sounds::MarkSound(int num)
     if (num == ksfx_None)
         return;
 
-    // fill any missing slots with nullptrs, including the one we want
-    while ((int)S_sfx.size() < num + 1)
-    {
-        S_sfx.push_back(nullptr);
-    }
-
     // already have a modified entry?
-    if (S_sfx[num] != nullptr)
+    if (S_sfx.count(num))
         return;
 
     SoundEffectInfo *entry = new SoundEffectInfo;
@@ -402,7 +402,7 @@ std::string sounds::GetEdgeSfxName(int sound_id)
     // we get here for sounds with no original name (only possible
     // for DSDehacked / MBF21).  check if modified name is empty too.
 
-    if (sound_id >= (int)S_sfx.size())
+    if (!S_sfx.count(sound_id))
         return name;
 
     const SoundEffectInfo *mod = S_sfx[sound_id];
@@ -454,12 +454,7 @@ std::string sounds::GetSound(int sound_id)
     if (!name.empty())
         return name;
 
-    // if something uses DEHEXTRA sounds (+ a few others), ensure we
-    // generate DDFSFX entries for them.
-    if ((ksfx_fre000 <= sound_id && sound_id <= ksfx_fre199) || (sound_id == ksfx_gibdth) || (sound_id == ksfx_scrsht))
-    {
-        MarkSound(sound_id);
-    }
+    MarkSound(sound_id);
 
     name = GetEdgeSfxName(sound_id);
     if (name.empty())
@@ -470,6 +465,8 @@ std::string sounds::GetSound(int sound_id)
 
 void sounds::WriteSound(int sound_id)
 {
+    MarkSound(sound_id);
+
     const SoundEffectInfo *sound = S_sfx[sound_id];
 
     // in the unlikely event the sound did not get a name (which is
@@ -516,22 +513,11 @@ void sounds::WriteSound(int sound_id)
 
 void sounds::ConvertSFX(void)
 {
-    if (all_mode)
-    {
-        for (int i = 1; i < kTotalSoundEffectsPortCompatibility; i++)
-            MarkSound(i);
-
-        /* this is debatable....
-        for (int i = ksfx_fre000 ; i <= ksfx_fre199 ; i++)
-            MarkSound(i);
-        */
-    }
-
     bool got_one = false;
 
-    for (int i = 1; i < (int)S_sfx.size(); i++)
+    for (std::map<int, SoundEffectInfo *>::iterator iter = S_sfx.begin(), iter_end = S_sfx.end(); iter != iter_end; ++iter)
     {
-        if (S_sfx[i] == nullptr)
+        if (iter->second == nullptr)
             continue;
 
         if (!got_one)
@@ -540,7 +526,7 @@ void sounds::ConvertSFX(void)
             got_one = true;
         }
 
-        WriteSound(i);
+        WriteSound(iter->first);
     }
 
     if (got_one)
@@ -585,7 +571,7 @@ void sounds::AlterBexSound(const char *new_val)
     if (epi::IsDigitASCII(old_val[0]))
     {
         int num = atoi(old_val);
-        if (num < 1 || num > 32767)
+        if (num < 1)
         {
             LogDebug("Dehacked: Warning - Line %d: illegal sound number '%s'.\n", patch::line_num, old_val);
         }

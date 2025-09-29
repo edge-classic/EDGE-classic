@@ -31,6 +31,7 @@
 #include <stddef.h>
 #include <string.h>
 
+#include <map>
 #include <unordered_map>
 
 #include "HandmadeMath.h"
@@ -57,7 +58,7 @@ constexpr uint16_t kMaximumActionNameLength = 1024;
 
 extern State states_orig[kTotalMBFStates];
 
-std::vector<State *> new_states;
+std::map<int, State *> new_states;
 
 // memory for states using misc1/misc2 or Args1..Args8
 std::vector<int> argument_mem;
@@ -452,16 +453,20 @@ const StateRange weapon_range[] = {
 
 void frames::Init()
 {
+    for (std::map<int, State *>::iterator iter = new_states.begin(), iter_end = new_states.end(); iter != iter_end; ++iter)
+    {
+        delete iter->second;
+    }
     new_states.clear();
     argument_mem.clear();
 }
 
 void frames::Shutdown()
 {
-    for (size_t i = 0; i < new_states.size(); i++)
-        if (new_states[i] != nullptr)
-            delete new_states[i];
-
+    for (std::map<int, State *>::iterator iter = new_states.begin(), iter_end = new_states.end(); iter != iter_end; ++iter)
+    {
+        delete iter->second;
+    }
     new_states.clear();
     argument_mem.clear();
 }
@@ -472,14 +477,8 @@ void frames::MarkState(int st_num)
     if (st_num == kS_NULL)
         return;
 
-    // fill any missing slots with nullptrs, including the one we want
-    while ((int)new_states.size() < st_num + 1)
-    {
-        new_states.push_back(nullptr);
-    }
-
     // already have a modified entry?
-    if (new_states[st_num] != nullptr)
+    if (new_states.count(st_num))
         return;
 
     State *entry       = new State;
@@ -508,49 +507,26 @@ const State *frames::NewStateElseOld(int st_num)
     if (st_num < 0)
         return nullptr;
 
-    if (st_num < (int)new_states.size())
-    {
-        if (new_states[st_num] != nullptr)
-            return new_states[st_num];
-        else if (st_num >= kTotalMBFStates)
-        {
-            State *entry = new State;
-            // these defaults follow the DSDehacked specs
-            entry->sprite      = kSPR_TNT1;
-            entry->frame       = 0;
-            entry->tics        = -1;
-            entry->action      = kA_NULL;
-            entry->next_state  = st_num;
-            entry->arg_pointer = 0;
-            entry->mbf21_flags = 0;
-            new_states[st_num] = entry;
-            return entry;
-        }
-    }
-    else
-    {
-        while ((int)new_states.size() < st_num + 1)
-        {
-            new_states.push_back(nullptr);
-        }
-        if (st_num >= kTotalMBFStates)
-        {
-            State *entry = new State;
-            // these defaults follow the DSDehacked specs
-            entry->sprite      = kSPR_TNT1;
-            entry->frame       = 0;
-            entry->tics        = -1;
-            entry->action      = kA_NULL;
-            entry->next_state  = st_num;
-            entry->arg_pointer = 0;
-            entry->mbf21_flags = 0;
-            new_states[st_num] = entry;
-            return entry;
-        }
-    }
+    if (new_states.count(st_num))
+        return new_states[st_num];
 
     if (st_num < kTotalMBFStates)
         return &states_orig[st_num];
+
+    if (st_num >= kTotalMBFStates)
+    {
+        State *entry = new State;
+        // these defaults follow the DSDehacked specs
+        entry->sprite      = kSPR_TNT1;
+        entry->frame       = 0;
+        entry->tics        = -1;
+        entry->action      = kA_NULL;
+        entry->next_state  = st_num;
+        entry->arg_pointer = 0;
+        entry->mbf21_flags = 0;
+        new_states[st_num] = entry;
+        return entry;
+    }
 
     return nullptr;
 }
@@ -600,11 +576,11 @@ bool frames::DependRangeWasModified(int low, int high)
     EPI_ASSERT(low <= high);
     EPI_ASSERT(low > kS_NULL);
 
-    if (high >= (int)new_states.size())
-        high = (int)new_states.size() - 1;
+    if (high >= new_states.rbegin()->first)
+        high = new_states.rbegin()->first;
 
     for (int i = low; i <= high; i++)
-        if (new_states[i] != nullptr)
+        if (new_states.count(i))
             return true;
 
     return false;
@@ -709,9 +685,7 @@ bool frames::SpreadGroupPass(bool alt_jumps)
 {
     bool changes = false;
 
-    int total = HMM_MAX((int)kTotalMBFStates, (int)new_states.size());
-
-    for (int i = 1; i < total; i++)
+    for (int i = 1; i < (int)kTotalMBFStates; i++)
     {
         const State *st = NewStateElseOld(i);
         if (st == nullptr)
@@ -753,6 +727,70 @@ bool frames::SpreadGroupPass(bool alt_jumps)
             {
                 EPI_ASSERT(current_weap);
                 next = current_weap->flashstate + i - kS_CHAIN1;
+            }
+        }
+
+        if (next == kS_NULL)
+            continue;
+
+        // require next state to have no group yet
+        if (group_for_state.find(next) != group_for_state.end())
+            continue;
+
+        G.states.push_back(next);
+
+        group_for_state[next]  = group;
+        offset_for_state[next] = (int)G.states.size();
+
+        changes = true;
+    }
+
+    // Iterate a second time for new states above the MBF range
+    for (std::map<int, State *>::iterator iter = new_states.begin(), iter_end = new_states.end(); iter != iter_end; ++iter)
+    {
+        if (iter->first < (int)kTotalMBFStates)
+            continue;
+
+        const State *st = NewStateElseOld(iter->first);
+        if (st == nullptr)
+            continue;
+
+        if (group_for_state.find(iter->first) == group_for_state.end())
+            continue;
+
+        char       group = group_for_state[iter->first];
+        GroupInfo &G     = groups[group];
+
+        // check if this is the very first state of death or overkill sequence.
+        // in vanilla Doom (and Boom/MBF/etc), a tics of -1 will be IGNORED when
+        // *entering* such a state due to this code in KillMapObject:
+        //    ``` if (target->tics < 1)
+        //            target->tics = 1;
+        //    ```
+        // and that means it *will* enter the next state.
+
+        bool first_death = ((group == 'D' || group == 'X') && G.states.size() == 1);
+
+        // hibernation?
+        // if action is kA_RandomJump or similar, still need to follow it!
+        if (st->tics < 0 && !first_death && !alt_jumps)
+            continue;
+
+        int next = st->next_state;
+
+        if (alt_jumps)
+        {
+            next = kS_NULL;
+            if (st->action == kA_RandomJump || st->action == kA_WeaponJump || st->action == kA_RefireTo ||
+                st->action == kA_CheckAmmo || st->action == kA_GunFlashTo || st->action == kA_HealChase ||
+                st->action == kA_JumpIfHealthBelow || st->action == kA_JumpIfTargetInSight ||
+                st->action == kA_JumpIfTargetCloser || st->action == kA_JumpIfTracerCloser ||
+                st->action == kA_JumpIfTracerInSight || st->action == kA_JumpIfFlagsSet)
+                next = ReadArg(st, 0); // arg0
+            if (st->action == kA_FireCGun)
+            {
+                EPI_ASSERT(current_weap);
+                next = current_weap->flashstate + iter->first - kS_CHAIN1;
             }
         }
 
@@ -1749,7 +1787,7 @@ void frames::AlterBexCodePtr(const char *new_action)
         return;
     }
 
-    if (st_num < 0 || st_num > 32767)
+    if (st_num < 0)
     {
         LogDebug("Dehacked: Warning - Line %d: illegal FRAME number: %d\n", patch::line_num, st_num);
         return;

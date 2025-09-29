@@ -54,7 +54,6 @@ namespace dehacked
 std::vector<InputBuffer *> input_buffers;
 
 bool quiet_mode;
-bool all_mode;
 
 void Init()
 {
@@ -74,7 +73,6 @@ void Init()
     /* reset parameters */
 
     quiet_mode = false;
-    all_mode   = false;
 }
 
 void FreeInputBuffers(void)

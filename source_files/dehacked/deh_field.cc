@@ -28,6 +28,7 @@
 #include "deh_field.h"
 
 #include <ctype.h>
+#include <limits.h>
 #include <stdarg.h>
 #include <string.h>
 
@@ -110,13 +111,13 @@ static bool FieldValidateValue(const FieldReference *reference, int new_val)
 
         // for DSDehacked, allow very high values
         case kFieldTypeFrameNumber:
-            max_obj = 32767;
+            max_obj = INT_MAX;
             break;
         case kFieldTypeSpriteNumber:
-            max_obj = 32767;
+            max_obj = INT_MAX;
             break;
         case kFieldTypeSoundNumber:
-            max_obj = 32767;
+            max_obj = INT_MAX;
             break;
 
         default:

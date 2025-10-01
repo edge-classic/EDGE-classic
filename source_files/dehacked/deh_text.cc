@@ -659,7 +659,7 @@ void text_strings::ConvertLDF(void)
 
     for (int i = 0; lang_list[i].orig_text; i++)
     {
-        if (!all_mode && !lang_list[i].new_text)
+        if (!lang_list[i].new_text)
             continue;
 
         WriteTextString(lang_list + i);
@@ -672,7 +672,7 @@ void text_strings::ConvertLDF(void)
 
     for (int i = 0; cheat_list[i].orig_text; i++)
     {
-        if (!all_mode && !cheat_list[i].new_text)
+        if (!cheat_list[i].new_text)
             continue;
 
         WriteTextString(cheat_list + i);

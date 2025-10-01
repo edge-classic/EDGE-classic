@@ -160,7 +160,7 @@ void rscript::HandleLevel(const std::string &map, int flag1, int mt1, int flag2,
     if (flag2 != 0 && (list2.size() != 1 || list2[0] != mt2))
         different = true;
 
-    if (!different && !all_mode)
+    if (!different)
         return;
 
     wad::Printf("START_MAP %s\n", map.c_str());

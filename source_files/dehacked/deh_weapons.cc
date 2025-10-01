@@ -396,7 +396,7 @@ void weapons::ConvertWEAP(void)
 
     for (int i = 0; i < kTotalWeapons; i++)
     {
-        if (!all_mode && !weapon_modified[i])
+        if (!weapon_modified[i])
             continue;
 
         ConvertWeapon(i);

@@ -2047,12 +2047,7 @@ static void DDFMobjStateGetDEHProjectile(const char *arg, State *cur_state)
     if (!arg || !arg[0])
         return;
 
-    // Sort of a WAG based on the avergage 32 attack height vs. 56 thing height in stock DDF
-    // for a lot of stock Doom monsters
-    float       dynamic_atk_height = dynamic_mobj->height_ * 0.5714285714285714f;
-    std::string atk_check_name     = epi::StringFormat("%s_%d", arg, (int)dynamic_atk_height);
-
-    AttackDefinition *atk_check = atkdefs.Lookup(atk_check_name.c_str());
+    AttackDefinition *atk_check = atkdefs.Lookup(arg);
 
     if (atk_check)
     {
@@ -2066,7 +2061,7 @@ static void DDFMobjStateGetDEHProjectile(const char *arg, State *cur_state)
         return;
 
     AttackDefinition *atk = new AttackDefinition();
-    atk->name_            = atk_check_name;
+    atk->name_            = arg;
     atk->atk_mobj_ref_    = args[0];
 
     size_t arg_size = args.size();
@@ -2076,7 +2071,7 @@ static void DDFMobjStateGetDEHProjectile(const char *arg, State *cur_state)
     atk->attack_class_ = epi::BitSetFromChar('M');
     atk->flags_ = (AttackFlags)(kAttackFlagFaceTarget | kAttackFlagInheritTracerFromTarget | kAttackFlagOffsetsLast);
     atk->damage_.Default(DamageClass::kDamageClassDefaultAttack);
-    atk->height_ = dynamic_atk_height;
+    atk->height_ = 32;
 
     if (arg_size > 1)
     {

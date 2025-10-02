@@ -1719,7 +1719,9 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty, floa
     // -AJA- projz now handles crouching
     float      projx          = source->x;
     float      projy          = source->y;
-    float      projz          = source->z + attack->height_ * source->height_ / source->info_->height_;
+    float      projz          = source->z + attack->height_;
+    if (source->height_ > 0 && source->info_->height_ > 0)
+        projz *= source->height_ / source->info_->height_;
     Sector    *cur_source_sec = source->subsector_->sector;
     BAMAngle   angle          = 0;
     float      slope          = 0.0f;
@@ -4127,9 +4129,7 @@ void A_WalkSoundChase(MapObject *object)
 void A_Die(MapObject *mo)
 {
     // Boom/MBF compatibility.
-
-    mo->health_ = 0;
-    KillMapObject(nullptr, mo);
+    DamageMapObject(mo, nullptr, nullptr, mo->health_);
 }
 
 void A_KeenDie(MapObject *mo)

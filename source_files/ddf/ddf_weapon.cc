@@ -698,19 +698,6 @@ static void DDFWStateGetDEHMelee(const char *arg, State *cur_state)
     atk->damage_.linear_max_ = 20.0f;
     atk->puff_ref_           = "PUFF";
     atk->range_              = 64.0f;
-    // In case player melee range has been modified, find the first
-    // player mobj and use its range to calculate the default.
-    // This shouldn't really fail or else it would be hard to
-    // play the game
-    for (int i = 0, i_end = mobjtypes.size(); i < i_end; i++)
-    {
-        if (mobjtypes[i]->playernum_ > 0)
-        {
-            if (mobjtypes[i]->melee_range_ > 0)
-                atk->range_ = mobjtypes[i]->melee_range_;
-            break;
-        }
-    }
 
     size_t arg_size = args.size();
 
@@ -856,18 +843,6 @@ static void DDFWStateGetDEHProjectile(const char *arg, State *cur_state)
     atk->flags_        = (AttackFlags)(kAttackFlagPlayer | kAttackFlagInheritTracerFromTarget | kAttackFlagOffsetsLast);
     atk->damage_.Default(DamageClass::kDamageClassDefaultAttack);
     atk->height_ = 32.0f;
-    // In case player heights have been modified, find the first
-    // player mobj and use its height to calculate the default.
-    // This shouldn't really fail or else it would be hard to
-    // play the game
-    for (int i = 0, i_end = mobjtypes.size(); i < i_end; i++)
-    {
-        if (mobjtypes[i]->playernum_ > 0)
-        {
-            atk->height_ = mobjtypes[i]->height_ * 0.5f;
-            break;
-        }
-    }
 
     if (arg_size > 1)
     {

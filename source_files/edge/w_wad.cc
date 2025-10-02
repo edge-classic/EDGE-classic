@@ -1313,23 +1313,28 @@ void ReadUMAPINFOLumps(void)
             epi::StringUpperASCII(mapname);
             // Check that the name adheres to either EXMX or MAPXX format per
             // the standard
-            if (epi::StringPrefixCaseCompareASCII(mapname, "MAP") == 0)
+            int epinum = -1;
+            int levelnum = -1;
+            
+            if (epi::StringPrefixCompare(mapname, "MAP") == 0)
             {
                 for (auto c : mapname.substr(3))
                 {
                     if (!epi::IsDigitASCII(c))
                         FatalError("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
                 }
+                if (sscanf(mapname.c_str(), "MAP%d", &levelnum) != 1)
+                    FatalError("UMAPINFO: Error parsing map name: %s!\n", mapname.c_str());
             }
-            else if (mapname.size() > 3 && mapname[0] == 'E' && mapname[2] == 'M')
+            else if (mapname[0] == 'E')
             {
-                if (!epi::IsDigitASCII(mapname[1]))
-                    FatalError("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
                 for (auto c : mapname.substr(3))
                 {
-                    if (!epi::IsDigitASCII(c))
+                    if (!epi::IsDigitASCII(c) && c != 'M')
                         FatalError("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
                 }
+                if (sscanf(mapname.c_str(), "E%dM%d", &epinum, &levelnum) != 2)
+                    FatalError("UMAPINFO: Error parsing map name: %s!\n", mapname.c_str());
             }
             else
                 FatalError("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
@@ -1694,55 +1699,35 @@ void ReadUMAPINFOLumps(void)
                 ReadRADScript(ba_rts, "UMAPINFO");
             }
 
-            // If a TEMPEPI gamedef had to be created, grab some details from
-            // the first valid gamedef iterating through gamedefs in reverse
-            // order
-            if (temp_level->episode_name_ == "TEMPEPI")
+           // Validate episode entry
+            bool good_epi = false;
+            for (auto g : gamedefs)
+            {
+                if (temp_level->episode_name_ == g->name_)
+                {
+                    good_epi = true;
+                    break;
+                }
+            }
+            if (!good_epi) // Find a suitable episode
             {
                 for (int g = gamedefs.size() - 1; g >= 0; g--)
                 {
-                    if (gamedefs[g]->name_ != "TEMPEPI" &&
-                        epi::StringCaseCompareMaxASCII(gamedefs[g]->firstmap_, temp_level->name_, 3) == 0)
+                    if (epi::StringCaseCompareASCII(gamedefs[g]->firstmap_, temp_level->name_) == 0)
                     {
-                        if (atoi(gamedefs[g]->firstmap_.substr(3).c_str()) > atoi(temp_level->name_.substr(3).c_str()))
-                            continue;
-                        else
-                        {
-                            temp_level->episode_->background_ = gamedefs[g]->background_;
-                            temp_level->episode_->music_      = gamedefs[g]->music_;
-                            temp_level->episode_->titlemusic_ = gamedefs[g]->titlemusic_;
-                            temp_level->episode_->titlepics_  = gamedefs[g]->titlepics_;
-                            temp_level->episode_->titletics_  = gamedefs[g]->titletics_;
-                            temp_level->episode_->percent_    = gamedefs[g]->percent_;
-                            temp_level->episode_->done_       = gamedefs[g]->done_;
-                            temp_level->episode_->accel_snd_  = gamedefs[g]->accel_snd_;
-                            break;
-                        }
-                    }
-                }
-            }
-            else // Validate episode entry to make sure it wasn't renamed or
-                 // removed
-            {
-                bool good_epi = false;
-                for (auto g : gamedefs)
-                {
-                    if (temp_level->episode_name_ == g->name_)
-                    {
-                        good_epi = true;
+                        temp_level->episode_      = gamedefs[g];
+                        temp_level->episode_name_ = gamedefs[g]->name_;
+                        good_epi                  = true;
                         break;
                     }
                 }
-                if (!good_epi) // Find a suitable episode
+                if (!good_epi)
                 {
-                    for (int g = gamedefs.size() - 1; g >= 0; g--)
+                    for (int ii = i - 1; ii >= 0; --ii)
                     {
-                        if (epi::StringCaseCompareMaxASCII(gamedefs[g]->firstmap_, temp_level->name_, 3) == 0)
+                        for (int g = gamedefs.size() - 1; g >= 0; g--)
                         {
-                            if (atoi(gamedefs[g]->firstmap_.substr(3).c_str()) >
-                                atoi(temp_level->name_.substr(3).c_str()))
-                                continue;
-                            else
+                            if (epi::StringCaseCompareASCII(gamedefs[g]->firstmap_, Maps.maps[ii].mapname) == 0)
                             {
                                 temp_level->episode_      = gamedefs[g];
                                 temp_level->episode_name_ = gamedefs[g]->name_;
@@ -1752,30 +1737,29 @@ void ReadUMAPINFOLumps(void)
                         }
                     }
                 }
-                if (!good_epi)
-                    FatalError("UMAPINFO: No valid episode found for level %s\n", temp_level->name_.c_str());
             }
+            if (!good_epi)
+                FatalError("UMAPINFO: No valid episode found for level %s\n", temp_level->name_.c_str());
+
             // Validate important things
             if (temp_level->sky_.empty())
             {
-                if (epi::StringPrefixCaseCompareASCII(temp_level->name_, "MAP") == 0)
+                if (epinum < 0)
                 {
-                    int levnum = atoi(temp_level->name_.substr(3).c_str());
-                    if (levnum < 12)
+                    if (levelnum < 12)
                         temp_level->sky_ = "SKY1";
-                    else if (levnum < 21)
+                    else if (levelnum < 21)
                         temp_level->sky_ = "SKY2";
                     else
                         temp_level->sky_ = "SKY3";
                 }
                 else
                 {
-                    int epnum = atoi(temp_level->name_.substr(1, 1).c_str());
-                    if (epnum == 1)
+                    if (epinum < 2)
                         temp_level->sky_ = "SKY1";
-                    else if (epnum == 2)
+                    else if (epinum == 2)
                         temp_level->sky_ = "SKY2";
-                    else if (epnum == 3)
+                    else if (epinum == 3)
                         temp_level->sky_ = "SKY3";
                     else
                         temp_level->sky_ = "SKY4";

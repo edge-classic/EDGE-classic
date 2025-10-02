@@ -117,15 +117,8 @@ static const Image *SECPIC(Sector *sec, bool is_ceiling, const Image *new_image)
 // -ACB- 1998/09/06 Remarked and Reformatted.
 // -ACB- 2001/02/04 Move to p_plane.c
 //
-static float GetSecHeightReference(const PlaneMoverDefinition *def, Sector *sec, Sector *model)
+static float GetSecHeightReference(const PlaneMoverDefinition *def, Sector *sec, Sector *model, const TriggerHeightReference ref)
 {
-    TriggerHeightReference ref;
-
-    if (def->type_ == kPlaneMoverPlatform || def->type_ == kPlaneMoverContinuous || def->type_ == kPlaneMoverToggle)
-        ref = def->otherref_;
-    else
-        ref = def->destref_;
-
     switch (ref & kTriggerHeightReferenceMask)
     {
     case kTriggerHeightReferenceAbsolute:
@@ -425,7 +418,7 @@ static bool MovePlane(PlaneMover *plane)
                 return true; // REMOVE ME
             }
         }
-        else if (res == RES_Crushed || res == RES_Impossible)
+        else if (res == RES_Crushed)
         {
             if (plane->crush)
             {
@@ -434,12 +427,39 @@ static bool MovePlane(PlaneMover *plane)
                 if (plane->speed < 1.5f)
                     plane->speed = plane->speed / 8.0f;
             }
-            else if (plane->type->type_ == kPlaneMoverMoveWaitReturn) // Go back up
+            else
             {
+                switch (plane->type->type_)
+                {
+                case kPlaneMoverPlatform:
+                case kPlaneMoverContinuous:
+                case kPlaneMoverMoveWaitReturn:
+                    plane->direction            = kPlaneDirectionUp;
+                    plane->sound_effect_started = false;
+                    plane->waited               = 0;
+                    plane->speed                = plane->type->speed_up_;
+                    break;
+
+                default:
+                    break;
+                }
+            }
+        }
+        else if (res == RES_Impossible)
+        {
+            switch (plane->type->type_)
+            {
+            case kPlaneMoverPlatform:
+            case kPlaneMoverContinuous:
+            case kPlaneMoverMoveWaitReturn:
                 plane->direction            = kPlaneDirectionUp;
                 plane->sound_effect_started = false;
                 plane->waited               = 0;
                 plane->speed                = plane->type->speed_up_;
+                break;
+
+            default:
+                break;
             }
         }
 
@@ -557,7 +577,7 @@ static bool MovePlane(PlaneMover *plane)
                 return true; // REMOVE ME
             }
         }
-        else if (res == RES_Crushed || res == RES_Impossible)
+        else if (res == RES_Crushed)
         {
             if (plane->crush)
             {
@@ -566,12 +586,37 @@ static bool MovePlane(PlaneMover *plane)
                 if (plane->speed < 1.5f)
                     plane->speed = plane->speed / 8.0f;
             }
-            else if (plane->type->type_ == kPlaneMoverMoveWaitReturn) // Go back down
+            else
             {
+                switch (plane->type->type_)
+                {
+                case kPlaneMoverPlatform:
+                case kPlaneMoverContinuous:
+                case kPlaneMoverMoveWaitReturn:
+                    plane->direction            = kPlaneDirectionDown;
+                    plane->sound_effect_started = false;
+                    plane->waited               = 0;
+                    plane->speed                = plane->type->speed_down_;
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+        else if (res == RES_Impossible)
+        {
+            switch (plane->type->type_)
+            {
+            case kPlaneMoverPlatform:
+            case kPlaneMoverContinuous:
+            case kPlaneMoverMoveWaitReturn:
                 plane->direction            = kPlaneDirectionDown;
                 plane->sound_effect_started = false;
                 plane->waited               = 0;
                 plane->speed                = plane->type->speed_down_;
+                break;
+            default:
+                break;
             }
         }
         break;
@@ -700,12 +745,12 @@ static PlaneMover *P_SetupSectorAction(Sector *sector, const PlaneMoverDefinitio
 
     float start = HEIGHT(sector, def->is_ceiling_);
 
-    float dest = GetSecHeightReference(def, sector, model);
+    float dest = GetSecHeightReference(def, sector, model, def->destref_);
     dest += def->dest_;
 
     if (def->type_ == kPlaneMoverPlatform || def->type_ == kPlaneMoverContinuous || def->type_ == kPlaneMoverToggle)
     {
-        start = GetSecHeightReference(def, sector, model);
+        start = GetSecHeightReference(def, sector, model, def->otherref_);
         start += def->other_;
     }
 

@@ -942,23 +942,6 @@ void RecomputeGapsAroundSector(Sector *sec)
     }
 
     sec->sight_gap_number = GapSightConstruct(sec->sight_gaps, sec);
-
-    // Dasho - Update plane mover destinations if necessary
-    for (PlaneMover *pl : active_planes)
-    {
-        if (!pl || !pl->sector || pl->sector != sec)
-            continue;
-
-        TriggerHeightReference ref = pl->type->destref_;
-
-        if ((ref & kTriggerHeightReferenceMask) == kTriggerHeightReferenceCurrent)
-        {
-           if ((ref & kTriggerHeightReferenceCeiling) && !pl->is_ceiling)
-                pl->destination_height = sec->ceiling_height + pl->type->dest_;
-            else if (!(ref & kTriggerHeightReferenceCeiling) && pl->is_ceiling)
-                pl->destination_height = sec->floor_height + pl->type->dest_; 
-        }
-    }
 }
 
 static inline bool CheckBoundingBoxOverlap(float *bspcoord, float *test)

@@ -239,7 +239,8 @@ bool TeleportMove(MapObject *thing, float x, float y, float z)
     move_check.below   = nullptr;
 
     // -ACB- 2004/08/01 Don't think this is needed
-    //	special_lines_hit.ZeroiseCount();
+    // Dasho - It is.
+    special_lines_hit.clear();
 
     float r = thing->radius_;
 
@@ -1221,6 +1222,8 @@ bool TryMove(MapObject *thing, float x, float y)
                             CrossSpecialLine(ld, oldside, thing);
                     }
                 }
+                if (special_lines_hit.empty()) // This can happen if something teleports, which invalidates the iterator
+                    break;
             }
         }
     }

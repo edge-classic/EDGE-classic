@@ -1628,7 +1628,7 @@ void ConsoleShowPosition(void)
     else
         y = current_screen_height - FNSZ * 15;
 
-    SolidBox(x, y - FNSZ * 10, XMUL * 16, FNSZ * 10 + 2, kRGBABlack, 0.5);
+    SolidBox(x, y - FNSZ * 11, XMUL * 16, FNSZ * 11 + 2, kRGBABlack, 0.5);
 
     RendererVertex *console_glvert = StartText();
     uint16_t        console_verts  = 0;
@@ -1660,6 +1660,10 @@ void ConsoleShowPosition(void)
 
     y -= FNSZ;
     stbsp_sprintf(textbuf, "z mom: %.4f", p->map_object_->momentum_.Z);
+    console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
+
+    y -= FNSZ;
+    stbsp_sprintf(textbuf, "speed: %.4f", p->actual_speed_);
     console_verts += AddText(x, y, textbuf, kRGBAWebGray, console_glvert);
 
     y -= FNSZ;

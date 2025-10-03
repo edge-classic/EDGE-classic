@@ -407,11 +407,11 @@ static void MovePlayer(Player *player)
         else
         {
             float velocity = mo->player_->actual_speed_;
-            if (velocity > kFootingFactor * 4)
+            if (velocity > kFootingFactor)
                 factor *= 8;
-            else if (velocity > kFootingFactor * 2)
+            else if (velocity > kFootingFactor / 2)
                 factor *= 4;
-            else if (velocity > kFootingFactor)
+            else if (velocity > kFootingFactor / 4)
                 factor *= 2;
             fric *= factor;
         }

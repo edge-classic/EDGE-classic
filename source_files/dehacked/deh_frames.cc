@@ -573,6 +573,9 @@ bool frames::DependRangeWasModified(int low, int high)
     if (high < 0)
         return false;
 
+    if (new_states.empty())
+        return false;
+
     EPI_ASSERT(low <= high);
     EPI_ASSERT(low > kS_NULL);
 

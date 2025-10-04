@@ -78,7 +78,7 @@ static constexpr float kLadderFriction = 0.5f;
 
 static constexpr float kOofSpeed = 9.0f; // Lobo: original value 20.0f too high, almost never played oof
 
-static constexpr uint8_t kMaxThinkLoop = 8;
+static constexpr uint8_t kMaxThinkLoop = 255;
 
 static constexpr float   kMaximumMove  = 30.0f;
 static constexpr float   kStepMove     = 16.0f;
@@ -1670,6 +1670,9 @@ static void P_MobjThinker(MapObject *mobj)
     // -AJA- 1999/09/12: reworked for deferred states.
     // -AJA- 2000/10/17: reworked again.
 
+    // Dasho - This used to be limited to 8 loops; but other ports don't really seem to impose an arbitrary
+    // cap on how long this can iterate through things like zero-tic states; set kMaxThinkLoop to 255 which
+    // should hopefully cover everything while still allowing a safety hatch if the loop somehow runs away
     for (int loop_count = 0; loop_count < kMaxThinkLoop; loop_count++)
     {
         if (level_flags.fast_monsters)

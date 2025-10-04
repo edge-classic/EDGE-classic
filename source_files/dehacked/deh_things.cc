@@ -1036,6 +1036,14 @@ void HandleFlags(const DehackedMapObjectDefinition *info, int mt_num, int player
     if (is_monster)
         AddOneFlag(info, "MONSTER", got_a_flag);
 
+    // Dasho - For MBF compat, we need to make bouncy things shootable when they are defined
+    // via Dehacked.
+    if (cur_f & kMF_BOUNCES)
+    {
+        if (!(cur_f & kMF_SHOOTABLE))
+            AddOneFlag(info, "SHOOTABLE", got_a_flag);
+    }
+
     AddOneFlag(info, "DEHACKED_COMPAT", got_a_flag);
 
     if (got_a_flag)

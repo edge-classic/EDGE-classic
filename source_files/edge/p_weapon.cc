@@ -45,7 +45,7 @@
 extern ConsoleVariable view_bobbing;
 extern ConsoleVariable erraticism;
 
-static constexpr uint8_t kMaximumPlayerSpriteLoop = 10;
+static constexpr uint8_t kMaximumPlayerSpriteLoop = 255;
 
 static constexpr float   kWeaponSwapSpeed = 6.0f;
 static constexpr uint8_t kWeaponBottom    = 128;
@@ -858,6 +858,9 @@ void MovePlayerSprites(Player *p)
         if (!psp->state)
             continue;
 
+        // Dasho - This used to be limited to 10 loops; but other ports don't really seem to impose an arbitrary
+        // cap on how long this can iterate through things like zero-tic states; set kMaximumPlayerSpriteLoop to 255 which
+        // should hopefully cover everything while still allowing a safety hatch if the loop somehow runs away
         for (int loop_count = 0; loop_count < kMaximumPlayerSpriteLoop; loop_count++)
         {
             // drop tic count and possibly change state

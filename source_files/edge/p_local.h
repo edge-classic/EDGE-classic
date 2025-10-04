@@ -118,7 +118,7 @@ bool MapObjectSetStateDeferred(MapObject *mobj, int state, int tic_skip);
 void MapObjectSetDirectionAndSpeed(MapObject *mobj, BAMAngle angle, float slope, float speed);
 void RunMapObjectThinkers();
 void SpawnDebris(float x, float y, float z, BAMAngle angle, const MapObjectDefinition *debris);
-void SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff, BAMAngle angle);
+void SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff, BAMAngle angle, bool shrink_it = true);
 void SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const MapObjectDefinition *blood);
 void CalculateFullRegionProperties(const MapObject *mo, RegionProperties *newregp);
 bool HitLiquidFloor(MapObject *thing);

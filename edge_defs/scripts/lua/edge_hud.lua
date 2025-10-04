@@ -423,7 +423,7 @@ function doom_automap()
     --
     -- hud.solid_box(0, 0, 320, 200 - 32, '80 80 80')
 
-    hud.render_automap(0, 0, 320, 200 - 32)
+    hud.render_automap(0, 0, 320, 200)
     local which = hud.which_hud() % 4
 
     if (which == 0) then

@@ -2090,7 +2090,7 @@ void SpawnDebris(float x, float y, float z, BAMAngle angle, const MapObjectDefin
 //
 // P_SpawnPuff
 //
-void SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff, BAMAngle angle)
+void SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff, BAMAngle angle, bool shrink_it)
 {
     MapObject *th;
 
@@ -2109,6 +2109,9 @@ void SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff, BAMAn
 
     if (th->tics_ < 1)
         th->tics_ = 1;
+
+    if (shrink_it)
+        th->radius_ = 0.000015259f;
 }
 
 //

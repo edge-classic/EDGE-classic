@@ -1711,8 +1711,8 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
             {
                 if (shoot_check.puff)
                 {
-                    sx -= trace.delta_x * (shoot_check.puff->radius_ + 1.0f) / shoot_check.range;
-                    sy -= trace.delta_y * (shoot_check.puff->radius_ + 1.0f) / shoot_check.range;
+                    sx -= trace.delta_x * 6.0f / shoot_check.range;
+                    sy -= trace.delta_y * 6.0f / shoot_check.range;
                     SpawnPuff(sx, sy, z, shoot_check.puff, shoot_check.angle + kBAMAngle180);
                 }
                 return false;
@@ -1728,8 +1728,8 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
                     {
                         if (shoot_check.puff)
                         {
-                            sx -= trace.delta_x * (shoot_check.puff->radius_ + 1.0f) / shoot_check.range;
-                            sy -= trace.delta_y * (shoot_check.puff->radius_ + 1.0f) / shoot_check.range;
+                            sx -= trace.delta_x * 6.0f / shoot_check.range;
+                            sy -= trace.delta_y * 6.0f / shoot_check.range;
                             SpawnPuff(sx, sy, z, shoot_check.puff, shoot_check.angle + kBAMAngle180);
                         }
                         return false;
@@ -1742,7 +1742,11 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
                                         {{sy, z}}))
                     {
                         if (shoot_check.puff)
+                        {
+                            sx -= trace.delta_x * 6.0f / shoot_check.range;
+                            sy -= trace.delta_y * 6.0f / shoot_check.range;
                             SpawnPuff(sx, sy, z, shoot_check.puff, shoot_check.angle + kBAMAngle180);
+                        }
                         return false;
                     }
                 }
@@ -1778,8 +1782,8 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
             {
                 if (shoot_check.puff)
                 {
-                    sx -= trace.delta_x * (shoot_check.puff->radius_ + 1.0f) / shoot_check.range;
-                    sy -= trace.delta_y * (shoot_check.puff->radius_ + 1.0f) / shoot_check.range;
+                    sx -= trace.delta_x * 6.0f / shoot_check.range;
+                    sy -= trace.delta_y * 6.0f / shoot_check.range;
                     SpawnPuff(sx, sy, z, shoot_check.puff, shoot_check.angle + kBAMAngle180);
                 }
                 return false;
@@ -1795,8 +1799,8 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
                     {
                         if (shoot_check.puff)
                         {
-                            sx -= trace.delta_x * (shoot_check.puff->radius_ + 1.0f) / shoot_check.range;
-                            sy -= trace.delta_y * (shoot_check.puff->radius_ + 1.0f) / shoot_check.range;
+                            sx -= trace.delta_x * 6.0f / shoot_check.range;
+                            sy -= trace.delta_y * 6.0f / shoot_check.range;
                             SpawnPuff(sx, sy, z, shoot_check.puff, shoot_check.angle + kBAMAngle180);
                         }
                         return false;
@@ -1809,7 +1813,11 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
                                         {{sy, z}}))
                     {
                         if (shoot_check.puff)
+                        {
+                            sx -= trace.delta_x * 6.0f / shoot_check.range;
+                            sy -= trace.delta_y * 6.0f / shoot_check.range;
                             SpawnPuff(sx, sy, z, shoot_check.puff, shoot_check.angle + kBAMAngle180);
+                        }
                         return false;
                     }
                 }
@@ -1844,7 +1852,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
                 if (PathTraverse(sx, sy, shoota.X, shoota.Y, kPathAddThings, ShootTraverseCallback))
                 {
                     if (shoot_check.puff)
-                        SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_check.puff, shoot_check.angle + kBAMAngle180);
+                        SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_check.puff, shoot_check.angle + kBAMAngle180, false);
                     return false;
                 }
             }
@@ -1863,7 +1871,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
                     if (PathTraverse(sx, sy, shoota.X, shoota.Y, kPathAddThings, ShootTraverseCallback))
                     {
                         if (shoot_check.puff)
-                            SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_check.puff, shoot_check.angle + kBAMAngle180);
+                            SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_check.puff, shoot_check.angle + kBAMAngle180, false);
                         return false;
                     }
                 }
@@ -1888,7 +1896,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
                 if (PathTraverse(sx, sy, shoota.X, shoota.Y, kPathAddThings, ShootTraverseCallback))
                 {
                     if (shoot_check.puff)
-                        SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_check.puff, shoot_check.angle + kBAMAngle180);
+                        SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_check.puff, shoot_check.angle + kBAMAngle180, false);
                     return false;
                 }
             }
@@ -1957,7 +1965,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
 
     // Spawn bullet puff
     if (shoot_check.puff)
-        SpawnPuff(x, y, z, shoot_check.puff, shoot_check.angle + kBAMAngle180);
+        SpawnPuff(x, y, z, shoot_check.puff, shoot_check.angle + kBAMAngle180, false);
 
     // don't go any farther
     return false;
@@ -2220,8 +2228,8 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
         // position puff off the wall and spawn
         if (shoot_check.puff)
         {
-            float puff_x = x - trace.delta_x * (shoot_check.puff->radius_ + 1.0f) / shoot_check.range;
-            float puff_y = y - trace.delta_y * (shoot_check.puff->radius_ + 1.0f) / shoot_check.range;
+            float puff_x = x - trace.delta_x * 6.0f / shoot_check.range;
+            float puff_y = y - trace.delta_y * 6.0f / shoot_check.range;
             SpawnPuff(puff_x, puff_y, z, shoot_check.puff, shoot_check.angle + kBAMAngle180);
         }
 

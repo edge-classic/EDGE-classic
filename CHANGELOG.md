@@ -1,112 +1,57 @@
-# CHANGELOG for EDGE-Classic 1.5 (since EDGE-Classic 1.38)
-
-## New Features
-
-- Uncapped framerate
-  - 'framerate_limit' CVAR can be used to cap framerate maximum; default 500
-- New Sokol GFX Renderer
-  - Leverages platform-specific APIs (Direct3D 11 on Windows, WebGL2 on Emscripten, and GL Core 3.3 on other platforms)
-    - Original GL 1.3 render path requires recompilation; see COMPILING.md for details
-  - Multithreaded BSP traversal/geometry creation (with new renderer)
-- Improved sound mixer
-  - Provides threading, floating point samples, and OpenAL attenuation/spatialization models
-  - Improved Freeverb-based reverb model used and exposed to modders via DDFVERB
-  - Underwater/reverb/vacuum effect nodes remove the need to cache premixed sounds
-- Dynamic light image-based coloring via AUTOCOLOUR DDF field
-  - Will use the average RGB value of the specified image as the light color
-- Implement "extra_light_step" CVAR
-  - Controls how much the light level is raised by actions such as A_Light1/2
-- New state action: LUA_RUN_SCRIPT("\<lua_script_name\>")
-  - Will pass a table containing the calling mobj's information as a parameter
-- New state actions:  CLEAR_TARGET and FRIEND_LOOKOUT
-- New BORE attack flag
-  - Can damage the same mobj multiple times as it is passing through, versus the once-per-mobj of the existing TUNNEL special
-- New state actions: GRAVITY and NO_GRAVITY
-- New state action: SET_SCALE(float)
-  - Changes the objects visual scale. This does not affect the actual collision box and is mainly intended for special effects things, such as a puff of smoke gradually dissipating by expansion (in combination with TRANS_FADE) or shrinking and disappearing.
-- New DDFTHING special: ASSIGN_TID
-  - Will assign a unique ID to a mobj when it spawns, managed separately from tags
-- New LUA/COAL functions: mapobject.render_view_tag(x, y, w, h, tag) and mapobject.render_view_tid(x, y, w, h, tid). See the world from the eyes of any mobj.
-  - Tags/TIDs used for this function should be unique; no guarantees regarding which mobj is returned if shared between multiple mobjs
-- New LUA functions: mapobject.tagged_info(tag) and mapobject.tid_info(tid).
-  - Will return a table of all active map objects with the matching tag/tid for iteration and scripting.
-- New LUA-only function: mapobject.objects_in_radius(x, y, radius).
-  - Will return a table of all map objects within a given radius from the indicated XY coordinates, for iteration and scripting.
-- Added FLIP and INVERT DDFIMAGE specials to allow easier creation of mirrored images, etc
-
+# CHANGELOG for EDGE-Classic 1.51 (since EDGE-Classic 1.50)
 
 ## General Improvements/Changes
-
-- Crosshairs and overlays no longer limited to a hardcoded list of options
-  - Images placed in the "crosshairs" or "overlays" folder will be added to the appropriate menu option
-    on the next run
-- Co-op bot improvements
-  - Bots and players (non-voodoo) will no longer clip or telefrag each other
-  - Bots will now follow behind the player instead of potentially obstructing their view
-  - Up to 15 bots can be spawned regardless of the number of single-player/co-op starts that exist
-- Faux skies (not real skyboxes) can use DDFANIM images sequences, allowing for animated skies
-- Implemented "idtakeall" cheat; removes current player loadout and gives them their initial benefits
-  - Also used for Heretic "idkfa" behavior, although it deviates somewhat
-- Add "Simple Skies" to Performance Options menu
-  - Can improve performance at the cost of breaking sky flooding, sky floors, and other behavior
-- Gameplay will be paused and the cursor released when the console is active
-- Consolidated SoundFont and OPL Instrument selection in Sound Menu
-  - Now a single option named "MIDI Instrument Set"
-  - Lumps named SNDFONT or pack files named SNDFONT.sf2/sf3 will override the "Default" soundfont option
-  - OPL emulation will use a GENMIDI lump/pack file if present, otherwise will fall back to a built-in instrument set
-- Default automap zoom halved.
-- Automap zoom persists for whole play session.
-- Allow negative percentages for DDFWEAPON bobbing
-- More accurate Heretic/Blasphemer cheats
-- Heretic/Blasphemer tweaks
-- Autoscale intermission texts if there are too many lines to fit on the screen
-- MLOOK_TURN() Weapons.ddf action has been renamed to FACE() with identical behaviour
-- "Exclusive Fullscreen" and its functionality removed from Screen Options menu
-- Removed support for SID and RAD v2 music formats
- 
+- Episode menu item positioning updated to allow for up to ten visible episodes
+- Restored support for C64 PSID/RSID music tracks
+- Added "Indexed+Fake Contrast" to Lighting Mode choices in the Video Options menu
+- Removed manual tiling and forced promotion of textures to power-of-two sizes
+  - As a result, support for NPOT textures is required by the program; for legacy GL builds the GL loader has been updated appropriately
 
 ## Compatibility Fixes
 
 ### Vanilla
-- Mikoportal support expanded to include all mobjs, not just voodoo dolls
-- Things can achieve peccaportal flight under the correct conditions
-  - Unlike true vanilla peccaportal flight, things retain a small degree of air control
-- Fixes for fading light level cycling
-- Fixed negative patch Y offset issue with SKY1 and W105_1 in Doom(1)
-- Fixed CheckRelThing callback for missiles missing some collisions that should have occurred
-- Improved scaling for intermission text that would not normally fit on the screen
-- Reduced MAXMOVE value to 30 to align with expected behavior
+- Fixed Dehacked-modified chainsaws not using the S_SAW2 attack state missing the proper ENGAGED_SOUND
+- Fixed weapons with a non-stock ammo type not granting the appopriate ammunition on pickup
+- Fixed the special_lines_hit vector not being cleared when teleporting
 
 ### Boom
-- Boom Line 242 sector rendering vastly improved
-- Carry scroller forces are now additive instead of averaged
-- Changed method of determining the sectors a thing is touching (for carry purposes/etc) from
-a BSP-based to a linedef-based method to be more in line with Boom behavior
-- Updated friction/wind force calculations to be more in line with Boom behavior
+- Fixed destination heights for the Shortest Lower/Upper Texture lift targets
+- Fixed ANIMATED entry name checks not being case-insensitive
+- Adjusted movefactor for high-friction ("muddy") sectors to be closer to other ports
 
 ### MBF
-- A_Mushroom codepointer revised to be in line with original behavior
-- Sky transfers now support offsets, animated skies and scrolling
+- Altered behavior of A_Die codepointer to align with other ports
+- Fixed mobjs with the BOUNCES flag not being marked as SHOOTABLE
 
 ### MBF21
-- All MBF21 Dehacked code pointers implemented
+- Fixed the `MBF21 Flags` Dehacked field not being zero-initialized when allocating new states
+- Fixed A_MonsterProjectile and A_WeaponProjectile not being able to reference mobjs that originate from stock DDFATK instead of DDFTHING
+- Fixed `Splash group` not being applied to dynamic mobjs created from a new A_WeaponProjectile/A_MonsterProjectile DDFATK entry
+- Fixed A_RadiusDamage checking the splash group of the calling mobj's source instead of the mobj itself
+- Fixed Dehacked-altered weapons with an "Ammo per shot" value of 0 being converted to use the NOAMMO ammo type when not desired
+- Removed attempt to scale height of new attack codepointers to their calling mobj's height; fixed height of 32 is used instead
+
+### Other
+- Fixed MUSINFO entry names with leading numbers being split into separate tokens when parsing
+- Titlescreen graphics will now ignore offsets to align with most other ports' behavior
+- Fixed DSDehacked things not being flagged as spawnable (indices beyond the DEHEXTRA range)
+- Removed arbitrary hard cap on DSDehacked indices; converter now uses an associative map and only allocates new items on demand
+- Fixed various UMAPINFOs being treated as invalid due to certain (incorrect) assumptions about map naming and ordering
+- Raised loop limit for successive 0-tic states to 255 (formerly 8 for mobj thinking and 10 for weapon psprites)
+  - This should accommodate more complex MBF21 mods while still allowing a 'safety hatch' if the loop runs away somehow
 
 ## General Bugfixes
-
-- Replaced PRNG as the previous ranlux24-based implementation was producing odd patterns/bias in regular gameplay
-- Fixed Glass linetypes not clearing the BlockSound flag after being shot
-- Fix UDMF sidedef mismask offset loading
-- Node follower CTD fix
-- Fixed legacy bug: switch activation noises when some switch images were not cached and the activating line was not textured
-- Flicker light fixes
-- Fix for patch atlas lookups for invalid characters
-- Calling named RTS Tags via state action RTS_ENABLE_TAGGED did not work
-- PNG textures/flats did not tile
-- MLOOK_TURN() and MLOOK_FACE() thing.ddf actions were exactly the same. Now MLOOK_TURN() affects horizontal and MLOOK_FACE() affects vertical.
-- Changed FACE() thing.ddf action to behave like it's horizontal equivalent TURN().
-- Stopped looping SFX still playing on intermission screen
-- Fixed player being able to build momentum by running against a wall/closed door
-- Fixed CTD when using the 'endoom' console command with no valid ENDOOM lump present
-- Fixed HUD messages with newline characters not formatting properly
-- Fixed plane movers using the sector's current floor/ceiling height as targets not updating their destination heights properly
-- Fixed UMAPINFO-defined levels that add intertext/intertextsecret without defining a backdrop not using the default flat
+- Fixed automap background not defaulting to black fill when not defined by the current AUTOMAP DDFSTYLE
+- Fixed sound fx category assignment for FAILED_SFX
+- Removed distance attenuation from BOSS category sound fx
+- Added missing glReadPixels function pointer to Sokol internal GL loader (for Windows builds)
+- Fixed improper tiling of textures-as-flats
+- Added missing Green Key graphics
+- Fixed level transition not killing all sound effects regardless of category
+- Fixed moving planes with a RES_Impossible move result not reversing direction when appropriate
+- Fixed legacy GL version check incorrectly flagging certain major/minor versions of GL as unsupported
+- Removed invalid references that were still present when EDGE_PROFILING was enabled at build-time
+- Fixed incorrect centering of menu items using the SELECTED text style
+- Fixed divide-by-zero error in DoLaunchProjectile when the calling mobj has a height of zero
+- Fixed stock LUAHUDs not drawing automap fully; leaving a gap if the status bar was hidden/disabled
+- Fixed bullet puffs spawned close to ledges "jumping" up to the adjacent floor

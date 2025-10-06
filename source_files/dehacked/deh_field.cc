@@ -111,13 +111,13 @@ static bool FieldValidateValue(const FieldReference *reference, int new_val)
 
         // for DSDehacked, allow very high values
         case kFieldTypeFrameNumber:
-            max_obj = INT_MAX;
+            max_obj = INT32_MAX;
             break;
         case kFieldTypeSpriteNumber:
-            max_obj = INT_MAX;
+            max_obj = INT32_MAX;
             break;
         case kFieldTypeSoundNumber:
-            max_obj = INT_MAX;
+            max_obj = INT32_MAX;
             break;
 
         default:

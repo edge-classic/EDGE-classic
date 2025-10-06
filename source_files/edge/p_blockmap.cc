@@ -83,7 +83,7 @@ MapObject **dynamic_light_blockmap_things = nullptr;
 extern std::unordered_set<AbstractShader *> seen_dynamic_lights;
 extern ConsoleVariable                      draw_culling;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(max_dynamic_lights, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(max_dynamic_light_radius, "4", kConsoleVariableFlagArchive)
 
 void CreateThingBlockmap(void)
 {
@@ -783,7 +783,7 @@ void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2, floa
                     continue;
 
                 // check whether radius touches the given bbox
-                float r = mo->dynamic_light_.r;
+                float r = HMM_MIN(exp2(5 + max_dynamic_light_radius.d_), mo->dynamic_light_.r);
 
                 if (mo->x + r <= x1 || mo->x - r >= x2 || mo->y + r <= y1 || mo->y - r >= y2 || mo->z + r <= z1 ||
                     mo->z - r >= z2)
@@ -792,18 +792,6 @@ void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2, floa
                 // create shader if necessary
                 if (!mo->dynamic_light_.shader)
                     mo->dynamic_light_.shader = MakeDLightShader(mo);
-
-                if (max_dynamic_lights.d_ > 0 && seen_dynamic_lights.count(mo->dynamic_light_.shader) == 0)
-                {
-                    if ((int)seen_dynamic_lights.size() >= max_dynamic_lights.d_ * 20)
-                        continue;
-                    else
-                    {
-                        seen_dynamic_lights.insert(mo->dynamic_light_.shader);
-                    }
-                }
-
-                //			mo->dynamic_light_.shader->CheckReset();
 
                 func(mo, data);
             }
@@ -832,7 +820,7 @@ void SectorGlowIterator(Sector *sec, float x1, float y1, float z1, float x2, flo
             continue;
 
         // check whether radius touches the given bbox
-        float r = mo->dynamic_light_.r;
+        float r = HMM_MIN(exp2(5 + max_dynamic_light_radius.d_), mo->dynamic_light_.r);
 
         if (mo->info_->glow_type_ == kSectorGlowTypeFloor && sec->floor_height + r <= z1)
             continue;
@@ -875,8 +863,6 @@ void SectorGlowIterator(Sector *sec, float x1, float y1, float z1, float x2, flo
             else
                 mo->dynamic_light_.shader = MakePlaneGlow(mo);
         }
-
-        //		mo->dynamic_light_.shader->CheckReset();
 
         func(mo, data);
     }

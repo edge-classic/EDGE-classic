@@ -897,8 +897,6 @@ void DDFMobjCleanUp(void)
 
         m->spitspot_ = m->spitspot_ref_ != "" ? mobjtypes.Lookup(m->spitspot_ref_.c_str()) : nullptr;
 
-        cur_ddf_entryname.clear();
-
         if (!weapondefs.deh_ammo_replacements.empty())
         {
             if (!m->pickup_benefits_)
@@ -935,6 +933,8 @@ void DDFMobjCleanUp(void)
                     BenefitAdd(&m->pickup_benefits_, weapondefs.deh_ammo_replacements[weap_to_change]);
             }
         }
+
+        cur_ddf_entryname.clear();
     }
 
     mobjtypes.shrink_to_fit();

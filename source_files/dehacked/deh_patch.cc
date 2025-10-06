@@ -887,16 +887,16 @@ bool ValidateObject(void)
 
         // for DSDehacked, allow very high values
         case kDEH_FRAME:
-            max_obj = INT_MAX;
+            max_obj = INT32_MAX;
             break;
         case kDEH_PTR:
-            max_obj = INT_MAX;
+            max_obj = INT32_MAX;
             break;
         case kDEH_SOUND:
-            max_obj = INT_MAX;
+            max_obj = INT32_MAX;
             break;
         case kDEH_THING:
-            max_obj = INT_MAX;
+            max_obj = INT32_MAX;
             min_obj = 1;
             break;
 

@@ -109,6 +109,8 @@ class AbstractShader
     // used to render overlay textures (world polygons)
     virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, BlendingMode blending,
                           bool masked, void *data, ShaderCoordinateFunction func) = 0;
+
+    virtual void SetRadius(float r) = 0;
 };
 
 // Delete all dynamic light "images"; cannot be done in the various shader

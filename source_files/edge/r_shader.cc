@@ -164,14 +164,16 @@ class dynlight_shader_c : public AbstractShader
 
     LightImage *lim;
 
+    float radius;
+
   public:
-    dynlight_shader_c(MapObject *object) : mo(object)
+    dynlight_shader_c(MapObject *object, float r) : mo(object), radius(r)
     {
         // Note: this is shared, we must not delete it
         lim = GetLightImage(mo->info_);
     }
 
-    virtual ~dynlight_shader_c()
+    ~dynlight_shader_c()
     { /* nothing to do */
     }
 
@@ -222,7 +224,7 @@ class dynlight_shader_c : public AbstractShader
 
     inline float WhatRadius()
     {
-        return mo->dynamic_light_.r * render_mirror_set.XYScale();
+        return radius * render_mirror_set.XYScale();
     }
 
     inline RGBAColor WhatColor()
@@ -236,7 +238,7 @@ class dynlight_shader_c : public AbstractShader
     }
 
   public:
-    virtual void Sample(ColorMixer *col, float x, float y, float z)
+    void Sample(ColorMixer *col, float x, float y, float z)
     {
         float mx = mo->x;
         float my = mo->y;
@@ -267,7 +269,7 @@ class dynlight_shader_c : public AbstractShader
         }
     }
 
-    virtual void Corner(ColorMixer *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon)
+    void Corner(ColorMixer *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon)
     {
         float mx = mo->x;
         float my = mo->y;
@@ -319,7 +321,7 @@ class dynlight_shader_c : public AbstractShader
         }
     }
 
-    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, BlendingMode blending,
+    void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, BlendingMode blending,
                           bool masked, void *data, ShaderCoordinateFunction func)
     {
         if (WhatType() == kDynamicLightTypeNone)
@@ -364,11 +366,16 @@ class dynlight_shader_c : public AbstractShader
 
         (*pass_var) += 1;
     }
+
+    void SetRadius(float r)
+    {
+        radius = r;
+    }
 };
 
-AbstractShader *MakeDLightShader(MapObject *mo)
+AbstractShader *MakeDLightShader(MapObject *mo, float r)
 {
-    return new dynlight_shader_c(mo);
+    return new dynlight_shader_c(mo, r);
 }
 
 //----------------------------------------------------------------------------
@@ -382,13 +389,15 @@ class plane_glow_c : public AbstractShader
 
     LightImage *lim;
 
+    float radius;
+
   public:
-    plane_glow_c(MapObject *_glower) : mo(_glower)
+    plane_glow_c(MapObject *_glower, float r) : mo(_glower), radius(r)
     {
         lim = GetLightImage(mo->info_);
     }
 
-    virtual ~plane_glow_c()
+    ~plane_glow_c()
     { /* nothing to do */
     }
 
@@ -410,7 +419,7 @@ class plane_glow_c : public AbstractShader
 
     inline float WhatRadius()
     {
-        return mo->dynamic_light_.r * render_mirror_set.XYScale();
+        return radius * render_mirror_set.XYScale();
     }
 
     inline RGBAColor WhatColor()
@@ -424,7 +433,7 @@ class plane_glow_c : public AbstractShader
     }
 
   public:
-    virtual void Sample(ColorMixer *col, float x, float y, float z)
+    void Sample(ColorMixer *col, float x, float y, float z)
     {
         EPI_UNUSED(x);
         EPI_UNUSED(y);
@@ -448,7 +457,7 @@ class plane_glow_c : public AbstractShader
         }
     }
 
-    virtual void Corner(ColorMixer *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon)
+    void Corner(ColorMixer *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon)
     {
         EPI_UNUSED(nx);
         EPI_UNUSED(ny);
@@ -491,7 +500,7 @@ class plane_glow_c : public AbstractShader
         }
     }
 
-    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, BlendingMode blending,
+    void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, BlendingMode blending,
                           bool masked, void *data, ShaderCoordinateFunction func)
     {
         const Sector *sec = mo->subsector_->sector;
@@ -535,11 +544,16 @@ class plane_glow_c : public AbstractShader
 
         (*pass_var) += 1;
     }
+
+    void SetRadius(float r)
+    {
+        radius = r;
+    }
 };
 
-AbstractShader *MakePlaneGlow(MapObject *mo)
+AbstractShader *MakePlaneGlow(MapObject *mo, float r)
 {
-    return new plane_glow_c(mo);
+    return new plane_glow_c(mo, r);
 }
 
 //----------------------------------------------------------------------------
@@ -556,6 +570,8 @@ class wall_glow_c : public AbstractShader
 
     LightImage *lim;
 
+    float radius;
+
     inline float Dist(float x, float y)
     {
         return (ld->vertex_1->X - x) * norm_x + (ld->vertex_1->Y - y) * norm_y;
@@ -571,7 +587,7 @@ class wall_glow_c : public AbstractShader
 
     inline float WhatRadius()
     {
-        return mo->dynamic_light_.r * render_mirror_set.XYScale();
+        return radius * render_mirror_set.XYScale();
     }
 
     inline RGBAColor WhatColor()
@@ -585,7 +601,7 @@ class wall_glow_c : public AbstractShader
     }
 
   public:
-    wall_glow_c(MapObject *_glower) : mo(_glower)
+    wall_glow_c(MapObject *_glower, float r) : mo(_glower), radius(r)
     {
         EPI_ASSERT(mo->dynamic_light_.glow_wall);
         ld     = mo->dynamic_light_.glow_wall;
@@ -595,11 +611,11 @@ class wall_glow_c : public AbstractShader
         lim = GetLightImage(mo->info_);
     }
 
-    virtual ~wall_glow_c()
+    ~wall_glow_c()
     { /* nothing to do */
     }
 
-    virtual void Sample(ColorMixer *col, float x, float y, float z)
+    void Sample(ColorMixer *col, float x, float y, float z)
     {
         EPI_UNUSED(z);
         float dist = Dist(x, y);
@@ -622,7 +638,7 @@ class wall_glow_c : public AbstractShader
         }
     }
 
-    virtual void Corner(ColorMixer *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon = false)
+    void Corner(ColorMixer *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon = false)
     {
         EPI_UNUSED(nx);
         EPI_UNUSED(ny);
@@ -648,7 +664,7 @@ class wall_glow_c : public AbstractShader
         }
     }
 
-    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, BlendingMode blending,
+    void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, BlendingMode blending,
                           bool masked, void *data, ShaderCoordinateFunction func)
     {
         const Sector *sec = mo->subsector_->sector;
@@ -694,11 +710,16 @@ class wall_glow_c : public AbstractShader
 
         (*pass_var) += 1;
     }
+
+    void SetRadius(float r)
+    {
+        radius = r;
+    }
 };
 
-AbstractShader *MakeWallGlow(MapObject *mo)
+AbstractShader *MakeWallGlow(MapObject *mo, float r)
 {
-    return new wall_glow_c(mo);
+    return new wall_glow_c(mo, r);
 }
 
 void DeleteAllLightImages()

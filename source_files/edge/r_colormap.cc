@@ -803,6 +803,11 @@ class ColormapShader : public AbstractShader
     {
         sector_ = sec;
     }
+
+    void SetRadius(float r)
+    {
+        EPI_UNUSED(r);
+    }
 };
 
 static ColormapShader *standard_colormap_shader;

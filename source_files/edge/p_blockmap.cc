@@ -46,9 +46,9 @@
 #include "r_state.h"
 
 // FIXME: have a proper API
-extern AbstractShader *MakeDLightShader(MapObject *mo);
-extern AbstractShader *MakePlaneGlow(MapObject *mo);
-extern AbstractShader *MakeWallGlow(MapObject *mo);
+extern AbstractShader *MakeDLightShader(MapObject *mo, float r);
+extern AbstractShader *MakePlaneGlow(MapObject *mo, float r);
+extern AbstractShader *MakeWallGlow(MapObject *mo, float r);
 
 extern unsigned int root_node;
 
@@ -83,7 +83,16 @@ MapObject **dynamic_light_blockmap_things = nullptr;
 extern std::unordered_set<AbstractShader *> seen_dynamic_lights;
 extern ConsoleVariable                      draw_culling;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(max_dynamic_light_radius, "4", kConsoleVariableFlagArchive)
+static void UpdateDLightRadius(ConsoleVariable *self)
+{
+    for (MapObject *mo = map_object_list_head; mo; mo = mo->next_)
+    {
+        if (mo->dynamic_light_.shader)
+            mo->dynamic_light_.shader->SetRadius(HMM_MIN(exp2(5 + self->d_), mo->dynamic_light_.r));
+    }
+}
+
+EDGE_DEFINE_CONSOLE_VARIABLE_WITH_CALLBACK_CLAMPED(max_dynamic_light_radius, "4", kConsoleVariableFlagArchive, UpdateDLightRadius, 0, 4)
 
 void CreateThingBlockmap(void)
 {
@@ -791,7 +800,7 @@ void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2, floa
 
                 // create shader if necessary
                 if (!mo->dynamic_light_.shader)
-                    mo->dynamic_light_.shader = MakeDLightShader(mo);
+                    mo->dynamic_light_.shader = MakeDLightShader(mo, r);
 
                 func(mo, data);
             }
@@ -849,7 +858,7 @@ void SectorGlowIterator(Sector *sec, float x1, float y1, float z1, float x2, flo
                     }
                     if (mo->dynamic_light_.glow_wall)
                     {
-                        mo->dynamic_light_.shader = MakeWallGlow(mo);
+                        mo->dynamic_light_.shader = MakeWallGlow(mo, r);
                     }
                     else // skip useless repeated checks
                     {
@@ -858,10 +867,10 @@ void SectorGlowIterator(Sector *sec, float x1, float y1, float z1, float x2, flo
                     }
                 }
                 else
-                    mo->dynamic_light_.shader = MakeWallGlow(mo);
+                    mo->dynamic_light_.shader = MakeWallGlow(mo, r);
             }
             else
-                mo->dynamic_light_.shader = MakePlaneGlow(mo);
+                mo->dynamic_light_.shader = MakePlaneGlow(mo, r);
         }
 
         func(mo, data);

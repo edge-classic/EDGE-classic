@@ -236,6 +236,7 @@ module hud
 	function render_automap(x, y, w, h, optional flags) = native
 	
 	function play_sound(sound : string) = native
+	function kill_sound(sound : string) = native
 
 	function grab_times() =
 	{

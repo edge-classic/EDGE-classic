@@ -1,5 +1,9 @@
 # CHANGELOG for EDGE-Classic 1.51 (since EDGE-Classic 1.50)
 
+## New Features
+- New LUA/COAL function: hud.kill_sound(SFXname) which will stop a sound if it is currently playing.
+
+
 ## General Improvements/Changes
 - Episode menu item positioning updated to allow for up to ten visible episodes
 - Restored support for C64 PSID/RSID music tracks

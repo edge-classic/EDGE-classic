@@ -34,7 +34,10 @@
 #include "r_state.h"
 #include "version.h"
 
-SDL_Window *program_window;
+SDL_Window *program_window = NULL;
+#ifndef SOKOL_D3D11
+SDL_GLContext program_context = NULL;
+#endif
 
 int graphics_shutdown = 0;
 
@@ -292,7 +295,8 @@ static bool InitializeWindow(DisplayMode *mode)
     }
 
 #ifndef SOKOL_D3D11
-    if (SDL_GL_CreateContext(program_window) == nullptr)
+    program_context = SDL_GL_CreateContext(program_window);
+    if (program_context == NULL)
         FatalError("Failed to create OpenGL context.\n");
 #endif
 
@@ -511,10 +515,18 @@ void ShutdownGraphics(void)
 
     render_backend->Shutdown();
 
-    if (program_window != nullptr)
+#ifndef SOKOL_D3D11
+    if (program_context != NULL)
+    {
+        SDL_GL_DeleteContext(program_context);
+        program_context = NULL;
+    }
+#endif
+
+    if (program_window != NULL)
     {
         SDL_DestroyWindow(program_window);
-        program_window = nullptr;
+        program_window = NULL;
     }
 
     for (DisplayMode *mode : screen_modes)

@@ -10,6 +10,8 @@
 - Added "Indexed+Fake Contrast" to Lighting Mode choices in the Video Options menu
 - Removed manual tiling and forced promotion of textures to power-of-two sizes
   - As a result, support for NPOT textures is required by the program; for legacy GL builds the GL loader has been updated appropriately
+- "Maximum Dynamic Lights" performance menu option changed to "Max Dynamic Light Radius"
+  - Better at helping performance without sacrificing intended aesthetics
 
 ## Compatibility Fixes
 
@@ -59,3 +61,4 @@
 - Fixed divide-by-zero error in DoLaunchProjectile when the calling mobj has a height of zero
 - Fixed stock LUAHUDs not drawing automap fully; leaving a gap if the status bar was hidden/disabled
 - Fixed bullet puffs spawned close to ledges "jumping" up to the adjacent floor
+- Fixed SDL GL context not being properly deleted on program shutdown (when applicable)

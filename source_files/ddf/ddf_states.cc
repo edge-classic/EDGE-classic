@@ -455,6 +455,30 @@ void DDFStateReadState(const char *info, const char *label, std::vector<StateRan
 
     cur->tics = atol(stateinfo[2].c_str());
 
+    if (redir)
+    {
+        bool zero_state = true;
+
+        for (int idx = index; idx >= 0; --idx)
+        {
+            State *ticker = &states[num_states - 1 - idx];
+            if (ticker->tics != 0 || ticker->action)
+            {
+                zero_state = false;
+                break;
+            }
+        }
+
+        // Dasho - This is an attempt to prevent a set of states in which every
+        // state is 0 tics in length, has no actions associated with it,
+        // and the last state redirects to the beginning.
+        // If we leave it as-is, then the thinking loop runs away very quickly
+        if (zero_state && DDFCompareName(redir, label) == 0)
+        {
+            cur->tics = 1;
+        }
+    }
+
     //--------------------------------------------------
     //------------STATE BRIGHTNESS LEVEL----------------
     //--------------------------------------------------

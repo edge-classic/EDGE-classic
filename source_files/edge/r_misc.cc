@@ -102,40 +102,43 @@ float sine_table[kSineTableSize];
 
 void FreeBSP(void);
 
-//
-// To get a global angle from cartesian coordinates,
-// the coordinates are flipped until they are in
-// the first octant of the coordinate system, then
-// the y (<=x) is scaled and divided by x to get a
-// tangent (slope) value which is looked up in the
-// tantoangle[] table.
-
-static float ApproximateAtan2(float y, float x)
+static float ApproximateAtan2(float y, float x) 
 {
-    // http://pubs.opengroup.org/onlinepubs/009695399/functions/atan2.html
-    // Volkan SALMA
+    static constexpr float kHalfPi = HMM_PI32 / 2.0f;
 
-    const float ONEQTR_PI = HMM_PI / 4.0;
-    const float THRQTR_PI = 3.0 * HMM_PI / 4.0;
-    float       r, angle;
-    float       abs_y = fabs(y) + 1e-10f; // kludge to prevent 0/0 condition
-    if (x < 0.0f)
+    // Avoid division by zero
+    if (x == 0.0f) 
     {
-        r     = (x + abs_y) / (abs_y - x);
-        angle = THRQTR_PI;
+        if (y > 0.0f)
+            return kHalfPi;
+        if (y < 0.0f) 
+            return -kHalfPi;
+        return 0.0f; // undefined, but return 0
     }
-    else
+
+    float atan;
+    float z = y / x;
+    if (fabsf(z) < 1.0f) 
     {
-        r     = (x - abs_y) / (x + abs_y);
-        angle = ONEQTR_PI;
+        atan = z / (1.0f + 0.28f * z * z);
+        if (x < 0.0f) 
+        {
+            if (y < 0.0f)
+                return atan - HMM_PI32;
+            else 
+                return atan + HMM_PI32;
+        }
+    } 
+    else 
+    {
+        atan = kHalfPi - z / (z * z + 0.28f);
+        if (y < 0.0f) 
+            return atan - HMM_PI32;
     }
-    angle += (0.1963f * r * r - 0.9817f) * r;
-    if (y < 0.0f)
-        return (-angle); // negate if in quad III or IV
-    else
-        return (angle);
+
+    return atan;
 }
-//
+
 BAMAngle PointToAngle(float x1, float y1, float x, float y, bool precise)
 {
     x -= x1;

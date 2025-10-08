@@ -492,12 +492,6 @@ void COALLoadScripts()
 static bool coal_detected = false;
 void        SetCOALDetected(bool detected)
 {
-    // check whether redundant call, once enabled stays enabled
-    if (coal_detected)
-    {
-        return;
-    }
-
     coal_detected = detected;
 }
 

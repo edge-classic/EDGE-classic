@@ -1056,6 +1056,7 @@ static void ProcessCOALInWad(DataFile *df)
         int lump = wad->coal_huds_;
 
         SetCOALDetected(true);
+        LuaSetLuaHUDDetected(false);
 
         std::string data   = LoadLumpAsString(lump);
         std::string source = GetLumpNameFromIndex(lump);
@@ -1078,6 +1079,7 @@ static void ProcessLuaInWad(DataFile *df)
         int lump = wad->lua_huds_;
 #ifdef EDGE_CLASSIC // This part only matters if in a potentially mixed Lua/COAL environment
         LuaSetLuaHUDDetected(true);
+        SetCOALDetected(false);
 #endif
         std::string data   = LoadLumpAsString(lump);
         std::string source = GetLumpNameFromIndex(lump);

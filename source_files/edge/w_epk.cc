@@ -738,6 +738,7 @@ static void ProcessCOALHUDInPack(PackFile *pack)
                 if (epi::StringPrefixCaseCompareASCII(bare_filename, "edge_defs") != 0)
                 {
                     SetCOALDetected(true);
+                    LuaSetLuaHUDDetected(false);
                 }
 
                 int            length   = -1;
@@ -801,6 +802,7 @@ static void ProcessLuaHUDInPack(PackFile *pack)
                 if (epi::StringPrefixCaseCompareASCII(bare_filename, "edge_defs") != 0)
                 {
                     LuaSetLuaHUDDetected(true);
+                    SetCOALDetected(false);
                 }
 #endif
                 int            length   = -1;

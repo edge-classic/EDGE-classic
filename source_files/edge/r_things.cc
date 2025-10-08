@@ -1212,7 +1212,7 @@ static bool RenderThing(DrawThing *dthing, bool solid)
         ModelDefinition *md       = GetModel(mo->state_->sprite);
         const Image     *skin_img = md->skins_[mo->model_skin_];
 
-        if ((mo->visibility_ < 0.99f) || (skin_img && skin_img->opacity_ == kOpacityComplex) ||
+        if ((mo->flags_ & kMapObjectFlagFuzzy) || (mo->visibility_ < 0.99f) || (skin_img && skin_img->opacity_ == kOpacityComplex) ||
             mo->hyper_flags_ & kHyperFlagNoZBufferUpdate)
         {
             is_solid = false;

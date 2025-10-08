@@ -70,12 +70,6 @@ lua_State *LuaGetGlobalVM()
 static bool lua_detected = false;
 void        LuaSetLuaHUDDetected(bool detected)
 {
-    // check whether redundant call, once enabled stays enabled
-    if (lua_detected)
-    {
-        return;
-    }
-
     lua_detected = detected;
 }
 

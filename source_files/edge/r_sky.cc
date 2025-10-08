@@ -773,10 +773,7 @@ void FinishSky()
     if (draw_culling.d_)
         render_state->Disable(GL_DEPTH_TEST);
 
-    if (!renderer_dumb_sky.d_)
-        render_state->DepthFunction(GL_GREATER);
-    else
-        render_state->DepthMask(false);
+    render_state->DepthFunction(GL_GREATER);
 
     StartUnitBatch(false);
 
@@ -801,18 +798,13 @@ void FinishSky()
     if (draw_culling.d_)
         render_state->Enable(GL_DEPTH_TEST);
 
-    if (!renderer_dumb_sky.d_)
-        render_state->DepthFunction(GL_LEQUAL);
-    else
-        render_state->DepthMask(true);
+    render_state->DepthFunction(GL_LEQUAL);
 }
 
 void RenderSkyPlane(Subsector *sub, float h)
 {
     need_to_draw_sky = true;
 
-    if (renderer_dumb_sky.d_)
-        return;
     Seg *seg = sub->segs;
     if (!seg)
         return;
@@ -872,9 +864,6 @@ void RenderSkyPlane(Subsector *sub, float h)
 void RenderSkyWall(Seg *seg, float h1, float h2)
 {
     need_to_draw_sky = true;
-
-    if (renderer_dumb_sky.d_)
-        return;
 
     if (!sky_unit_started)
         BeginSkyUnit();

@@ -41,7 +41,6 @@
 #include "r_texgl.h"
 #include "r_units.h"
 
-EDGE_DEFINE_CONSOLE_VARIABLE(renderer_dumb_sky, "0", kConsoleVariableFlagArchive)
 #ifdef APPLE_SILICON
 EDGE_DEFINE_CONSOLE_VARIABLE(renderer_dumb_clamp, "1", kConsoleVariableFlagNone)
 #else

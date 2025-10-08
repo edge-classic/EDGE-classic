@@ -2085,10 +2085,9 @@ void RenderTrueBSP(void)
 
     if (!render_world_index)
     {
-        bool simple_sky  = renderer_dumb_sky.d_ == 1;
         need_to_draw_sky = deferred_sky_items.size();
 
-        if (need_to_draw_sky && !simple_sky)
+        if (need_to_draw_sky)
         {
             render_backend->SetRenderLayer(kRenderLayerSkyDeferred, true);
 
@@ -2109,24 +2108,9 @@ void RenderTrueBSP(void)
             }
 
             FlushSky(); // flush any deferred sky units
-
-            int current = renderer_dumb_sky.d_;
-
             // Always render a simple sky, when rendering sky walls/planes they are deferred
             // from previous frame, so fast movement will cause issus on screen edges
-            renderer_dumb_sky.d_ = 1;
-
             render_backend->SetRenderLayer(kRenderLayerSky, false);
-            FinishSky();
-
-            renderer_dumb_sky.d_ = 0;
-            FinishSky();
-
-            renderer_dumb_sky.d_ = current;
-        }
-        else if (need_to_draw_sky)
-        {
-            render_backend->SetRenderLayer(kRenderLayerSky, true);
             FinishSky();
         }
 
@@ -2137,10 +2121,7 @@ void RenderTrueBSP(void)
         // Always render simple skies for additional world renders
         need_to_draw_sky = true;
         render_backend->SetRenderLayer(kRenderLayerSky, true);
-        int current          = renderer_dumb_sky.d_;
-        renderer_dumb_sky.d_ = 1;
         FinishSky();
-        renderer_dumb_sky.d_ = current;
     }
 
     // draw all solid walls and planes

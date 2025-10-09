@@ -1996,9 +1996,9 @@ static void InitializeCamera(MapObject *mo, bool full_height, float expand_w)
     if (oned_side_angle != kBAMAngle180)
     {
         // Dasho - From some testing with problematic geometry, seems like buffering
-        // the clip angles by one degree helps with the imprecision of our fast atan2
+        // the clip angles by 1/4 degree helps with the imprecision of our fast atan2
         // versus 'real' atan2
-        oned_side_angle += kBAMAngle1;
+        oned_side_angle += (kBAMAngle1 / 4);
         clip_left  = 0 + oned_side_angle;
         clip_right = 0 - oned_side_angle;
         clip_scope = clip_left - clip_right;

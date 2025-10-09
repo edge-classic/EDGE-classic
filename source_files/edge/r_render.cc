@@ -1519,13 +1519,13 @@ static void RenderSeg(DrawFloor *dfloor, Seg *seg, bool mirror_sub = false)
         }
 
         // -AJA- 2004/04/21: Emulate Flat-Flooding TRICK
-        if (!debug_hall_of_mirrors.d_ && solid_mode && dfloor->is_lowest && sd->bottom.image == nullptr &&
+        if (!debug_hall_of_mirrors.d_ && solid_mode && dfloor->is_lowest && !sd->middle.image && !sd->bottom.image &&
             current_seg->back_subsector && b_fh > f_fh && b_fh < view_z)
         {
             EmulateFloodPlane(dfloor, current_seg->back_subsector->sector, +1, f_fh, b_fh);
         }
 
-        if (!debug_hall_of_mirrors.d_ && solid_mode && dfloor->is_highest && sd->top.image == nullptr &&
+        if (!debug_hall_of_mirrors.d_ && solid_mode && dfloor->is_highest && !sd->middle.image && !sd->top.image &&
             current_seg->back_subsector && b_ch < f_ch && b_ch > view_z)
         {
             EmulateFloodPlane(dfloor, current_seg->back_subsector->sector, -1, b_ch, f_ch);

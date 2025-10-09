@@ -49,7 +49,7 @@ void ComputeSkyHeights(void);
 
 void BeginSky(void);
 void FlushSky(void);
-void FinishSky(void);
+void FinishSky(bool use_depth_mask);
 
 void RenderSkyPlane(Subsector *sub, float h);
 void RenderSkyWall(Seg *seg, float h1, float h2);

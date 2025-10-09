@@ -762,7 +762,7 @@ void FlushSky(void)
         FinishSkyUnit();
 }
 
-void FinishSky()
+void FinishSky(bool use_depth_mask)
 {
 
     render_state->ColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -773,7 +773,10 @@ void FinishSky()
     if (draw_culling.d_)
         render_state->Disable(GL_DEPTH_TEST);
 
-    render_state->DepthFunction(GL_GREATER);
+    if (use_depth_mask)
+        render_state->DepthFunction(GL_GREATER);
+    else
+        render_state->DepthMask(false);
 
     StartUnitBatch(false);
 
@@ -798,7 +801,10 @@ void FinishSky()
     if (draw_culling.d_)
         render_state->Enable(GL_DEPTH_TEST);
 
-    render_state->DepthFunction(GL_LEQUAL);
+    if (use_depth_mask)
+        render_state->DepthFunction(GL_LEQUAL);
+    else
+        render_state->DepthMask(true);
 }
 
 void RenderSkyPlane(Subsector *sub, float h)

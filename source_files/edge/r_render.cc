@@ -2111,7 +2111,9 @@ void RenderTrueBSP(void)
             // Always render a simple sky, when rendering sky walls/planes they are deferred
             // from previous frame, so fast movement will cause issus on screen edges
             render_backend->SetRenderLayer(kRenderLayerSky, false);
-            FinishSky();
+            FinishSky(false);
+
+            FinishSky(true);
         }
 
         deferred_sky_items.clear();
@@ -2121,7 +2123,7 @@ void RenderTrueBSP(void)
         // Always render simple skies for additional world renders
         need_to_draw_sky = true;
         render_backend->SetRenderLayer(kRenderLayerSky, true);
-        FinishSky();
+        FinishSky(false);
     }
 
     // draw all solid walls and planes
@@ -2203,7 +2205,7 @@ void RenderTrueBSP(void)
     BSPWalkNode(root_node);
 
     FlushSky();
-    FinishSky();
+    FinishSky(true);
 
     RenderSubList(draw_subsector_list);
 

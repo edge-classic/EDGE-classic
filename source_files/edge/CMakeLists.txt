@@ -207,11 +207,8 @@ set (EDGE_LINK_LIBRARIES
   pl_mpeg
   prns
   stb
+  thread
 )
-
-if (NOT EMSCRIPTEN)
-  list (APPEND EDGE_LINK_LIBRARIES thread)
-endif()
 
 if (EDGE_CLASSIC)
   list (APPEND

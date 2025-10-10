@@ -57,17 +57,12 @@
 #include "r_units.h"
 
 #ifdef EDGE_SOKOL
-#ifndef EDGE_WEB
 #define BSP_MULTITHREAD
 static void BSPQueueRenderBatch(RenderBatch *batch);
-#endif
-
 static void BSPQueueDrawSubsector(DrawSubsector *subsector);
 static void BSPQueueSkyWall(Seg *seg, float h1, float h2);
 static void BSPQueueSkyPlane(Subsector *sub, float h);
-
 static RenderBatch *current_batch = nullptr;
-
 #endif
 
 #ifdef BSP_MULTITHREAD

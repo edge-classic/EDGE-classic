@@ -30,7 +30,7 @@
 #include "m_math.h"
 #include "p_mobj.h"
 
-#if defined(EDGE_SOKOL) && !defined(EDGE_WEB)
+#if defined(EDGE_SOKOL)
 #define THREAD_U64 uint64_t
 #include "thread.h"
 #endif

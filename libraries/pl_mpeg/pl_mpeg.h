@@ -855,6 +855,24 @@ plm_samples_t *plm_audio_decode(plm_audio_t *self);
 
 #define PLM_UNUSED(expr) (void)(expr)
 
+#if defined(__GNUC__) || defined(__clang__)
+static inline uint32_t byte_swap_32(uint32_t p_n) {
+	return __builtin_bswap32(p_n);
+}
+#elif defined(_MSC_VER)
+static inline uint32_t byte_swap_32(uint32_t p_n) {
+	return _byteswap_ulong(p_n);
+}
+#else
+static inline uint32_t byte_swap_32(uint32_t p_n) {
+	uint32_t a;
+	a = (p_n & 0xFFU) << 24;
+	a |= (p_n & 0xFF00U) << 8;
+	a |= (p_n >> 8) & 0xFF00U;
+	a |= (p_n >> 24) & 0xFFU;
+	return a;
+}
+#endif
 
 // -----------------------------------------------------------------------------
 // plm (high-level interface) implementation
@@ -1661,7 +1679,7 @@ uint32_t plm_buffer_read(plm_buffer_t *self, int count) {
     uint32_t bit_index = self->bit_index;
     uint8_t *s = &self->bytes[bit_index >> 3];
     uint32_t u32 = *(uint32_t *)s; // assume we can read unaligned
-    u32 = __builtin_bswap32(u32); // codes are stored as big-endian
+    u32 = byte_swap_32(u32); // codes are stored as big-endian
     value = u32 << (bit_index & 7);
     bit_index += count;
     value >>= (32 - count);
@@ -3794,7 +3812,7 @@ uint16_t plm_read_dct_vlc_fast(plm_video_t *self)
     uint32_t *s;
                 
     s = (uint32_t *)&buf->bytes[shift >> 3];
-    c = __builtin_bswap32(s[0]); // big endian bit stream
+    c = byte_swap_32(s[0]); // big endian bit stream
     c >>= (16-bits); // prepare lower 16 bits
     if (c & 0xfc00) { // short code
         c = (c >> 6) & 0x3ff;

@@ -391,7 +391,12 @@ void MovieDrawer()
 
         StartUnitBatch(false);
 
-        RGBAColor unit_col = kRGBAWhite;
+        RGBAColor unit_col;
+
+        if (fadeout > 0.25f)
+            unit_col = kRGBABlack;
+        else
+            unit_col = kRGBAWhite;
 
         RendererVertex *glvert =
             BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, canvas, (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNone);
@@ -467,8 +472,8 @@ void MovieTicker()
     }
     if (fadeout > 0.25f)
     {
-        EndMovie();
         playing_movie = false;
+        EndMovie();
         return;
     }
     if (!plm_has_ended(decoder))

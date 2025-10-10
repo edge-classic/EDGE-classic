@@ -131,7 +131,9 @@ Now, configure and build:
 
 Once the build is complete, all the required files should be in the ```/web/site``` folder, change directory to this folder and run ```python webplayer.py``` (webplayer.py is a small Python script that ensures correct MIME typing of JavaScript modules)
 
-Open a web browser, navigate to ```http://localhost:8000```, and play Edge Classic!   
+Open a web browser, navigate to ```http://localhost:8000```, and play Edge Classic!
+
+NOTE: Serving the web player requires proper COOP/COEP headers; see https://web.dev/articles/coop-coep for more details
 
 # Launching EDGE-Classic
 

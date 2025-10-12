@@ -56,9 +56,11 @@
 #include "r_things.h"
 #include "r_units.h"
 
-#ifdef EDGE_SOKOL
+#if defined(EDGE_SOKOL)
+#if !defined(EDGE_WEB) || defined(EDGE_WEB_MULTITHREADED)
 #define BSP_MULTITHREAD
 static void BSPQueueRenderBatch(RenderBatch *batch);
+#endif
 static void BSPQueueDrawSubsector(DrawSubsector *subsector);
 static void BSPQueueSkyWall(Seg *seg, float h1, float h2);
 static void BSPQueueSkyPlane(Subsector *sub, float h);

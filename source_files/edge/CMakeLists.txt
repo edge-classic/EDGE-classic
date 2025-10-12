@@ -207,8 +207,11 @@ set (EDGE_LINK_LIBRARIES
   pl_mpeg
   prns
   stb
-  thread
 )
+
+if (NOT EMSCRIPTEN OR (EMSCRIPTEN AND EDGE_WEB_MULTITHREADED))
+  list (APPEND EDGE_LINK_LIBRARIES thread)
+endif()
 
 if (EDGE_CLASSIC)
   list (APPEND

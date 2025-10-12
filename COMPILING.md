@@ -9,26 +9,29 @@ The following options can be passed to CMake to control certain features:
 - EDGE_SOKOL_GLES3 (default OFF): Will force use of the Sokol GLES3 render path
 - EDGE_SOKOL_D3D11 (default OFF): Will force use of the Sokol Direct3D 11 render path
 - EDGE_LEGACY_GL (default OFF): Will force use of the original GL 1.3 render path. BSP traversal will not be threaded with this render path.
-
-Note: If none of the above options are selected, a default will be chosen based on platform. This means Sokol D3D11 for Windows, Sokol GLES3 for Emscripten, and Sokol GL 3.3 for all other targets.
-
+  - If none of the renderer options are selected, a default will be chosen based on platform. This means Sokol D3D11 for Windows, Sokol GLES3 for Emscripten, and Sokol GL 3.3 for all other targets.
 - EDGE_CLASSIC (default ON): Will build all of EDGE-Classic's default features. Disabling this will build a smaller core engine that is still capable of playing many Doom mapsets but will remove support for the following:
--- COAL scripting language
--- Dehacked patch parsing and application
--- Tracker music (S3M/MOD/XM/IT/FT) playback
--- C64 SID playback
--- OPL emulation for MIDI playback
--- MUS to MIDI track conversion
--- IMF music playback
--- Doom format sound effect playback
--- PC speaker sound effect playback
--- MUSINFO-based music changers
--- UMAPINFO parsing and application
-
+  - COAL scripting language
+  - Dehacked patch parsing and application
+  - Tracker music (S3M/MOD/XM/IT/FT) playback
+  - C64 SID playback
+  - OPL emulation for MIDI playback
+  - MUS to MIDI track conversion
+  - IMF music playback
+  - Doom format sound effect playback
+  - PC speaker sound effect playback
+  - MUSINFO-based music changers
+  - UMAPINFO parsing and application
 - EDGE_SANITIZE (default OFF): Will build with AddressSanitizer support. Suppressions can be found in ASanSuppress.txt.
 - EDGE_SANITIZE_THREADS (default OFF): Will build with ThreadSanitizer support. Suppressions can be found in TSanSuppress.txt. This option is mutually exclusive with EDGE_SANITIZE and only works with non-MSVC builds.
 - EDGE_PROFILING (default OFF): Will build with support for the Tracy profiler.
 - EDGE_EXTRA_CHECKS (default OFF): Will perform extra validation checks when launching/running the program for development purposes.
+
+These options are specific to Emscripten builds; although they offer a substantial improvement in performance, they are disabled by default for compatibility with the widest range of web browsers:
+
+- EDGE_WEB_SIMD (default OFF): Enable support for WebAssembly SIMD and SSE2 instruction compatibility.
+- EDGE_WEB_MULTITHREADED (default OFF): Enable support for audio worklets and multithreaded BSP traversal.
+  - The multithreaded web player requires cross-origin isolation; see https://web.dev/articles/coop-coep for more details
 
 ## Windows Compilation using MSVC Build Tools and VSCode
 
@@ -129,11 +132,9 @@ Now, configure and build:
 > cmake --build build (-j# optional, with # being the number of threads/cores you'd like to use)
 ```
 
-Once the build is complete, all the required files should be in the ```/web/site``` folder, change directory to this folder and run ```python webplayer.py``` (webplayer.py is a small Python script that ensures correct MIME typing of JavaScript modules)
+Once the build is complete, all the required files should be in the ```/web/site``` folder, change directory to this folder and run ```python webplayer.py``` (webplayer.py is a small Python script that ensures correct CORS handling if testing the multithreaded player)
 
 Open a web browser, navigate to ```http://localhost:8000```, and play Edge Classic!
-
-NOTE: Serving the web player requires proper COOP/COEP headers; see https://web.dev/articles/coop-coep for more details
 
 # Launching EDGE-Classic
 

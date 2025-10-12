@@ -12,6 +12,7 @@
   - As a result, support for NPOT textures is required by the program; for legacy GL builds the GL loader has been updated appropriately
 - "Maximum Dynamic Lights" performance menu option changed to "Max Dynamic Light Radius"
   - Better at helping performance without sacrificing intended aesthetics
+- Added compile-time support for WebAssembly multithreading and SIMD support for Emscripten builds
 
 ## Compatibility Fixes
 
@@ -62,3 +63,4 @@
 - Fixed stock LUAHUDs not drawing automap fully; leaving a gap if the status bar was hidden/disabled
 - Fixed bullet puffs spawned close to ledges "jumping" up to the adjacent floor
 - Fixed SDL GL context not being properly deleted on program shutdown (when applicable)
+- Fixed web player not allocating a sufficiently large stack for heavy MPEG/audio processing

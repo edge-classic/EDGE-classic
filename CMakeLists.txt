@@ -23,6 +23,10 @@ option(EDGE_SOKOL_GLES3 "Sokol GLES3" OFF)
 option(EDGE_SOKOL_D3D11 "Sokol D3D11" OFF)
 option(EDGE_LEGACY_GL "Legacy GL Renderer" OFF)
 
+# Web Player
+option(EDGE_WEB_MULTITHREADED "Build multithreaded web player" OFF)
+option(EDGE_WEB_SIMD "Build SIMD-enabled web player" OFF)
+
 # If the legacy GL renderer has not been selected and
 # a Sokol backend is not already specified by CMake params, 
 # choose a default based on platform

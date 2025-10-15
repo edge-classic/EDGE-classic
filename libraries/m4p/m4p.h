@@ -43,6 +43,8 @@
 // - Fast Tracker 2: XM/MOD/FT Playback
 // - Impulse Tracker 2: IT/S3M Playback
 // - Mod4Play: Public Unified Interface
+// An exception to this is several Mod4Play declarations that must come before
+// the rest of the implementation.
 //
 // Each portion is laid out with the following sections (if applicable):
 // - Defines
@@ -59,6 +61,9 @@
 // M4P_CALLOC and M4P_FREE in order to override usage of regular malloc/calloc/free.
 //----------------------------------------------------------------------------------
 
+#ifndef M4P_HEADER
+#define M4P_HEADER
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -73,14 +78,25 @@ int m4p_TestFromData(uint8_t *Data, uint32_t DataLen);
 // Load song from memory and initialize appropriate replayer
 bool m4p_LoadFromData(uint8_t *Data, uint32_t DataLen, int32_t mixingFrequency, int32_t mixingBufferSize);
 
+// See if song on disk is a supported type (IT/S3M/XM/MOD)
+int m4p_TestFromFile(const char *Filename);
+
+// Load song from disk and initialize appropriate replayer
+bool m4p_LoadFromFile(const char *Filename, int32_t mixingFrequency, int32_t mixingBufferSize);
+
 // Set replayer status to Play (does not generate output)
-void m4p_PlaySong(void);
+void m4p_PlaySong(bool loop);
 
 // Generate samples and fill buffer
+// Buffer must be at least numSamples * 2 (channels) * sizeof(int16_t)
 void m4p_GenerateSamples(int16_t *buffer, int32_t numSamples);
 
 // Generate samples and fill buffer
+// Buffer must be at least numSamples * 2 (channels) * sizeof(float)
 void m4p_GenerateFloatSamples(float *buffer, int32_t numSamples);
+
+// Report if track has reached the end (if not looping)
+bool m4p_AtEnd(void);
 
 // Set replayer status to Stop
 void m4p_Stop(void);
@@ -95,12 +111,9 @@ void m4p_FreeSong(void);
 }
 #endif
 
-#ifdef M4P_IMPLEMENTATION
+#endif // M4P_HEADER
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+#ifdef M4P_IMPLEMENTATION
 
 #include <assert.h>
 #include <math.h>
@@ -110,6 +123,9 @@ extern "C"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 // define these to use custom memory management functions
 #ifndef M4P_MALLOC
@@ -121,6 +137,25 @@ extern "C"
 #ifndef M4P_FREE
 #define M4P_FREE free
 #endif
+
+//-----------------------------------------------------------------------------------
+// 							Enumerations - Mod4Play
+//-----------------------------------------------------------------------------------
+
+enum
+{
+    M4P_FORMAT_UNKNOWN = 0,
+    M4P_FORMAT_IT_S3M  = 1,
+    M4P_FORMAT_XM_MOD  = 2
+};
+
+//-----------------------------------------------------------------------------------
+// 							Declarations - Mod4Play
+//-----------------------------------------------------------------------------------
+
+static int m4p_current_format = M4P_FORMAT_UNKNOWN;
+static bool m4p_at_end = false;
+static bool m4p_loop_song = false;
 
 //-----------------------------------------------------------------------------------
 // 							Typedefs - MEMFILE
@@ -1061,6 +1096,7 @@ typedef void (*efxRoutine)(stmTyp *ch, uint8_t param);
 // 						Declarations - FastTracker 2
 //-----------------------------------------------------------------------------------
 
+static bool            ft2_maybe_over = false;
 static const uint32_t  panningTab[257];
 static const uint16_t  amigaPeriods[1936];
 static const uint16_t  linearPeriods[1936];
@@ -1092,6 +1128,7 @@ static void     updateReplayRate(void);
 static void     resumeMusic(void);
 static void     P_SetSpeed(uint16_t bpm);
 static void     P_StartTone(sampleTyp *s, int32_t smpStartPos);
+static void     pauseMusic(void);
 static void     stopMusic(void);
 static int32_t  soundBufferSize;
 static MEMFILE *mopen(const uint8_t *src, uint32_t length);
@@ -3653,6 +3690,20 @@ static void getNextPos(void)
     }
 }
 
+static bool mix_EndOfTune(void)
+{
+	bool returnValue = (ft2_maybe_over && song.pattPos == 0 && song.timer == 1) || (song.tempo == 0);
+
+	// 8bb: FT2 bugfix for EEx (pattern delay) on first row of a pattern
+	if (song.pattDelTime2 > 0)
+		returnValue = false;
+
+	if (song.songPos == song.len-1 && song.pattPos == 0 && song.timer == 1)
+		ft2_maybe_over = true;
+
+	return returnValue;
+}
+
 static void mainPlayer(void)
 {
     if (musicPaused)
@@ -3695,6 +3746,21 @@ static void mainPlayer(void)
 
     if (song.timer == 1)
         getNextPos();
+
+    if (mix_EndOfTune())
+    {
+        if (m4p_loop_song)
+        {
+            m4p_at_end = false;
+            song.globVol = 64;
+            resetMusic();
+        }
+        else
+        {
+            m4p_at_end = true;
+            pauseMusic();
+        }
+    }
 }
 
 static void mix_UpdateChannel(int32_t nr, WaveChannelInfoType *WCI);
@@ -3990,7 +4056,7 @@ static void mix_UpdateBuffer(int16_t *buffer, int32_t numSamples)
             out32     = (out32 * masterVol) >> 8;
             buffer[i] = (int16_t)out32;
         }
-    }
+    }  
 }
 
 static void mix_UpdateBufferFloat(float *buffer, int32_t numSamples)
@@ -4000,7 +4066,7 @@ static void mix_UpdateBufferFloat(float *buffer, int32_t numSamples)
 
     if (musicPaused) // silence output
     {
-        memset(buffer, 0, numSamples * (2 * sizeof(int16_t)));
+        memset(buffer, 0, numSamples * (2 * sizeof(float)));
         return;
     }
 
@@ -4389,6 +4455,7 @@ static void setPos(int32_t pos, int32_t row) // -1 = don't change
 static void resetMusic(void)
 {
     song.timer = 1;
+    ft2_maybe_over = false;
     stopVoices();
     setPos(0, 0);
 }
@@ -4940,7 +5007,7 @@ static bool startMusic(void)
     return true;
 }
 
-static void pauseMusic(void)
+void pauseMusic(void)
 {
     musicPaused = true;
 }
@@ -4956,6 +5023,7 @@ static void stopMusic(void)
 
     mix_Free();
     song.globVol = 64;
+    ft2_maybe_over = false;
 
     resumeMusic();
 }
@@ -4964,6 +5032,7 @@ static void startPlaying(void)
 {
     stopMusic();
     song.pattDelTime = song.pattDelTime2 = 0; // 8bb: added these
+    ft2_maybe_over = false;
     setPos(0, 0);
     startMusic();
 }
@@ -5829,6 +5898,8 @@ static const uint8_t  SlideTable[9] = {1, 4, 8, 16, 32, 64, 96, 128, 255};
 static void        RecalculateAllVolumes(void);
 static void        Update(void);
 static void        Music_InitTempo(void);
+static void        Music_PlaySong(uint16_t order);
+static void        Music_Stop(void);
 static void        M32Mix8(slaveChn_t *sc, int32_t *mixBufPtr, int32_t numSamples);
 static void        M32Mix16(slaveChn_t *sc, int32_t *mixBufPtr, int32_t numSamples);
 static void        M32Mix8S(slaveChn_t *sc, int32_t *mixBufPtr, int32_t numSamples);
@@ -10371,6 +10442,21 @@ static void Update(void)
         UpdateInstruments();
     else
         UpdateSamples();
+
+    if (Song.StopSong)
+    {
+        Song.StopSong = false;
+        if (m4p_loop_song)
+        {
+            m4p_at_end = false;
+            Music_PlaySong(0); // reset params/restart
+        }
+        else
+        {
+            m4p_at_end = true;
+            Music_Stop();
+        }
+    }
 }
 
 void Music_FillAudioBuffer(int16_t *buffer, int32_t numSamples)
@@ -12260,23 +12346,6 @@ static const uint16_t LinearSlideDownTable[257] = {
     26008};
 
 //-----------------------------------------------------------------------------------
-// 							Enumerations - Mod4Play
-//-----------------------------------------------------------------------------------
-
-enum
-{
-    M4P_FORMAT_UNKNOWN = 0,
-    M4P_FORMAT_IT_S3M  = 1,
-    M4P_FORMAT_XM_MOD  = 2
-};
-
-//-----------------------------------------------------------------------------------
-// 							Declarations - Mod4Play
-//-----------------------------------------------------------------------------------
-
-static int current_format = M4P_FORMAT_UNKNOWN;
-
-//-----------------------------------------------------------------------------------
 // 							Implementation - Mod4Play
 //-----------------------------------------------------------------------------------
 
@@ -12315,18 +12384,205 @@ int m4p_TestFromData(uint8_t *Data, uint32_t DataLen)
     return M4P_FORMAT_UNKNOWN;
 }
 
+int m4p_TestFromFile(const char *Filename)
+{
+    if (Filename == NULL)
+    {
+        return M4P_FORMAT_UNKNOWN;   
+    }
+    FILE *fp = NULL;
+#if !defined(_WIN32)
+    fp = fopen(Filename, "rb");
+#else
+    wchar_t wide_path[MAX_PATH];
+    int path_size = MultiByteToWideChar(CP_UTF8, 0, Filename, (int)strlen(Filename), wide_path, MAX_PATH);
+    wide_path[path_size] = '\0';
+    fp = _wfopen(wide_path, L"rb");
+#endif
+    if (fp == NULL)
+    {
+        return M4P_FORMAT_UNKNOWN;
+    }
+
+    long file_length = 0;
+    fseek(fp, 0, SEEK_END);
+    file_length = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+
+    if (file_length < 4)
+    {
+        fclose(fp);
+        return M4P_FORMAT_UNKNOWN;
+    }
+
+    char magic_check[16];
+    if (fread(magic_check, 4, 1, fp) != 1)
+    {
+        fclose(fp);
+        return M4P_FORMAT_UNKNOWN;
+    }
+
+    if (magic_check[0] == 'I' && magic_check[1] == 'M' && magic_check[2] == 'P' && magic_check[3] == 'M')
+    {
+        fclose(fp);
+        return M4P_FORMAT_IT_S3M;
+    }
+    if (file_length >= 48)
+    {
+        fseek(fp, 44, SEEK_SET);
+        if (fread(magic_check, 4, 1, fp) != 1)
+        {
+            fclose(fp);
+            return M4P_FORMAT_UNKNOWN;
+        }
+        if (magic_check[0] == 'S' && magic_check[1] == 'C' && magic_check[2] == 'R' && magic_check[3] == 'M')
+        {
+            fclose(fp);
+            return M4P_FORMAT_IT_S3M;
+        }
+    }
+    if (file_length >= 17)
+    {
+        fseek(fp, 0, SEEK_SET);
+        if (fread(magic_check, 16, 1, fp) != 1)
+        {
+            fclose(fp);
+            return M4P_FORMAT_UNKNOWN;
+        }
+        bool        is_xm_mod = true;
+        const char *hdrtxt    = "Extended Module:";
+        for (int i = 0; i < 16; i++)
+        {
+            if (magic_check[i] != *hdrtxt++)
+            {
+                is_xm_mod = false;
+                break;
+            }
+        }
+        if (is_xm_mod)
+        {
+            fclose(fp);
+            return M4P_FORMAT_XM_MOD;
+        }
+    }
+    if (file_length >= 1084)
+    {
+        fseek(fp, 1080, SEEK_SET);
+        if (fread(magic_check, 4, 1, fp) != 1)
+        {
+            fclose(fp);
+            return M4P_FORMAT_UNKNOWN;
+        }
+        for (uint8_t i = 0; i < 16; i++)
+        {
+            if (magic_check[0] == MODSig[i][0] && magic_check[1] == MODSig[i][1] && magic_check[2] == MODSig[i][2] &&
+                magic_check[3] == MODSig[i][3])
+            {
+                fclose(fp);
+                return M4P_FORMAT_XM_MOD;
+            }
+        }
+    }
+
+    fclose(fp);
+    return M4P_FORMAT_UNKNOWN;
+}
+
+// Internal, prevents having to close and reopen the file pointer when using m4p_LoadFromFile
+// Unlike the above, leaves closing the file pointer to the calling function
+// Also populates FileSize to reduce seeking/telling a smidge
+static int m4p_TestFromFilePointer(FILE *Fp, long *FileSize)
+{
+    if (Fp == NULL || FileSize == NULL)
+    {
+        return M4P_FORMAT_UNKNOWN;   
+    }
+
+    fseek(Fp, 0, SEEK_END);
+    *FileSize = ftell(Fp);
+    fseek(Fp, 0, SEEK_SET);
+
+    if (*FileSize < 4)
+    {
+        return M4P_FORMAT_UNKNOWN;
+    }
+
+    char magic_check[16];
+    if (fread(magic_check, 4, 1, Fp) != 1)
+    {
+        return M4P_FORMAT_UNKNOWN;
+    }
+
+    if (magic_check[0] == 'I' && magic_check[1] == 'M' && magic_check[2] == 'P' && magic_check[3] == 'M')
+    {
+        return M4P_FORMAT_IT_S3M;
+    }
+    if (*FileSize >= 48)
+    {
+        fseek(Fp, 44, SEEK_SET);
+        if (fread(magic_check, 4, 1, Fp) != 1)
+        {
+            return M4P_FORMAT_UNKNOWN;
+        }
+        if (magic_check[0] == 'S' && magic_check[1] == 'C' && magic_check[2] == 'R' && magic_check[3] == 'M')
+        {
+            return M4P_FORMAT_IT_S3M;
+        }
+    }
+    if (*FileSize >= 17)
+    {
+        fseek(Fp, 0, SEEK_SET);
+        if (fread(magic_check, 16, 1, Fp) != 1)
+        {
+            return M4P_FORMAT_UNKNOWN;
+        }
+        bool        is_xm_mod = true;
+        const char *hdrtxt    = "Extended Module:";
+        for (int i = 0; i < 16; i++)
+        {
+            if (magic_check[i] != *hdrtxt++)
+            {
+                is_xm_mod = false;
+                break;
+            }
+        }
+        if (is_xm_mod)
+        {
+            return M4P_FORMAT_XM_MOD;
+        }
+    }
+    if (*FileSize >= 1084)
+    {
+        fseek(Fp, 1080, SEEK_SET);
+        if (fread(magic_check, 4, 1, Fp) != 1)
+        {
+            return M4P_FORMAT_UNKNOWN;
+        }
+        for (uint8_t i = 0; i < 16; i++)
+        {
+            if (magic_check[0] == MODSig[i][0] && magic_check[1] == MODSig[i][1] && magic_check[2] == MODSig[i][2] &&
+                magic_check[3] == MODSig[i][3])
+            {
+                return M4P_FORMAT_XM_MOD;
+            }
+        }
+    }
+
+    return M4P_FORMAT_UNKNOWN;
+}
+
 bool m4p_LoadFromData(uint8_t *Data, uint32_t DataLen, int32_t mixingFrequency, int32_t mixingBufferSize)
 {
-    current_format = m4p_TestFromData(Data, DataLen);
+    m4p_current_format = m4p_TestFromData(Data, DataLen);
 
-    if (current_format == M4P_FORMAT_IT_S3M)
+    if (m4p_current_format == M4P_FORMAT_IT_S3M)
     {
         if (Music_Init(mixingFrequency))
             return Music_LoadFromData(Data, DataLen);
         else
             return false;
     }
-    else if (current_format == M4P_FORMAT_XM_MOD)
+    else if (m4p_current_format == M4P_FORMAT_XM_MOD)
     {
         if (initMusic(mixingFrequency, mixingBufferSize, true, true))
             return loadMusicFromData(Data, DataLen);
@@ -12337,9 +12593,99 @@ bool m4p_LoadFromData(uint8_t *Data, uint32_t DataLen, int32_t mixingFrequency, 
     return false;
 }
 
-void m4p_PlaySong(void)
+bool m4p_LoadFromFile(const char *Filename, int32_t mixingFrequency, int32_t mixingBufferSize)
 {
-    if (current_format == M4P_FORMAT_IT_S3M)
+    if (Filename == NULL)
+    {
+        return false;  
+    }
+    FILE *fp = NULL;
+#if !defined(_WIN32)
+    fp = fopen(Filename, "rb");
+#else
+    wchar_t wide_path[MAX_PATH];
+    int path_size = MultiByteToWideChar(CP_UTF8, 0, Filename, (int)strlen(Filename), wide_path, MAX_PATH);
+    wide_path[path_size] = '\0';
+    fp = _wfopen(wide_path, L"rb");
+#endif
+    if (fp == NULL)
+    {
+        return false;
+    }
+    
+    long file_size = 0;
+    m4p_current_format = m4p_TestFromFilePointer(fp, &file_size);
+
+    if (m4p_current_format == M4P_FORMAT_UNKNOWN)
+    {
+        fclose(fp);
+        return false;
+    }
+    else if (m4p_current_format == M4P_FORMAT_IT_S3M)
+    {
+        if (Music_Init(mixingFrequency))
+        {
+            fseek(fp, 0, SEEK_SET);
+            uint8_t *raw_file = (uint8_t *)malloc(file_size);
+            if (raw_file == NULL || fread(raw_file, file_size, 1, fp) != 1)
+            {
+                fclose(fp);
+                if (raw_file != NULL)
+                {
+                    free(raw_file);
+                }
+                return false;
+            }
+            else
+            {
+                fclose(fp);
+                bool status = Music_LoadFromData(raw_file, file_size);
+                free(raw_file);
+                return status;
+            }
+        }
+        else
+        {
+            fclose(fp);
+            return false;
+        }
+    }
+    else
+    {
+        if (initMusic(mixingFrequency, mixingBufferSize, true, true))
+        {
+            fseek(fp, 0, SEEK_SET);
+            uint8_t *raw_file = (uint8_t *)malloc(file_size);
+            if (raw_file == NULL || fread(raw_file, file_size, 1, fp) != 1)
+            {
+                fclose(fp);
+                if (raw_file != NULL)
+                {
+                    free(raw_file);
+                }
+                return false;
+            }
+            else
+            {
+                fclose(fp);
+                bool status = loadMusicFromData(raw_file, file_size);
+                free(raw_file);
+                return status;
+            }
+        }
+        else
+        {
+            fclose(fp);
+            return false;
+        }
+    }
+}
+
+void m4p_PlaySong(bool loop)
+{
+    m4p_at_end = false;
+    m4p_loop_song = loop;
+    if (m4p_current_format == M4P_FORMAT_IT_S3M)
         Music_PlaySong(0);
     else
         startPlaying();
@@ -12347,7 +12693,7 @@ void m4p_PlaySong(void)
 
 void m4p_GenerateSamples(int16_t *buffer, int32_t numSamples)
 {
-    if (current_format == M4P_FORMAT_IT_S3M)
+    if (m4p_current_format == M4P_FORMAT_IT_S3M)
         Music_FillAudioBuffer(buffer, numSamples);
     else
         mix_UpdateBuffer(buffer, numSamples);
@@ -12355,15 +12701,20 @@ void m4p_GenerateSamples(int16_t *buffer, int32_t numSamples)
 
 void m4p_GenerateFloatSamples(float *buffer, int32_t numSamples)
 {
-    if (current_format == M4P_FORMAT_IT_S3M)
+    if (m4p_current_format == M4P_FORMAT_IT_S3M)
         Music_FillAudioBufferFloat(buffer, numSamples);
     else
         mix_UpdateBufferFloat(buffer, numSamples);
 }
 
+bool m4p_AtEnd(void)
+{
+    return m4p_at_end;
+}
+
 void m4p_Stop(void)
 {
-    if (current_format == M4P_FORMAT_IT_S3M)
+    if (m4p_current_format == M4P_FORMAT_IT_S3M)
         Music_Stop();
     else
         stopPlaying();
@@ -12371,24 +12722,20 @@ void m4p_Stop(void)
 
 void m4p_Close(void)
 {
-    if (current_format == M4P_FORMAT_IT_S3M)
+    if (m4p_current_format == M4P_FORMAT_IT_S3M)
         Music_Close();
     else
         stopMusic();
 
-    current_format = M4P_FORMAT_UNKNOWN;
+    m4p_current_format = M4P_FORMAT_UNKNOWN;
 }
 
 void m4p_FreeSong(void)
 {
-    if (current_format == M4P_FORMAT_IT_S3M)
+    if (m4p_current_format == M4P_FORMAT_IT_S3M)
         Music_FreeSong();
     else
         freeMusic();
 }
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

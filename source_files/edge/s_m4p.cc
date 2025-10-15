@@ -46,6 +46,7 @@ typedef struct
     ma_uint32               channels;
     ma_uint32               sampleRate;
     ma_uint64               cursor;
+    bool                    looping;
 } ma_m4p;
 
 static ma_result ma_m4p_init(ma_read_proc onRead, ma_seek_proc onSeek, ma_tell_proc onTell, void *pReadSeekTellUserData,
@@ -129,8 +130,6 @@ static ma_result ma_m4p_post_init(ma_m4p *pM4P)
 
     pM4P->channels   = 2;
     pM4P->sampleRate = HMM_MIN(64000, sound_device_frequency);
-
-    m4p_PlaySong();
 
     return MA_SUCCESS;
 }
@@ -237,17 +236,17 @@ static ma_result ma_m4p_read_pcm_frames(ma_m4p *pM4P, void *pFramesOut, ma_uint6
 
     pM4P->cursor += totalFramesRead;
 
-    if (totalFramesRead == 0)
-    {
-        result = MA_AT_END;
-    }
-
     if (pFramesRead != NULL)
     {
         *pFramesRead = totalFramesRead;
     }
 
     if (result == MA_SUCCESS && totalFramesRead == 0)
+    {
+        result = MA_AT_END;
+    }
+
+    if (m4p_AtEnd()) // should only be the case if not looping
     {
         result = MA_AT_END;
     }
@@ -263,7 +262,7 @@ static ma_result ma_m4p_seek_to_pcm_frame(ma_m4p *pM4P, ma_uint64 frameIndex)
     }
 
     m4p_Stop();
-    m4p_PlaySong();
+    m4p_PlaySong(pM4P->looping);
 
     pM4P->cursor = frameIndex;
 
@@ -393,8 +392,6 @@ static ma_result ma_decoding_backend_init_memory__m4p(void *pUserData, const voi
     ma_result result;
     ma_m4p   *pM4P;
 
-    EPI_UNUSED(pUserData);
-
     /* For now we're just allocating the decoder backend on the heap. */
     pM4P = (ma_m4p *)ma_malloc(sizeof(*pM4P), pAllocationCallbacks);
     if (pM4P == NULL)
@@ -410,6 +407,11 @@ static ma_result ma_decoding_backend_init_memory__m4p(void *pUserData, const voi
     }
 
     *ppBackend = pM4P;
+
+    if (pUserData != NULL)
+        pM4P->looping = *(bool *)pUserData;
+
+    m4p_PlaySong(pM4P->looping);
 
     return MA_SUCCESS;
 }
@@ -439,7 +441,7 @@ class M4PPlayer : public AbstractMusicPlayer
     M4PPlayer();
     ~M4PPlayer() override;
 
-    bool OpenMemory(const uint8_t *data, int length);
+    bool OpenMemory(const uint8_t *data, int length, bool loop);
 
     void Close(void) override;
 
@@ -464,16 +466,19 @@ M4PPlayer::~M4PPlayer()
     Close();
 }
 
-bool M4PPlayer::OpenMemory(const uint8_t *data, int length)
+bool M4PPlayer::OpenMemory(const uint8_t *data, int length, bool loop)
 {
     if (status_ != kNotLoaded)
         Close();
+
+    looping_ = loop;
 
     ma_decoder_config decode_config      = ma_decoder_config_init_default();
     decode_config.format                 = ma_format_s16;
     decode_config.customBackendCount     = 1;
     decode_config.pCustomBackendUserData = NULL;
     decode_config.ppCustomBackendVTables = &custom_vtable;
+    decode_config.pCustomBackendUserData = &looping_;
 
     if (ma_decoder_init_memory(data, length, &decode_config, &m4p_decoder) != MA_SUCCESS)
     {
@@ -536,10 +541,10 @@ void M4PPlayer::Resume()
 
 void M4PPlayer::Play(bool loop)
 {
+    EPI_UNUSED(loop); // Already handled for m4p in OpenMemory
+
     if (status_ != kNotLoaded && status_ != kStopped)
         return;
-
-    looping_ = loop;
 
     ma_sound_set_looping(&m4p_stream, looping_ ? MA_TRUE : MA_FALSE);
 
@@ -580,7 +585,7 @@ AbstractMusicPlayer *PlayM4PMusic(uint8_t *data, int length, bool looping)
 {
     M4PPlayer *player = new M4PPlayer();
 
-    if (!player->OpenMemory(data, length))
+    if (!player->OpenMemory(data, length, looping))
     {
         delete[] data;
         delete player;

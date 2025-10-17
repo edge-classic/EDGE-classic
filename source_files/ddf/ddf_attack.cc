@@ -269,6 +269,8 @@ static void AttackFinishEntry(void)
 
         if (dynamic_mobj->dlight_.radius_ > 512)
             DDFWarning("DLIGHT RADIUS value %1.1f too large (over 512).\n", dynamic_mobj->dlight_.radius_);
+
+        dynamic_mobj->proj_damage_ = dynamic_atk->damage_;
     }
 
     // check DAMAGE stuff

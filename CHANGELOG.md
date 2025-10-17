@@ -3,7 +3,6 @@
 ## New Features
 - New LUA/COAL function: hud.kill_sound(SFXname) which will stop a sound if it is currently playing.
 
-
 ## General Improvements/Changes
 - Episode menu item positioning updated to allow for up to ten visible episodes
 - Restored support for C64 PSID/RSID music tracks
@@ -13,6 +12,8 @@
 - "Maximum Dynamic Lights" performance menu option changed to "Max Dynamic Light Radius"
   - Better at helping performance without sacrificing intended aesthetics
 - Added compile-time support for WebAssembly multithreading and SIMD support for Emscripten builds
+- Removed "Simple Skies" performance menu option
+  - Broke too many maps to be worth the potential improvement
 
 ## Compatibility Fixes
 
@@ -20,6 +21,7 @@
 - Fixed Dehacked-modified chainsaws not using the S_SAW2 attack state missing the proper ENGAGED_SOUND
 - Fixed weapons with a non-stock ammo type not granting the appopriate ammunition on pickup
 - Fixed the special_lines_hit vector not being cleared when teleporting
+- Fixed flat flooding emulation attempting to draw over midtextures on the same sidedef
 
 ### Boom
 - Fixed destination heights for the Shortest Lower/Upper Texture lift targets
@@ -28,7 +30,13 @@
 
 ### MBF
 - Altered behavior of A_Die codepointer to align with other ports
+- Fixed A_Mushroom not spawning the correct mobj for its 'fireballs'
 - Fixed mobjs with the BOUNCES flag not being marked as SHOOTABLE
+  - This is a specific fix for Dehacked-altered mobjs; the original EDGE BOUNCES special is unchanged
+- Fixed mobjs with the BOUNCES flag losing X/Y momentum after bouncing off of a floor/ceiling
+  - This is a specific fix for Dehacked-altered mobjs; the original EDGE BOUNCES special is unchanged
+- Fixed mobjs with BOUNCES+MISSILE not exploding when they contact a wall
+  - This is a specific fix for Dehacked-altered mobjs; the original EDGE BOUNCES+MISSILE specials are unchanged
 
 ### MBF21
 - Fixed the `MBF21 Flags` Dehacked field not being zero-initialized when allocating new states
@@ -44,8 +52,11 @@
 - Fixed DSDehacked things not being flagged as spawnable (indices beyond the DEHEXTRA range)
 - Removed arbitrary hard cap on DSDehacked indices; converter now uses an associative map and only allocates new items on demand
 - Fixed various UMAPINFOs being treated as invalid due to certain (incorrect) assumptions about map naming and ordering
-- Raised loop limit for successive 0-tic states to 255 (formerly 8 for mobj thinking and 10 for weapon psprites)
+- Raised loop limit for successive 0-tic states to 64 (formerly 8 for mobj thinking and 10 for weapon psprites)
   - This should accommodate more complex MBF21 mods while still allowing a 'safety hatch' if the loop runs away somehow
+- Added 1 tic of duration for the last frame of states comprised completely of zero-tic states that do nothing
+  - Reduces unnecessary looping during thinker functions
+- Fixed all mobjs with the BOUNCES special incorrectly ending P_XYMovement once they bounce off of a wall
 
 ## General Bugfixes
 - Fixed automap background not defaulting to black fill when not defined by the current AUTOMAP DDFSTYLE
@@ -64,3 +75,9 @@
 - Fixed bullet puffs spawned close to ledges "jumping" up to the adjacent floor
 - Fixed SDL GL context not being properly deleted on program shutdown (when applicable)
 - Fixed web player not allocating a sufficiently large stack for heavy MPEG/audio processing
+- Added global parameter reset for tracker music when a song repeats to fix certain problematic songs
+- Expanded occlusion clipping scope to prevent artifacts at screen edges when viewing certain geometry
+- Fixed depth map usage with various sky drawing routines
+- Added missing 'fuzzy' check that caused artifacts when rendering MDL/MD2 mobjs with partial invisibility
+- Fixed accidental disabling of Lua if COAL was detected at any point in the load order
+  - Correct behavior is for the last loaded lump between LUAHUDS/COALHUDS to take precedence

@@ -254,47 +254,21 @@ static void BounceOffWall(MapObject *mo, Line *wall)
     BAMAngle wall_angle;
     BAMAngle diff;
 
-    DividingLine div;
-    float        dest_x, dest_y;
-
     angle      = PointToAngle(0, 0, mo->momentum_.X, mo->momentum_.Y);
-    wall_angle = PointToAngle(0, 0, wall->delta_x, wall->delta_y);
+    wall_angle = PointToAngle(0, 0, wall->delta_x, wall->delta_y) - kBAMAngle90;
 
     diff = wall_angle - angle;
 
     if (diff > kBAMAngle90 && diff < kBAMAngle270)
         diff -= kBAMAngle180;
 
-    // -AJA- Prevent getting stuck at some walls...
-
-    dest_x = mo->x + epi::BAMCos(angle) * (mo->speed_ + mo->info_->radius_) * 4.0f;
-    dest_y = mo->y + epi::BAMSin(angle) * (mo->speed_ + mo->info_->radius_) * 4.0f;
-
-    div.x       = wall->vertex_1->X;
-    div.y       = wall->vertex_1->Y;
-    div.delta_x = wall->delta_x;
-    div.delta_y = wall->delta_y;
-
-    if (PointOnDividingLineSide(mo->x, mo->y, &div) == PointOnDividingLineSide(dest_x, dest_y, &div))
-    {
-        // Result is the same, thus we haven't crossed the line.  Choose a
-        // random angle to bounce away.  And don't attenuate the speed (so
-        // we can get far enough away).
-
-        angle = RandomByteDeterministic() << (kBAMAngleBits - 8);
-    }
-    else
-    {
-        angle += diff << 1;
-    }
+    angle = wall_angle + diff;
 
     // calculate new momentum
-
-    mo->speed_ *= mo->info_->bounce_speed_;
-
+    mo->speed_     *= mo->info_->bounce_speed_;
+    mo->angle_      = angle;
     mo->momentum_.X = epi::BAMCos(angle) * mo->speed_;
     mo->momentum_.Y = epi::BAMSin(angle) * mo->speed_;
-    mo->angle_      = angle;
 
     EnterBounceStates(mo);
 }
@@ -308,11 +282,30 @@ static void BounceOffPlane(MapObject *mo, float dir)
 {
     // calculate new momentum
 
-    mo->speed_ *= mo->info_->bounce_speed_;
-
-    mo->momentum_.X = (float)(epi::BAMCos(mo->angle_) * mo->speed_);
-    mo->momentum_.Y = (float)(epi::BAMSin(mo->angle_) * mo->speed_);
-    mo->momentum_.Z = (float)(dir * mo->speed_ * mo->info_->bounce_up_);
+    if (mo->hyper_flags_ & kHyperFlagDehackedCompatibility)
+    {
+        float bounce_factor = 1.0f;
+        if (!(mo->flags_ & kMapObjectFlagNoGravity))
+        {
+            if (mo->flags_ & kMapObjectFlagFloat)
+            {
+                if (mo->flags_ & kMapObjectFlagDropOff)
+                    bounce_factor = 0.85f;
+                else
+                    bounce_factor = 0.70f;
+            }
+            else
+                bounce_factor = 0.5f;
+        }
+        mo->momentum_.Z *= (dir * bounce_factor);
+    }
+    else
+    {
+        mo->speed_ *= mo->info_->bounce_speed_;
+        mo->momentum_.X = (float)(epi::BAMCos(mo->angle_) * mo->speed_);
+        mo->momentum_.Y = (float)(epi::BAMSin(mo->angle_) * mo->speed_);
+        mo->momentum_.Z = (float)(dir * mo->speed_ * mo->info_->bounce_up_);
+    }
 
     EnterBounceStates(mo);
 }
@@ -1060,8 +1053,109 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props)
                     return;
                 }
 
-                BounceOffWall(mo, block_line);
-                xmove = ymove = 0;
+                // Dasho - MBF behavior dictactes that BOUNCES+MISSILE
+                // explodes when hitting a wall
+                if (mo->hyper_flags_ & kHyperFlagDehackedCompatibility)
+                {
+                    if (mo->flags_ & kMapObjectFlagMissile)
+                        ExplodeMissile(mo);
+                    else
+                    {
+                        BounceOffWall(mo, block_line);
+                        // recalculate remaining xmove/ymove
+                        xmove = mo->momentum_.X;
+                        ymove = mo->momentum_.Y;
+
+                        // Use half radius as max step, if not exceptionally small.
+                        if (mo->radius_ > kStepMove)
+                            maxstep = mo->radius_ / 2;
+                        else
+                            maxstep = kStepMove / 2;
+
+                        // precalculate these two, they are used frequently
+                        absx = (float)fabs(xmove);
+                        absy = (float)fabs(ymove);
+
+                        if (absx > maxstep || absy > maxstep)
+                        {
+                            // Do it in the most number of steps.
+                            if (absx > absy)
+                            {
+                                xstep = (xmove > 0) ? maxstep : -maxstep;
+
+                                // almost orthogonal movements are rounded to orthogonal, to prevent
+                                // an infinite loop in some extreme cases.
+                                if (absy * 256 < absx)
+                                    ystep = ymove = 0;
+                                else
+                                    ystep = ymove * xstep / xmove;
+                            }
+                            else
+                            {
+                                ystep = (ymove > 0) ? maxstep : -maxstep;
+
+                                if (absx * 256 < absy)
+                                    xstep = xmove = 0;
+                                else
+                                    xstep = xmove * ystep / ymove;
+                            }
+                        }
+                        else
+                        {
+                            // Step is less than half radius, so one iteration is enough.
+                            xstep = xmove;
+                            ystep = ymove;
+                        }
+                    }
+                }
+                else
+                {
+                    BounceOffWall(mo, block_line);
+                    // Recalculate remaining xmove/ymove
+                    xmove = mo->momentum_.X;
+                    ymove = mo->momentum_.Y;
+
+                    // Use half radius as max step, if not exceptionally small.
+                    if (mo->radius_ > kStepMove)
+                        maxstep = mo->radius_ / 2;
+                    else
+                        maxstep = kStepMove / 2;
+
+                    // precalculate these two, they are used frequently
+                    absx = (float)fabs(xmove);
+                    absy = (float)fabs(ymove);
+
+                    if (absx > maxstep || absy > maxstep)
+                    {
+                        // Do it in the most number of steps.
+                        if (absx > absy)
+                        {
+                            xstep = (xmove > 0) ? maxstep : -maxstep;
+
+                            // almost orthogonal movements are rounded to orthogonal, to prevent
+                            // an infinite loop in some extreme cases.
+                            if (absy * 256 < absx)
+                                ystep = ymove = 0;
+                            else
+                                ystep = ymove * xstep / xmove;
+                        }
+                        else
+                        {
+                            ystep = (ymove > 0) ? maxstep : -maxstep;
+
+                            if (absx * 256 < absy)
+                                xstep = xmove = 0;
+                            else
+                                xstep = xmove * ystep / ymove;
+                        }
+                    }
+                    else
+                    {
+                        // Step is less than half radius, so one iteration is enough.
+                        xstep = xmove;
+                        ystep = ymove;
+                    }
+                }
             }
             else if (mo->flags_ & kMapObjectFlagMissile)
             {
@@ -1263,7 +1357,10 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props)
                     fabs(mo->momentum_.Z) <
                         kStopSpeed + fabs(gravity / (mo->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1)))
                 {
-                    mo->momentum_.X = mo->momentum_.Y = mo->momentum_.Z = 0;
+                    if (mo->hyper_flags_ & kHyperFlagDehackedCompatibility)
+                        mo->momentum_.Z = 0;
+                    else
+                        mo->momentum_.X = mo->momentum_.Y = mo->momentum_.Z = 0;
                 }
             }
             else
@@ -1357,7 +1454,10 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props)
                     fabs(mo->momentum_.Z) <
                         kStopSpeed + fabs(gravity / (mo->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1)))
                 {
-                    mo->momentum_.X = mo->momentum_.Y = mo->momentum_.Z = 0;
+                    if (mo->hyper_flags_ & kHyperFlagDehackedCompatibility)
+                        mo->momentum_.Z = 0;
+                    else
+                        mo->momentum_.X = mo->momentum_.Y = mo->momentum_.Z = 0;
                 }
             }
             else

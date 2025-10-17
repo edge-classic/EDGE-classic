@@ -308,11 +308,30 @@ static void BounceOffPlane(MapObject *mo, float dir)
 {
     // calculate new momentum
 
-    mo->speed_ *= mo->info_->bounce_speed_;
-
-    mo->momentum_.X = (float)(epi::BAMCos(mo->angle_) * mo->speed_);
-    mo->momentum_.Y = (float)(epi::BAMSin(mo->angle_) * mo->speed_);
-    mo->momentum_.Z = (float)(dir * mo->speed_ * mo->info_->bounce_up_);
+    if (mo->hyper_flags_ & kHyperFlagDehackedCompatibility)
+    {
+        float bounce_factor = 1.0f;
+        if (!(mo->flags_ & kMapObjectFlagNoGravity))
+        {
+            if (mo->flags_ & kMapObjectFlagFloat)
+            {
+                if (mo->flags_ & kMapObjectFlagDropOff)
+                    bounce_factor = 0.85f;
+                else
+                    bounce_factor = 0.70f;
+            }
+            else
+                bounce_factor = 0.5f;
+        }
+        mo->momentum_.Z *= (dir * bounce_factor);
+    }
+    else
+    {
+        mo->speed_ *= mo->info_->bounce_speed_;
+        mo->momentum_.X = (float)(epi::BAMCos(mo->angle_) * mo->speed_);
+        mo->momentum_.Y = (float)(epi::BAMSin(mo->angle_) * mo->speed_);
+        mo->momentum_.Z = (float)(dir * mo->speed_ * mo->info_->bounce_up_);
+    }
 
     EnterBounceStates(mo);
 }
@@ -1060,8 +1079,23 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props)
                     return;
                 }
 
-                BounceOffWall(mo, block_line);
-                xmove = ymove = 0;
+                // Dasho - MBF behavior dictactes that BOUNCES+MISSILE
+                // explodes when hitting a wall
+                if (mo->hyper_flags_ & kHyperFlagDehackedCompatibility)
+                {
+                    if (mo->flags_ & kMapObjectFlagMissile)
+                        ExplodeMissile(mo);
+                    else
+                    {
+                        BounceOffWall(mo, block_line);
+                        xmove = ymove = 0;
+                    }
+                }
+                else
+                {
+                    BounceOffWall(mo, block_line);
+                    xmove = ymove = 0;
+                }
             }
             else if (mo->flags_ & kMapObjectFlagMissile)
             {
@@ -1263,7 +1297,10 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props)
                     fabs(mo->momentum_.Z) <
                         kStopSpeed + fabs(gravity / (mo->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1)))
                 {
-                    mo->momentum_.X = mo->momentum_.Y = mo->momentum_.Z = 0;
+                    if (mo->hyper_flags_ & kHyperFlagDehackedCompatibility)
+                        mo->momentum_.Z = 0;
+                    else
+                        mo->momentum_.X = mo->momentum_.Y = mo->momentum_.Z = 0;
                 }
             }
             else
@@ -1357,7 +1394,10 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props)
                     fabs(mo->momentum_.Z) <
                         kStopSpeed + fabs(gravity / (mo->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1)))
                 {
-                    mo->momentum_.X = mo->momentum_.Y = mo->momentum_.Z = 0;
+                    if (mo->hyper_flags_ & kHyperFlagDehackedCompatibility)
+                        mo->momentum_.Z = 0;
+                    else
+                        mo->momentum_.X = mo->momentum_.Y = mo->momentum_.Z = 0;
                 }
             }
             else

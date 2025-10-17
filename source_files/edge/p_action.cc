@@ -66,6 +66,8 @@ extern FlatDefinition *P_IsThingOnLiquidFloor(MapObject *thing);
 static constexpr float kLongMeleeRange    = 128.0f; // For kMBF21FlagLongMeleeRange
 static constexpr float kShortMissileRange = 896.0f; // For kMBF21FlagShortMissileRange
 
+static const MapObjectDefinition *mushroom_mobj = nullptr;
+
 static int AttackSfxCat(const MapObject *mo)
 {
     int category = GetSoundEffectCategory(mo);
@@ -5416,9 +5418,22 @@ void A_Mushroom(MapObject *mo)
     A_DamageExplosion(mo);
 
     // Now launch mushroom cloud
-    const MapObjectDefinition *fireball = mobjtypes.Lookup("MANCUBUS_FIREBALL");
-    if (!fireball)
-        return;
+    if (!mushroom_mobj)
+    {
+        for (std::vector<MapObjectDefinition *>::reverse_iterator iter = mobjtypes.dynamic_atk_mobjtypes.rbegin(), iter_end = mobjtypes.dynamic_atk_mobjtypes.rend(); iter != iter_end; ++iter)
+        {
+            MapObjectDefinition *mobj = *iter;
+            if (mobj->name_ == "atk:MANCUBUS_FIREBALL")
+            {
+                mushroom_mobj = mobj;
+                break;
+            }
+        }
+        if (!mushroom_mobj)
+        {
+            FatalError("A_Mushroom called, but the MANCUBUS_FIREBALL attack has been removed!\n");
+        }
+    }
 
     // Spread is determined by the 'missile damage' mobj property,
     // which from our Dehacked conversion equates to nominal
@@ -5434,7 +5449,7 @@ void A_Mushroom(MapObject *mo)
             float ty = mo->y + j;
             float tz = mo->z + ApproximateDistance(i, j) * height;
 
-            MapObject *proj = CreateMapObject(mo->x, mo->y, mo->z + 32.0f, fireball);
+            MapObject *proj = CreateMapObject(mo->x, mo->y, mo->z + 32.0f, mushroom_mobj);
             if (proj)
             {
                 proj->flags_ &= ~kMapObjectFlagNoGravity;

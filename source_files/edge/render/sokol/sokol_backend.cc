@@ -358,6 +358,10 @@ class SokolRenderBackend : public RenderBackend
         {
             SetupSkyMatrices();
         }
+        else if (layer == kRenderLayerViewport)
+        {
+            SetupWorldMatrices2D();
+        }
         else
         {
             SetupMatrices3D();

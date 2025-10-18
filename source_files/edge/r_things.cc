@@ -683,9 +683,6 @@ void RenderWeaponSprites(Player *p)
     {
         PlayerSprite *psp = &p->player_sprites_[kPlayerSpriteWeapon];
 
-        if ((p->ready_weapon_ < 0) || (psp->state == 0))
-            return;
-
         WeaponDefinition *w = p->weapons_[p->ready_weapon_].info;
 
         // 2023.06.13 - If zoom state missing but weapon can zoom, allow the
@@ -704,19 +701,13 @@ void RenderWeaponSprites(Player *p)
     // Allow changing the order of weapon sprite
     // rendering so that FLASH states are
     // drawn in front of the WEAPON states
-    bool FlashFirst = false;
-    if (p->ready_weapon_ >= 0)
-    {
-        FlashFirst = p->weapons_[p->ready_weapon_].info->render_invert_;
-    }
-
-    if (FlashFirst == false)
+    if (!p->weapons_[p->ready_weapon_].info->render_invert_)
     {
         for (int i = 0; i < kTotalPlayerSpriteTypes; i++) // normal
         {
             PlayerSprite *psp = &p->player_sprites_[i];
 
-            if ((p->ready_weapon_ < 0) || (psp->state == 0))
+            if (psp->state == 0)
                 continue;
 
             RenderPSprite(psp, i, p, view_properties, psp->state);
@@ -728,7 +719,7 @@ void RenderWeaponSprites(Player *p)
         {
             PlayerSprite *psp = &p->player_sprites_[i];
 
-            if ((p->ready_weapon_ < 0) || (psp->state == 0))
+            if (psp->state == 0)
                 continue;
 
             RenderPSprite(psp, i, p, view_properties, psp->state);
@@ -762,12 +753,6 @@ void RenderWeaponModel(Player *p)
         return;
 
     PlayerSprite *psp = &p->player_sprites_[kPlayerSpriteWeapon];
-
-    if (p->ready_weapon_ < 0)
-        return;
-
-    if (psp->state == 0)
-        return;
 
     if (!(psp->state->flags & kStateFrameFlagModel))
         return;

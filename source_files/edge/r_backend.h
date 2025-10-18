@@ -19,7 +19,7 @@ enum RenderLayer
     kRenderLayerSky,
     kRenderLayerSolid,
     kRenderLayerTransparent, // Transparent - additive renders on this layer
-    kRenderLayerWeapon,
+    kRenderLayerViewport, // Weapon sprites and 2D effects that use viewport instead of full screen space like the HUD
     kRenderLayerMax,
     kRenderLayerInvalid
 };

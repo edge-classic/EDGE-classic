@@ -176,9 +176,9 @@ static ma_result ma_sid_init_memory(const void *pData, size_t dataSize, const ma
 
     EPI_UNUSED(pAllocationCallbacks);
 
-    pSID->SID = cRSID_init(sound_device_frequency);
+    pSID->SID = cRSID_init(sound_device_frequency, 0);
 
-    pSID->SIDheader = cRSID_processSIDfile(pSID->SID, (unsigned char *)pData, dataSize);
+    pSID->SIDheader = cRSID_processSIDbuffer(pSID->SID, (unsigned char *)pData, dataSize);
 
     if (!pSID->SIDheader)
     {

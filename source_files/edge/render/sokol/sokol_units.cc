@@ -305,7 +305,7 @@ void RenderCurrentUnits(void)
 
     RenderFlush();
 
-    bool no_fog = (render_layer == kRenderLayerHUD) || (render_layer == kRenderLayerWeapon);
+    bool no_fog = (render_layer == kRenderLayerHUD) || (render_layer == kRenderLayerViewport);
 
     bool culling = draw_culling.d_ && !no_fog;
 

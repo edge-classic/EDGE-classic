@@ -81,3 +81,4 @@
 - Added missing 'fuzzy' check that caused artifacts when rendering MDL/MD2 mobjs with partial invisibility
 - Fixed accidental disabling of Lua if COAL was detected at any point in the load order
   - Correct behavior is for the last loaded lump between LUAHUDS/COALHUDS to take precedence
+- Fixed mobjs retaining "above/below" mobj references when not applicable, causing certain items to "hang" in the air

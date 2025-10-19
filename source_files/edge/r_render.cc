@@ -1525,7 +1525,7 @@ static void RenderSeg(DrawFloor *dfloor, Seg *seg, bool mirror_sub = false)
             EmulateFloodPlane(dfloor, current_seg->back_subsector->sector, +1, f_fh, b_fh);
         }
 
-        if (!debug_hall_of_mirrors.d_ && solid_mode && dfloor->is_highest && !sd->middle.image && !sd->top.image &&
+        if (!debug_hall_of_mirrors.d_ && solid_mode && dfloor->is_highest && !sd->top.image &&
             current_seg->back_subsector && b_ch < f_ch && b_ch > view_z)
         {
             EmulateFloodPlane(dfloor, current_seg->back_subsector->sector, -1, b_ch, f_ch);

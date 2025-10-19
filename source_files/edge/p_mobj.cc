@@ -1798,6 +1798,16 @@ static void P_MobjThinker(MapObject *mobj)
 
 //---------------------------------------------------------------------------
 
+static inline bool CheckThingBoundingBoxOverlap(const MapObject *A, const MapObject *B)
+{
+    return (A->x + A->radius_ <= B->x - B->radius_ ||
+            A->x - A->radius_ >= B->x + B->radius_ ||
+            A->y + A->radius_ <= B->y - B->radius_ ||
+            A->y - A->radius_ >= B->y + B->radius_)
+               ? false
+               : true;
+}
+
 void MapObject::ClearStaleReferences()
 {
     if (target_ && target_->IsRemoved())
@@ -1806,13 +1816,56 @@ void MapObject::ClearStaleReferences()
         SetSource(nullptr);
     if (tracer_ && tracer_->IsRemoved())
         SetTracer(nullptr);
-
     if (support_object_ && support_object_->IsRemoved())
         SetSupportObject(nullptr);
-    if (above_object_ && above_object_->IsRemoved())
-        SetAboveObject(nullptr);
-    if (below_object_ && below_object_->IsRemoved())
-        SetBelowObject(nullptr);
+
+    // Dasho - It's not enough just to check above/below objects
+    // for removal, but whether or not they even meet the criteria
+    // anymore
+    if (above_object_)
+    {
+        bool remove_it = false;
+        if (above_object_->IsRemoved())
+            remove_it = true;
+        else if (z + height_ > above_object_->z) // doesn't meet criteria now
+            remove_it = true;
+        else if (!CheckThingBoundingBoxOverlap(this, above_object_)) // not in contact with each other anymore
+            remove_it = true;
+        else if (!(above_object_->flags_ & kMapObjectFlagSolid)) // maybe it turned into a corpse or something?
+            remove_it = true;
+        
+        if (remove_it)
+        {
+            ceiling_z_ = above_object_->ceiling_z_;
+            SetAboveObject(nullptr);
+        }
+        else
+        {
+            ceiling_z_ = above_object_->z;
+        }
+    }
+    if (below_object_)
+    {
+        bool remove_it = false;
+        if (below_object_->IsRemoved())
+            remove_it = true;
+        else if (z < below_object_->z + below_object_->height_) // doesn't meet criteria now
+            remove_it = true;
+        else if (!CheckThingBoundingBoxOverlap(this, below_object_)) // not in contact with each other anymore
+            remove_it = true;
+        else if (!(below_object_->flags_ & kMapObjectFlagSolid)) // maybe it turned into a corpse or something?
+            remove_it = true;
+        
+        if (remove_it)
+        {
+            floor_z_ = below_object_->floor_z_;
+            SetBelowObject(nullptr);
+        }
+        else
+        {
+            floor_z_ = below_object_->z + below_object_->height_;
+        }
+    }
 }
 
 //
@@ -2242,7 +2295,7 @@ void SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const M
         if (th->tics_ < 1)
             th->tics_ = 1;
 
-        if (damage <= 12 && th->state_ && th->next_state_)
+        if (damage <= 12 && damage >= 9 && th->state_ && th->next_state_)
             MapObjectSetState(th, th->next_state_ - states);
 
         if (damage <= 8 && th->state_ && th->next_state_)

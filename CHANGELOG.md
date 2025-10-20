@@ -84,3 +84,4 @@
   - Correct behavior is for the last loaded lump between LUAHUDS/COALHUDS to take precedence
 - Fixed mobjs retaining "above/below" mobj references when not applicable, causing certain items to "hang" in the air
 - Fixed certain menu option items (jumping, mouselook, etc) being overridden when loading a game and not appropriate, (i.e. no forcing of these via DDFLEVL/UMAPINFO)
+- Fixed rendering artifacts when viewing mobjs through a camera portal whose view height is not 1:1 with the partner area

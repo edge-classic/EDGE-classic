@@ -91,6 +91,7 @@ struct DrawThing
     float translated_z;
     float floor_z;
     float mir_scale;
+    float mir_zscale;
 
     // colourmap/lighting
     RegionProperties *properties;

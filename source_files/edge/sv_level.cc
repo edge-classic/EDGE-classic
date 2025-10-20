@@ -178,6 +178,7 @@ static SaveField sv_fields_line[] = {
     EDGE_SAVE_FIELD(dummy_line, flags, "flags", 1, kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
                     SaveGamePutInteger),
     EDGE_SAVE_FIELD(dummy_line, tag, "tag", 1, kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_line, arg0, "arg0", 1, kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger, SaveGamePutInteger),
     EDGE_SAVE_FIELD(dummy_line, count, "count", 1, kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
                     SaveGamePutInteger),
     EDGE_SAVE_FIELD(dummy_line, side, "side", 1, kSaveFieldIndex, 4, "sides", SR_SideGetSide, SR_SidePutSide),

@@ -134,12 +134,20 @@ static void SpawnInitialPlayers(void);
 static bool GameLoadGameFromFile(const std::string &filename, bool is_hub = false);
 static bool GameSaveGameToFile(const std::string &filename, const char *description);
 
-static void HandleLevelFlag(bool *special, MapFlag flag)
+static bool HandleLevelFlag(bool *special, MapFlag flag)
 {
+    bool handled_it = false;
     if (current_map->force_on_ & (flag))
+    {
         *special = true;
+        handled_it = true;
+    }
     else if (current_map->force_off_ & (flag))
+    {
         *special = false;
+        handled_it = true;
+    }
+    return handled_it;
 }
 
 void LoadLevel_Bits(void)
@@ -178,34 +186,85 @@ void LoadLevel_Bits(void)
 
     // -KM- 1998/12/16 Make map flags actually do stuff.
     // -AJA- 2000/02/02: Made it more generic.
-    HandleLevelFlag(&level_flags.jump, kMapFlagJumping);
-    HandleLevelFlag(&level_flags.crouch, kMapFlagCrouching);
-    HandleLevelFlag(&level_flags.mouselook, kMapFlagMlook);
-    HandleLevelFlag(&level_flags.items_respawn, kMapFlagItemRespawn);
-    HandleLevelFlag(&level_flags.fast_monsters, kMapFlagFastParm);
-    HandleLevelFlag(&level_flags.true_3d_gameplay, kMapFlagTrue3D);
-    HandleLevelFlag(&level_flags.more_blood, kMapFlagMoreBlood);
-    HandleLevelFlag(&level_flags.cheats, kMapFlagCheats);
-    HandleLevelFlag(&level_flags.enemies_respawn, kMapFlagRespawn);
-    HandleLevelFlag(&level_flags.enemy_respawn_mode, kMapFlagResRespawn);
-    HandleLevelFlag(&level_flags.have_extra, kMapFlagExtras);
-    HandleLevelFlag(&level_flags.limit_zoom, kMapFlagLimitZoom);
-    HandleLevelFlag(&level_flags.kicking, kMapFlagKicking);
-    HandleLevelFlag(&level_flags.weapon_switch, kMapFlagWeaponSwitch);
-    HandleLevelFlag(&level_flags.pass_missile, kMapFlagPassMissile);
-    HandleLevelFlag(&level_flags.team_damage, kMapFlagTeamDamage);
+
+    // Dasho - Changed HandleLevelFlag to return a boolean;
+    // true if force on/off was applicable, false if not.
+    // If false, then our global flags (user-defined settings)
+    // should be applied
+    if (!HandleLevelFlag(&level_flags.jump, kMapFlagJumping))
+        level_flags.jump = global_flags.jump;
+    if (!HandleLevelFlag(&level_flags.crouch, kMapFlagCrouching))
+        level_flags.crouch = global_flags.crouch;
+    if (!HandleLevelFlag(&level_flags.mouselook, kMapFlagMlook))
+        level_flags.mouselook = global_flags.mouselook;
+    if (!HandleLevelFlag(&level_flags.items_respawn, kMapFlagItemRespawn))
+        level_flags.items_respawn = global_flags.items_respawn;
+    if (!HandleLevelFlag(&level_flags.fast_monsters, kMapFlagFastParm))
+        level_flags.fast_monsters = global_flags.fast_monsters;
+    if (!HandleLevelFlag(&level_flags.true_3d_gameplay, kMapFlagTrue3D))
+        level_flags.true_3d_gameplay = global_flags.true_3d_gameplay;
+    if (!HandleLevelFlag(&level_flags.more_blood, kMapFlagMoreBlood))
+        level_flags.more_blood = global_flags.more_blood;
+    if (!HandleLevelFlag(&level_flags.cheats, kMapFlagCheats))
+        level_flags.cheats = global_flags.cheats;
+    if (!HandleLevelFlag(&level_flags.enemies_respawn, kMapFlagRespawn))
+        level_flags.enemies_respawn = global_flags.enemies_respawn;
+    if (!HandleLevelFlag(&level_flags.enemy_respawn_mode, kMapFlagResRespawn))
+        level_flags.enemy_respawn_mode = global_flags.enemy_respawn_mode;
+    if (!HandleLevelFlag(&level_flags.have_extra, kMapFlagExtras))
+        level_flags.have_extra = global_flags.have_extra;
+    if (!HandleLevelFlag(&level_flags.limit_zoom, kMapFlagLimitZoom))
+        level_flags.limit_zoom = global_flags.limit_zoom;
+    if (!HandleLevelFlag(&level_flags.kicking, kMapFlagKicking))
+        level_flags.kicking = global_flags.kicking;
+    if (!HandleLevelFlag(&level_flags.weapon_switch, kMapFlagWeaponSwitch))
+        level_flags.weapon_switch = global_flags.weapon_switch;
+    if (!HandleLevelFlag(&level_flags.pass_missile, kMapFlagPassMissile))
+        level_flags.pass_missile = global_flags.pass_missile;
+    if (!HandleLevelFlag(&level_flags.team_damage, kMapFlagTeamDamage))
+        level_flags.team_damage = global_flags.team_damage;
+
+    // Some extra autoaim processing >:(
+    level_flags.autoaim = global_flags.autoaim;
 
     if (current_map->force_on_ & kMapFlagAutoAimVertical)
-        level_flags.autoaim = kAutoAimVertical;
+    {
+        if (level_flags.autoaim < kAutoAimVertical)
+            level_flags.autoaim = kAutoAimVertical;
+    }
     if (current_map->force_on_ & kMapFlagAutoAimVerticalSnap)
-        level_flags.autoaim = kAutoAimVerticalSnap;
+    {
+        if (level_flags.autoaim < kAutoAimVerticalSnap)
+            level_flags.autoaim = kAutoAimVerticalSnap;
+    }
     if (current_map->force_on_ & kMapFlagAutoAimFull)
-        level_flags.autoaim = kAutoAimFull;
+    {
+        if (level_flags.autoaim < kAutoAimFull)
+            level_flags.autoaim = kAutoAimFull;
+    }
     if (current_map->force_on_ & kMapFlagAutoAimFullSnap)
+    {
         level_flags.autoaim = kAutoAimFullSnap;
-
+    }
+    if (current_map->force_off_ & kMapFlagAutoAimFullSnap)
+    {
+        if (level_flags.autoaim == kAutoAimFullSnap)
+            level_flags.autoaim = kAutoAimFull;
+    }
     if (current_map->force_off_ & kMapFlagAutoAimFull)
+    {
+        if (level_flags.autoaim >= kAutoAimFull)
+            level_flags.autoaim = kAutoAimVerticalSnap;
+    }
+    if (current_map->force_off_ & kMapFlagAutoAimVerticalSnap)
+    {
+        if (level_flags.autoaim >= kAutoAimVerticalSnap)
+            level_flags.autoaim = kAutoAimVertical;
+    }
+    if (current_map->force_off_ & kMapFlagAutoAimVertical)
+    {
         level_flags.autoaim = kAutoAimOff;
+    }
 
     //
     // Note: It should be noted that only the game_skill is

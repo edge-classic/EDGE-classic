@@ -14,6 +14,7 @@
 - Added compile-time support for WebAssembly multithreading and SIMD support for Emscripten builds
 - Removed "Simple Skies" performance menu option
   - Broke too many maps to be worth the potential improvement
+- Added support for linedef id/arg0 parameter split in support of cross-port UDMF efforts
 
 ## Compatibility Fixes
 
@@ -82,3 +83,4 @@
 - Fixed accidental disabling of Lua if COAL was detected at any point in the load order
   - Correct behavior is for the last loaded lump between LUAHUDS/COALHUDS to take precedence
 - Fixed mobjs retaining "above/below" mobj references when not applicable, causing certain items to "hang" in the air
+- Fixed certain menu option items (jumping, mouselook, etc) being overridden when loading a game and not appropriate, (i.e. no forcing of these via DDFLEVL/UMAPINFO)

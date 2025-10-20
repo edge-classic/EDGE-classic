@@ -357,17 +357,6 @@ enum ThingOption
 constexpr int16_t kExtrafloorMask     = 0x3C00;
 constexpr uint8_t kExtrafloorBitShift = 10;
 
-//
-// Polyobject stuff
-//
-constexpr uint8_t kHexenPolyobjectStart    = 1;
-constexpr uint8_t kHexenPolyobjectExplicit = 5;
-
-// -JL- ZDoom polyobj thing types
-constexpr int16_t kZDoomPolyobjectAnchorType     = 9300;
-constexpr int16_t kZDoomPolyobjectSpawnType      = 9301;
-constexpr int16_t kZDoomPolyobjectSpawnCrushType = 9302;
-
 // Known string hashes for parsing UDMF
 
 namespace udmf
@@ -389,6 +378,7 @@ EPI_KNOWN_STRINGHASH(kZFloor, "ZFLOOR")
 EPI_KNOWN_STRINGHASH(kZCeiling, "ZCEILING")
 
 // linedefs
+EPI_KNOWN_STRINGHASH(kArg0, "ARG0")
 EPI_KNOWN_STRINGHASH(kV1, "V1")
 EPI_KNOWN_STRINGHASH(kV2, "V2")
 EPI_KNOWN_STRINGHASH(kSideFront, "SIDEFRONT")

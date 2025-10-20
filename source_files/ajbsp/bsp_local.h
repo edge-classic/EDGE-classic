@@ -97,12 +97,6 @@ struct Sector
 {
     // sector index.  Always valid after loading & pruning.
     int index;
-
-    // most info (floor_h, floor_tex, etc) omitted.  We don't need to
-    // write the SECTORS lump, only read it.
-
-    // -JL- non-zero if this sector contains a polyobj.
-    bool has_polyobject;
 };
 
 struct Sidedef
@@ -232,10 +226,6 @@ class Seg
     }
 };
 
-// a seg with this index is removed by SortSegs().
-// it must be a very high value.
-constexpr uint32_t kSegIsGarbage = (1 << 29);
-
 class Subsector
 {
   public:
@@ -352,7 +342,6 @@ extern std::vector<Vertex *>  level_vertices;
 extern std::vector<Linedef *> level_linedefs;
 extern std::vector<Sidedef *> level_sidedefs;
 extern std::vector<Sector *>  level_sectors;
-extern std::vector<Thing *>   level_things;
 
 extern std::vector<Seg *>       level_segs;
 extern std::vector<Subsector *> level_subsecs;
@@ -369,7 +358,6 @@ Vertex  *NewVertex();
 Linedef *NewLinedef();
 Sidedef *NewSidedef();
 Sector  *NewSector();
-Thing   *NewThing();
 
 Seg       *NewSeg();
 Subsector *NewSubsec();
@@ -390,7 +378,6 @@ void ZLibFinishLump(void);
 // detection routines
 void DetectOverlappingVertices(void);
 void DetectOverlappingLines(void);
-void DetectPolyobjSectors(void);
 
 // pruning routines
 void PruneVerticesAtEnd(void);

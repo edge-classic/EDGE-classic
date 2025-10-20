@@ -1743,7 +1743,7 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special, int tag, 
 //
 bool CrossSpecialLine(Line *ld, int side, MapObject *thing)
 {
-    return P_ActivateSpecialLine(ld, ld->special, ld->tag, side, thing, kLineTriggerWalkable, 1, 0);
+    return P_ActivateSpecialLine(ld, ld->special, ld->arg0, side, thing, kLineTriggerWalkable, 1, 0);
 }
 
 //
@@ -1751,7 +1751,7 @@ bool CrossSpecialLine(Line *ld, int side, MapObject *thing)
 //
 void ShootSpecialLine(Line *ld, int side, MapObject *thing)
 {
-    P_ActivateSpecialLine(ld, ld->special, ld->tag, side, thing, kLineTriggerShootable, 1, 0);
+    P_ActivateSpecialLine(ld, ld->special, ld->arg0, side, thing, kLineTriggerShootable, 1, 0);
 }
 
 //
@@ -1771,7 +1771,7 @@ bool UseSpecialLine(MapObject *thing, Line *line, int side, float open_bottom, f
 {
     int can_reach = (thing->z < open_top) && (thing->z + thing->height_ + kUseZRange >= open_bottom);
 
-    return P_ActivateSpecialLine(line, line->special, line->tag, side, thing, kLineTriggerPushable, can_reach, 0);
+    return P_ActivateSpecialLine(line, line->special, line->arg0, side, thing, kLineTriggerPushable, can_reach, 0);
 }
 
 //
@@ -2724,7 +2724,7 @@ void SpawnMapSpecials2(int autotag)
 
         if (special->autoline_)
         {
-            P_ActivateSpecialLine(&level_lines[i], level_lines[i].special, level_lines[i].tag, 0, nullptr,
+            P_ActivateSpecialLine(&level_lines[i], level_lines[i].special, level_lines[i].arg0, 0, nullptr,
                                   kLineTriggerAny, 1, 1);
         }
 

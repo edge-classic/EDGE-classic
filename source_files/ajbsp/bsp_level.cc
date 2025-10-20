@@ -75,7 +75,6 @@ std::vector<Vertex *>  level_vertices;
 std::vector<Linedef *> level_linedefs;
 std::vector<Sidedef *> level_sidedefs;
 std::vector<Sector *>  level_sectors;
-std::vector<Thing *>   level_things;
 
 std::vector<Seg *>       level_segs;
 std::vector<Subsector *> level_subsecs;
@@ -118,14 +117,6 @@ Sector *NewSector()
     S->index  = (int)level_sectors.size();
     level_sectors.push_back(S);
     return S;
-}
-
-Thing *NewThing()
-{
-    Thing *T = (Thing *)UtilCalloc(sizeof(Thing));
-    T->index = (int)level_things.size();
-    level_things.push_back(T);
-    return T;
 }
 
 Seg *NewSeg()
@@ -188,14 +179,6 @@ void FreeSectors()
         UtilFree((void *)level_sectors[i]);
 
     level_sectors.clear();
-}
-
-void FreeThings()
-{
-    for (unsigned int i = 0; i < level_things.size(); i++)
-        UtilFree((void *)level_things[i]);
-
-    level_things.clear();
 }
 
 void FreeSegs()
@@ -339,40 +322,6 @@ void GetSectors()
     }
 }
 
-void GetThings()
-{
-    int count = 0;
-
-    Lump *lump = FindLevelLump("THINGS");
-
-    if (lump)
-        count = lump->Length() / (int)sizeof(RawThing);
-
-    if (lump == nullptr || count == 0)
-        return;
-
-    if (!lump->Seek(0))
-        FatalError("AJBSP: Error seeking to things.\n");
-
-#if AJBSP_DEBUG_LOAD
-    LogDebug("GetThings: num = %d\n", count);
-#endif
-
-    for (int i = 0; i < count; i++)
-    {
-        RawThing raw;
-
-        if (!lump->Read(&raw, sizeof(raw)))
-            FatalError("AJBSP: Error reading things.\n");
-
-        Thing *thing = NewThing();
-
-        thing->x    = AlignedLittleEndianS16(raw.x);
-        thing->y    = AlignedLittleEndianS16(raw.y);
-        thing->type = AlignedLittleEndianU16(raw.type);
-    }
-}
-
 void GetSidedefs()
 {
     int count = 0;
@@ -469,20 +418,6 @@ void GetLinedefs()
 
 /* ----- UDMF reading routines ------------------------- */
 
-static void ParseThingField(Thing *thing, const uint32_t &key, const epi::Scanner &lex)
-{
-    // Do we need more precision than an int for things? I think this would only
-    // be an issue if/when polyobjects happen, as I think other thing types are
-    // ignored - Dasho
-
-    if (key == udmf::kX)
-        thing->x = RoundToInteger(lex.state_.decimal);
-    else if (key == udmf::kY)
-        thing->y = RoundToInteger(lex.state_.decimal);
-    else if (key == udmf::kType)
-        thing->type = lex.state_.number;
-}
-
 static void ParseVertexField(Vertex *vertex, const uint32_t &key, const epi::Scanner &lex)
 {
     if (key == udmf::kX)
@@ -546,7 +481,6 @@ static void ParseLinedefField(Linedef *line, const uint32_t &key, const epi::Sca
 void ParseUDMF_Block(epi::Scanner &lex, int cur_type)
 {
     Vertex  *vertex = nullptr;
-    Thing   *thing  = nullptr;
     Sidedef *side   = nullptr;
     Linedef *line   = nullptr;
 
@@ -554,9 +488,6 @@ void ParseUDMF_Block(epi::Scanner &lex, int cur_type)
     {
     case kUDMFVertex:
         vertex = NewVertex();
-        break;
-    case kUDMFThing:
-        thing = NewThing();
         break;
     case kUDMFSector:
         NewSector(); // We don't use the returned pointer in this function
@@ -567,6 +498,7 @@ void ParseUDMF_Block(epi::Scanner &lex, int cur_type)
     case kUDMFLinedef:
         line = NewLinedef();
         break;
+    case kUDMFThing:
     default:
         break;
     }
@@ -605,9 +537,6 @@ void ParseUDMF_Block(epi::Scanner &lex, int cur_type)
         case kUDMFVertex:
             ParseVertexField(vertex, key_hash.Value(), lex);
             break;
-        case kUDMFThing:
-            ParseThingField(thing, key_hash.Value(), lex);
-            break;
         case kUDMFSidedef:
             ParseSidedefField(side, key_hash.Value(), lex);
             break;
@@ -615,6 +544,7 @@ void ParseUDMF_Block(epi::Scanner &lex, int cur_type)
             ParseLinedefField(line, key_hash.Value(), lex);
             break;
         case kUDMFSector:
+        case kUDMFThing:
         default: /* just skip it */
             break;
         }
@@ -626,6 +556,12 @@ void ParseUDMF_Block(epi::Scanner &lex, int cur_type)
     {
         if (line->start == nullptr || line->end == nullptr)
             FatalError("AJBSP: Linedef #%d is missing a vertex!\n", line->index);
+
+        line->start->is_used_ = true;
+        line->end->is_used_   = true;
+
+        // check for zero-length line
+        line->zero_length = (fabs(line->start->x_ - line->end->x_) < kEpsilon) && (fabs(line->start->y_ - line->end->y_) < kEpsilon);
 
         if (line->right || line->left)
             num_real_lines++;
@@ -757,13 +693,6 @@ void SortSegs()
 
     // sort segs into ascending index
     std::sort(level_segs.begin(), level_segs.end(), CompareSegPredicate());
-
-    // remove unwanted segs
-    while (level_segs.size() > 0 && level_segs.back()->index_ == kSegIsGarbage)
-    {
-        UtilFree((void *)level_segs.back());
-        level_segs.pop_back();
-    }
 }
 
 /* ----- ZDoom format writing --------------------------- */
@@ -834,31 +763,6 @@ void PutZSubsecs()
 
     if ((size_t)cur_seg_index != level_segs.size())
         FatalError("AJBSP: PutZSubsecs miscounted segs (%d != %zu)\n", cur_seg_index, level_segs.size());
-}
-
-void PutZSegs()
-{
-    uint32_t Rawnum = AlignedLittleEndianU32(level_segs.size());
-    ZLibAppendLump(&Rawnum, 4);
-
-    for (int i = 0; (size_t)i < level_segs.size(); i++)
-    {
-        const Seg *seg = level_segs[i];
-
-        if (seg->index_ != i)
-            FatalError("AJBSP: PutZSegs: seg index mismatch (%d != %d)\n", seg->index_, i);
-
-        uint32_t v1 = AlignedLittleEndianU32(VertexIndex_XNOD(seg->start_));
-        uint32_t v2 = AlignedLittleEndianU32(VertexIndex_XNOD(seg->end_));
-
-        uint16_t line = AlignedLittleEndianU16(seg->linedef_->index);
-        uint8_t  side = (uint8_t)seg->side_;
-
-        ZLibAppendLump(&v1, 4);
-        ZLibAppendLump(&v2, 4);
-        ZLibAppendLump(&line, 2);
-        ZLibAppendLump(&side, 1);
-    }
 }
 
 void PutXGL3Segs()
@@ -1004,36 +908,22 @@ void LoadLevel()
     }
     else
     {
+        if (level_format == kMapFormatHexen)
+            FatalError("AJBSP: Level %s is Hexen format (not supported).\n", level_current_name);
+
         GetVertices();
         GetSectors();
         GetSidedefs();
-
-        if (level_format == kMapFormatHexen)
-        {
-            FatalError("AJBSP: Level %s is Hexen format (not supported).\n", level_current_name);
-        }
-        else
-        {
-            GetLinedefs();
-            GetThings();
-        }
-
-        // always prune vertices at end of lump, otherwise all the
-        // unused vertices from seg splits would keep accumulating.
-        PruneVerticesAtEnd();
+        GetLinedefs();
     }
 
-    LogDebug("    Loaded %zu vertices, %zu sectors, %zu sides, %zu lines, %zu things\n", level_vertices.size(),
-             level_sectors.size(), level_sidedefs.size(), level_linedefs.size(), level_things.size());
+    LogDebug("    Loaded %zu vertices, %zu sectors, %zu sides, %zu lines\n", level_vertices.size(),
+             level_sectors.size(), level_sidedefs.size(), level_linedefs.size());
 
+    PruneVerticesAtEnd();
     DetectOverlappingVertices();
     DetectOverlappingLines();
-
     CalculateWallTips();
-
-    // -JL- Find sectors containing polyobjs
-    if (level_format == kMapFormatUDMF)
-        DetectPolyobjSectors();
 }
 
 void FreeLevel()
@@ -1042,7 +932,6 @@ void FreeLevel()
     FreeSidedefs();
     FreeLinedefs();
     FreeSectors();
-    FreeThings();
     FreeSegs();
     FreeSubsecs();
     FreeNodes();

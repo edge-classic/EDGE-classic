@@ -1109,6 +1109,7 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
     dthing->sink_mult    = sink_mult;
 
     dthing->mir_scale = bsp_mirror_set.XYScale();
+    dthing->mir_zscale = bsp_mirror_set.ZScale();
 
     RendererClipSpriteVertically(dsub, dthing);
 }
@@ -1249,13 +1250,13 @@ static bool RenderThing(DrawThing *dthing, bool solid)
     switch (mo->info_->yalign_)
     {
     case SpriteYAlignmentTopDown:
-        gzt = dthing->map_z + mo->height_ + top_offset * mo->scale_;
-        gzb = gzt - sprite_height * mo->scale_;
+        gzt = dthing->map_z + mo->height_ + top_offset * mo->scale_ * dthing->mir_zscale;
+        gzb = gzt - sprite_height * mo->scale_ * dthing->mir_zscale;
         break;
 
     case SpriteYAlignmentMiddle: {
-        float _mz = dthing->map_z + mo->height_ * 0.5 + top_offset * mo->scale_;
-        float dz  = sprite_height * 0.5 * mo->scale_;
+        float _mz = dthing->map_z + mo->height_ * 0.5 + top_offset * mo->scale_* dthing->mir_zscale;
+        float dz  = sprite_height * 0.5 * mo->scale_* dthing->mir_zscale;
 
         gzt = _mz + dz;
         gzb = _mz - dz;
@@ -1264,8 +1265,8 @@ static bool RenderThing(DrawThing *dthing, bool solid)
 
     case SpriteYAlignmentBottomUp:
     default:
-        gzb = dthing->map_z + top_offset * mo->scale_;
-        gzt = gzb + sprite_height * mo->scale_;
+        gzb = dthing->map_z + top_offset * mo->scale_* dthing->mir_zscale;
+        gzt = gzb + sprite_height * mo->scale_ * dthing->mir_zscale;
         break;
     }
 

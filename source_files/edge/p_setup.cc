@@ -72,8 +72,9 @@
 extern unsigned int root_node;
 
 static bool level_active = false;
+static bool id_arg0_split = false;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(udmf_strict_namespace, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(udmf_strict_namespace, "1", kConsoleVariableFlagArchive)
 
 //
 // MAP related Lookup tables.
@@ -943,6 +944,7 @@ static void LoadLineDefs(int lump)
     {
         ld->flags    = AlignedLittleEndianU16(mld->flags);
         ld->tag      = HMM_MAX(0, AlignedLittleEndianS16(mld->tag));
+        ld->arg0     = ld->tag; // this is always true for binary format
         ld->vertex_1 = &level_vertexes[AlignedLittleEndianU16(mld->start)];
         ld->vertex_2 = &level_vertexes[AlignedLittleEndianU16(mld->end)];
 
@@ -2112,7 +2114,7 @@ static void LoadUDMFLineDefs()
         if (section == "linedef")
         {
             int   flags = 0, v1 = 0, v2 = 0;
-            int   side0 = -1, side1 = -1, tag = -1;
+            int   side0 = -1, side1 = -1, tag = -1, arg0 = -1;
             float alpha   = 1.0f;
             int   special = 0;
             for (;;)
@@ -2148,6 +2150,9 @@ static void LoadUDMFLineDefs()
                 {
                 case udmf::kID:
                     tag = lex.state_.number;
+                    break;
+                case udmf::kArg0:
+                    arg0 = lex.state_.number;
                     break;
                 case udmf::kV1:
                     v1 = lex.state_.number;
@@ -2211,6 +2216,10 @@ static void LoadUDMFLineDefs()
 
             ld->flags    = flags;
             ld->tag      = HMM_MAX(0, tag);
+            if (id_arg0_split)
+                ld->arg0 = HMM_MAX(0, arg0);
+            else
+                ld->arg0 = ld->tag;
             ld->vertex_1 = &level_vertexes[v1];
             ld->vertex_2 = &level_vertexes[v2];
 
@@ -2543,15 +2552,17 @@ static void LoadUDMFCounts()
             if (udmf_strict_namespace.d_)
             {
                 if (section != "doom" && section != "heretic" && section != "edge-classic" &&
-                    section != "zdoomtranslated")
+                    section != "zdoomtranslated" && section != "woof")
                 {
                     LogWarning("UDMF: %s uses unsupported namespace "
                                "\"%s\"!\nSupported namespaces are \"doom\", "
-                               "\"heretic\", \"edge-classic\", or "
+                               "\"heretic\", \"edge-classic\", \"woof\" or "
                                "\"zdoomtranslated\"!\n",
                                current_map->lump_.c_str(), section.c_str());
                 }
             }
+
+            id_arg0_split = (section != "edge-classic");
 
             if (!lex.CheckToken(';'))
                 FatalError("Malformed TEXTMAP lump: missing ';'\n");

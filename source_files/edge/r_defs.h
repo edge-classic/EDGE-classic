@@ -404,6 +404,7 @@ struct Line
     // Animation related.
     int flags;
     int tag;
+    int arg0;
     int count;
 
     const LineType *special;

@@ -808,8 +808,10 @@ void RenderWeaponModel(Player *p)
         EPI_ASSERT(psp->state->tics > 1);
 
         last_frame = p->weapon_last_frame_;
-
-        lerp = (psp->state->tics - psp->tics + 1) / (float)(psp->state->tics);
+        if (!console_active && !paused && !menu_active && !erraticism_active && !rts_menu_active)
+            lerp = ((float)psp->state->tics - psp->tics + fractional_tic) / (float)(psp->state->tics);
+        else
+            lerp = (psp->state->tics - psp->tics + 1) / (float)(psp->state->tics);
         lerp = HMM_Clamp(0, lerp, 1);
     }
 
@@ -985,29 +987,43 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
     float mx, my, mz, fz;
 
     // position interpolation
-    if (mo->interpolate_ && !console_active && !paused && !menu_active && !erraticism_active && !rts_menu_active)
-    {
-        mx = HMM_Lerp(mo->old_x_, fractional_tic, mo->x);
-        my = HMM_Lerp(mo->old_y_, fractional_tic, mo->y);
-        mz = HMM_Lerp(mo->old_z_, fractional_tic, mo->z);
-        fz = HMM_Lerp(mo->old_floor_z_, fractional_tic, mo->floor_z_);
-    }
-    else
-    {
-        mx = mo->x;
-        my = mo->y;
-        mz = mo->z;
-        fz = mo->floor_z_;
-    }
 
     // This applies to kStateFrameFlagModel and kMapObjectFlagFloat
     if (mo->interpolation_number_ > 1)
     {
-        float along = mo->interpolation_position_ / (float)mo->interpolation_number_;
-
-        mx = mo->interpolation_from_.X + (mx - mo->interpolation_from_.X) * along;
-        my = mo->interpolation_from_.Y + (my - mo->interpolation_from_.Y) * along;
-        mz = mo->interpolation_from_.Z + (mz - mo->interpolation_from_.Z) * along;
+        if (mo->interpolate_ && !console_active && !paused && !menu_active && !erraticism_active && !rts_menu_active)
+        {
+            float along = (float)(mo->interpolation_position_ - 1 + fractional_tic) / mo->interpolation_number_;
+            mx = HMM_Lerp(mo->interpolation_from_.X, along, mo->x);
+            my = HMM_Lerp(mo->interpolation_from_.Y, along, mo->y);
+            mz = HMM_Lerp(mo->interpolation_from_.Z, along, mo->z);
+            fz = HMM_Lerp(mo->old_floor_z_, fractional_tic, mo->floor_z_);
+        }
+        else
+        {
+            float along = (float)mo->interpolation_position_ / mo->interpolation_number_;
+            mx = HMM_Lerp(mo->interpolation_from_.X, along, mo->x);
+            my = HMM_Lerp(mo->interpolation_from_.Y, along, mo->y);
+            mz = HMM_Lerp(mo->interpolation_from_.Z, along, mo->z);
+            fz = mo->floor_z_;
+        }
+    }
+    else
+    {
+        if (mo->interpolate_ && !console_active && !paused && !menu_active && !erraticism_active && !rts_menu_active)
+        {
+            mx = HMM_Lerp(mo->old_x_, fractional_tic, mo->x);
+            my = HMM_Lerp(mo->old_y_, fractional_tic, mo->y);
+            mz = HMM_Lerp(mo->old_z_, fractional_tic, mo->z);
+            fz = HMM_Lerp(mo->old_floor_z_, fractional_tic, mo->floor_z_);
+        }
+        else
+        {
+            mx = mo->x;
+            my = mo->y;
+            mz = mo->z;
+            fz = mo->floor_z_;
+        }
     }
 
     bsp_mirror_set.Coordinate(mx, my);
@@ -1142,8 +1158,10 @@ static void RenderModel(DrawThing *dthing)
         last_frame = mo->model_last_frame_;
 
         EPI_ASSERT(mo->state_->tics > 1);
-
-        lerp = (mo->state_->tics - mo->tics_ + 1) / (float)(mo->state_->tics);
+        if (mo->interpolate_ && !console_active && !paused && !menu_active && !erraticism_active && !rts_menu_active)
+            lerp = ((float)mo->state_->tics - mo->tics_ + fractional_tic) / (float)(mo->state_->tics);
+        else
+            lerp = (mo->state_->tics - mo->tics_ + 1) / (float)(mo->state_->tics);
         lerp = HMM_Clamp(0, lerp, 1);
     }
 

@@ -2069,7 +2069,7 @@ static void DDFMobjStateGetDEHProjectile(const char *arg, State *cur_state)
     atk->range_        = 2048.0f;
     atk->attackstyle_  = kAttackStyleProjectile;
     atk->attack_class_ = epi::BitSetFromChar('M');
-    atk->flags_ = (AttackFlags)(kAttackFlagFaceTarget | kAttackFlagInheritTracerFromTarget | kAttackFlagOffsetsLast);
+    atk->flags_ = (AttackFlags)(kAttackFlagFaceTarget | kAttackFlagInheritTracerFromTarget | kAttackFlagOffsetsLast | kAttackFlagKillFailedSpawn);
     atk->damage_.Default(DamageClass::kDamageClassDefaultAttack);
     atk->height_ = 32;
 

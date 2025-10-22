@@ -1670,9 +1670,16 @@ static void CheckMissileSpawn(MapObject *projectile)
     if (projectile->tics_ < 1)
         projectile->tics_ = 1;
 
-    projectile->z += projectile->momentum_.Z / 2;
+    HMM_Vec3 check_pos = {{projectile->momentum_.X * 0.5f, projectile->momentum_.Y * 0.5f, projectile->momentum_.Z  * 0.5f}};
 
-    if (!TryMove(projectile, projectile->x + projectile->momentum_.X / 2, projectile->y + projectile->momentum_.Y / 2))
+    while (PointToDistance(projectile->x, projectile->y, projectile->x + check_pos.X, projectile->y + check_pos.Y) > projectile->radius_)
+    {
+        check_pos *= 0.5f;
+    }
+
+    projectile->z += check_pos.Z;
+
+    if (!TryMove(projectile, projectile->x + check_pos.X, projectile->y + check_pos.Y))
     {
         ExplodeMissile(projectile);
     }

@@ -918,6 +918,11 @@ void RemoveOldAvatars(void)
             mo->SetSource(mo->source_->player_->map_object_);
         }
 
+        if (mo->spawn_source_ && (mo->spawn_source_->hyper_flags_ & kHyperFlagRememberOldAvatars))
+        {
+            mo->SetSpawnSource(mo->spawn_source_->player_->map_object_);
+        }
+
         if (mo->support_object_ && (mo->support_object_->hyper_flags_ & kHyperFlagRememberOldAvatars))
         {
             mo->SetSupportObject(mo->support_object_->player_->map_object_);

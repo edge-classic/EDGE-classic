@@ -168,6 +168,8 @@ static SaveField sv_fields_mobj[] = {
                     SaveGameMapObjectGetAttack, SaveGameMapObjectPutAttack),
     EDGE_SAVE_FIELD(dummy_map_object, source_, "source", 1, kSaveFieldIndex, 4, "mobjs", SaveGameGetMapObject,
                     SaveGamePutMapObject),
+    EDGE_SAVE_FIELD(dummy_map_object, spawn_source_, "spawn_source", 1, kSaveFieldIndex, 4, "mobjs", SaveGameGetMapObject,
+                    SaveGamePutMapObject),
     EDGE_SAVE_FIELD(dummy_map_object, target_, "target", 1, kSaveFieldIndex, 4, "mobjs", SaveGameGetMapObject,
                     SaveGamePutMapObject),
     EDGE_SAVE_FIELD(dummy_map_object, tracer_, "tracer", 1, kSaveFieldIndex, 4, "mobjs", SaveGameGetMapObject,
@@ -414,6 +416,8 @@ void SaveGameMapObjectFinaliseElems(void)
             mo->tracer_->reference_count_++;
         if (mo->source_)
             mo->source_->reference_count_++;
+        if (mo->spawn_source_)
+            mo->spawn_source_->reference_count_++;
         if (mo->target_)
             mo->target_->reference_count_++;
         if (mo->support_object_)

@@ -501,6 +501,7 @@ static void ResurrectRespawn(MapObject *mobj)
     mobj->pain_chance_ = info->pain_chance_;
 
     mobj->SetSource(nullptr);
+    mobj->SetSpawnSource(nullptr);
     mobj->SetTarget(nullptr);
 
     mobj->tag_ = mobj->spawnpoint_.tag;
@@ -1814,6 +1815,8 @@ void MapObject::ClearStaleReferences()
         SetTarget(nullptr);
     if (source_ && source_->IsRemoved())
         SetSource(nullptr);
+    if (spawn_source_ && spawn_source_->IsRemoved())
+        SetSpawnSource(nullptr);
     if (tracer_ && tracer_->IsRemoved())
         SetTracer(nullptr);
     if (support_object_ && support_object_->IsRemoved())
@@ -1918,6 +1921,11 @@ void MapObject::SetTarget(MapObject *other)
 void MapObject::SetSource(MapObject *other)
 {
     UpdateMobjRef(this, source_, other);
+}
+
+void MapObject::SetSpawnSource(MapObject *other)
+{
+    UpdateMobjRef(this, spawn_source_, other);
 }
 
 void MapObject::SetTracer(MapObject *other)
@@ -2080,6 +2088,7 @@ void RemoveMapObject(MapObject *mo)
     // Clear all references to other mobjs
     mo->SetTarget(nullptr);
     mo->SetSource(nullptr);
+    mo->SetSpawnSource(nullptr);
     mo->SetTracer(nullptr);
 
     mo->SetSupportObject(nullptr);

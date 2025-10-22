@@ -599,6 +599,7 @@ static void SpawnDeathMissile(MapObject *source, float x, float y, float z)
         StartSoundEffect(th->info_->seesound_, GetSoundEffectCategory(th), th);
 
     th->SetRealSource(source);
+    th->SetSpawnSource(source);
 
     th->momentum_.X = (x - source->x) / 50.0f;
     th->momentum_.Y = -0.25f;

@@ -376,13 +376,12 @@ static bool CheckAbsoluteThingCallback(MapObject *thing, void *data)
     // check for missiles making contact
     // -ACB- 1998/08/04 Procedure for missile contact
 
-    if (move_check.mover->source_ && move_check.mover->source_ == thing)
-        return true;
-
     if (move_check.flags & kMapObjectFlagMissile)
     {
         // ignore the missile's shooter
         if (move_check.mover->source_ && move_check.mover->source_ == thing)
+            return true;
+        if (move_check.mover->spawn_source_ && move_check.mover->spawn_source_ == thing)
             return true;
 
         if ((thing->hyper_flags_ & kHyperFlagMissilesPassThrough) && level_flags.pass_missile)
@@ -948,6 +947,8 @@ static bool CheckRelativeThingCallback(MapObject *thing, void *data)
 
         // ignore the missile's shooter
         if (move_check.mover->source_ && move_check.mover->source_ == thing)
+            return true;
+        if (move_check.mover->spawn_source_ && move_check.mover->spawn_source_ == thing)
             return true;
 
         if ((thing->hyper_flags_ & kHyperFlagMissilesPassThrough) && level_flags.pass_missile)

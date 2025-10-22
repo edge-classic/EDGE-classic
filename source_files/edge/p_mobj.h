@@ -316,8 +316,12 @@ class MapObject : public Position
     // us from a crash.
     int reference_count_ = 0;
 
-    // source of the mobj, used for projectiles (i.e. the shooter)
+    // true source of the mobj, used for side/friendly fire/aggression determiniation
     MapObject *source_ = nullptr;
+
+    // immediate source of the mobj, important for collision checks for
+    // missiles launching missiles, etc, especially MBF21 stuff
+    MapObject *spawn_source_ = nullptr;
 
     // target of the mobj
     MapObject *target_ = nullptr;
@@ -399,6 +403,7 @@ class MapObject : public Position
 
     void SetTracer(MapObject *ref);
     void SetSource(MapObject *ref);
+    void SetSpawnSource(MapObject *ref);
     void SetTarget(MapObject *ref);
     void SetSupportObject(MapObject *ref);
     void SetAboveObject(MapObject *ref);

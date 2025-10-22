@@ -1856,6 +1856,7 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty, floa
     //
     projectile->current_attack_ = attack;
     projectile->SetRealSource(source);
+    projectile->SetSpawnSource(source);
 
     // check for blocking lines between source and projectile
     if (MapCheckBlockingLine(source, projectile))
@@ -2733,6 +2734,7 @@ static void LaunchTracker(MapObject *object)
 
     // tracker source is the object
     tracker->SetRealSource(object);
+    tracker->SetSpawnSource(object);
 
     // tracker's target is the object's target
     tracker->SetTarget(target);
@@ -3263,6 +3265,7 @@ void A_Spawn(MapObject *mo)
     item->side_  = mo->side_;
 
     item->SetRealSource(mo);
+    item->SetSpawnSource(mo);
 }
 
 void A_PathCheck(MapObject *mo)
@@ -5374,6 +5377,7 @@ void A_SpawnObject(MapObject *mo)
     spawn->side_ = mo->side_;
 
     spawn->SetRealSource(mo);
+    spawn->SetSpawnSource(mo);
 
     if ((spawn->flags_ & kMapObjectFlagMissile) || (spawn->extended_flags_ & kExtendedFlagBounce))
     {
@@ -5474,6 +5478,7 @@ void A_Mushroom(MapObject *mo)
                     proj->momentum_.Z += mo->momentum_.Z;
                 }
                 proj->SetRealSource(mo);
+                proj->SetSpawnSource(mo);
             }
         }
     }

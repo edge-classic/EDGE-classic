@@ -55,6 +55,7 @@
 #include "epi_str_compare.h"
 #include "epi_str_hash.h"
 #include "epi_str_util.h"
+#include "epi_windows.h"
 #include "f_finale.h"
 #include "f_interm.h"
 #include "g_game.h"
@@ -175,6 +176,8 @@ std::string game_directory;
 std::string home_directory;
 std::string save_directory;
 std::string screenshot_directory;
+
+static std::vector<std::string> load_file_search_paths;
 
 // not using EDGE_DEFINE_CONSOLE_VARIABLE here since var name != cvar name
 ConsoleVariable m_language("language", "ENGLISH", kConsoleVariableFlagArchive);
@@ -1383,14 +1386,145 @@ static int CheckPackForGameFiles(std::string_view check_pack, FileKind check_kin
     }
 }
 
+// This list will be used to search for both IWADs and arbitrary files added
+// through the -file parameter
+static void CollectSearchPaths()
+{
+#ifndef EDGE_WEB
+    load_file_search_paths.push_back(epi::CurrentDirectoryGet());
+#endif
+    load_file_search_paths.push_back(home_directory);
+    if (home_directory != game_directory)
+        load_file_search_paths.push_back(game_directory);
+
+    const char *check = SDL_getenv("DOOMWADDIR");
+
+    if (check && epi::IsDirectory(check))
+        load_file_search_paths.push_back(check);
+
+    check = SDL_getenv("DOOMWADPATH");
+
+    if (check)
+    {
+        for (const std::string &dir : epi::SeparatedStringVector(check, ':'))
+            load_file_search_paths.push_back(dir);
+    }
+}
+
+// This list of locations will only be used to search for IWADs; they are treated
+// like locations that a regular user would not have access to in order to
+// place arbitrary mods, PWADs, etc. These paths are checked after the
+// regular search paths collected above.
+static void CollectInstallSearchPaths(std::vector<std::string> &paths)
+{
+#if defined(EDGE_WEB)
+    EPI_UNUSED(paths);
+    return;
+#elif defined(_WIN32)
+#ifdef _WIN64
+    static constexpr const char *kGOGRegistryPath = "Software\\Wow6432Node\\GOG.com\\Games\\"; 
+#else
+    static constexpr const char *kGOGRegistryPath = "Software\\GOG.com\\Games\\";
+#endif
+    static constexpr const wchar_t *kGOGRegistrySubPath = L"path";
+    static constexpr const char *kSteamRegistryPath = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Steam App ";
+    static constexpr const wchar_t *kSteamRegistrySubPath = L"InstallLocation";
+
+    static const std::vector<std::pair<int, std::vector<std::string>>> gog_product_paths = 
+    {
+      {1435848814, {"doom2"}},
+      {1135892318, {"base\\wads"}},
+      {1435848742, {"Plutonia", "TNT"}},
+      {1435827232, {"."}},
+      {2015545325, {"DOOM_Data\\StreamingAssets"}},
+      {1426071866, {"DOOM II_Data\\StreamingAssets"}},
+      {1413291984, {"dosdoom\\base","dosdoom\\base\\doom2","dosdoom\\base\\plutonia","dosdoom\\base\\tnt","."}}
+    };
+
+    static const std::vector<std::pair<int, std::vector<std::string>>> steam_product_paths = 
+    {
+      {2280, {"base","base\\doom2","base\\plutonia","base\\tnt","rerelease","rerelease\\DOOM_Data\\StreamingAssets"}},
+      {2300, {"base","masterbase\\doom2","finaldoombase","rerelease\\DOOM II_Data\\StreamingAssets"}},
+      {2290, {"base"}},
+      {208200, {"base\\wads"}},
+      {782330, {"base\\classicwads"}}
+    };
+   
+    for (const std::pair<int, std::vector<std::string>> &product : gog_product_paths)
+    {
+        HKEY key;
+        DWORD value_type;
+        DWORD value_length;
+        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, (LPCWSTR)epi::UTF8ToWString(epi::StringFormat("%s%d", kGOGRegistryPath, product.first)).c_str(), 0, KEY_READ, &key) == ERROR_SUCCESS)
+        {
+            if (RegQueryValueExW(key, kGOGRegistrySubPath, NULL, &value_type, NULL, &value_length) == ERROR_SUCCESS && value_type == REG_SZ)
+            {
+                std::wstring value;
+                value.resize(value_length);
+                if (RegQueryValueExW(key, kGOGRegistrySubPath, NULL, &value_type, (LPBYTE)value.data(), &value_length) == ERROR_SUCCESS)
+                {
+                    std::string utf8_value = epi::WStringToUTF8(value);
+                    if (!utf8_value.empty())
+                    {
+                        for (const std::string &folder : product.second)
+                            paths.push_back(epi::PathAppend(utf8_value, folder));
+                    }
+                }
+            }
+            RegCloseKey(key);
+        }
+    }
+    for (const std::pair<int, std::vector<std::string>> &product : steam_product_paths)
+    {
+        HKEY key;
+        DWORD value_type;
+        DWORD value_length;
+        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, (LPCWSTR)epi::UTF8ToWString(epi::StringFormat("%s%d", kSteamRegistryPath, product.first)).c_str(), 0, KEY_READ, &key) == ERROR_SUCCESS)
+        {
+            if (RegQueryValueExW(key, kSteamRegistrySubPath, NULL, &value_type, NULL, &value_length) == ERROR_SUCCESS && value_type == REG_SZ)
+            {
+                std::wstring value;
+                value.resize(value_length);
+                if (RegQueryValueExW(key, kSteamRegistrySubPath, NULL, &value_type, (LPBYTE)value.data(), &value_length) == ERROR_SUCCESS)
+                {
+                    std::string utf8_value = epi::WStringToUTF8(value);
+                    if (!utf8_value.empty())
+                    {
+                        for (const std::string &folder : product.second)
+                            paths.push_back(epi::PathAppend(utf8_value, folder));
+                    }
+                }
+            }
+            RegCloseKey(key);
+        }
+    }
+#else
+    const char *check = SDL_getenv("XDG_DATA_HOME");
+    if (check)
+    {
+        paths.push_back(epi::PathAppend(check, "games/doom"));
+    }
+    check = SDL_getenv("XDG_DATA_DIRS");
+    if (check)
+    {
+        for (const std::string &dir : epi::SeparatedStringVector(check, ':'))
+            paths.push_back(epi::PathAppend(dir, "games/doom"));
+    }
+    else
+    {
+        paths.push_back("/usr/local/share/games/doom");
+        paths.push_back("/usr/local/share/doom");
+        paths.push_back("/usr/share/games/doom");
+        paths.push_back("/usr/share/doom");
+    }
+#endif
+}
+
 //
 // Adds main game content and edge_defs folder/EPK
 //
 static void IdentifyVersion(void)
 {
-    // For env checks
-    const char *check = nullptr;
-
     if (epi::IsDirectory(epkfile))
         AddDataFile(epkfile, kFileKindEFolder);
     else
@@ -1405,8 +1539,6 @@ static void IdentifyVersion(void)
     // Check -iwad parameter, find out if it is the IWADs directory
     std::string              iwad_par;
     std::string              iwad_file;
-    std::string              iwad_dir;
-    std::vector<std::string> iwad_dir_vector;
 
     std::string s = ArgumentValue("iwad");
 
@@ -1538,31 +1670,9 @@ static void IdentifyVersion(void)
         }
     }
 
-    // If we haven't yet set the IWAD directory, then we check
-    // the DOOMWADDIR environment variable
-    check = SDL_getenv("DOOMWADDIR");
-    if (check)
-        s = check;
-
-    if (!s.empty() && epi::IsDirectory(s))
-        iwad_dir_vector.push_back(s);
-
-    // Should the IWAD directory not be set by now, then we
-    // use our standby option of the home directory.
-    if (iwad_dir.empty())
-        iwad_dir = home_directory;
-
-    // Add DOOMWADPATH directories if they exist
-    s.clear();
-    check = SDL_getenv("DOOMWADPATH");
-    if (check)
-        s = check;
-
-    if (!s.empty())
-    {
-        for (const std::string &dir : epi::SeparatedStringVector(s, ':'))
-            iwad_dir_vector.push_back(dir);
-    }
+    std::vector<std::string> iwad_paths = load_file_search_paths;
+    // Append the normal search list with iwad-specific paths
+    CollectInstallSearchPaths(iwad_paths);
 
     // Should the IWAD Parameter not be empty then it means
     // that one was given which is not a directory. Therefore
@@ -1579,24 +1689,16 @@ static void IdentifyVersion(void)
             epi::ReplaceExtension(fn, ".wad");
         }
 
-        // If no directory given use the IWAD directory
-        std::string dir = epi::GetDirectory(fn);
-        if (dir.empty())
-            iwad_file = epi::PathAppend(iwad_dir, fn);
-        else
-            iwad_file = fn;
+        iwad_file = fn;
 
         if (!epi::TestFileAccess(iwad_file))
         {
             // Check DOOMWADPATH directories if present
-            if (!iwad_dir_vector.empty())
+            for (size_t i = 0; i < iwad_paths.size(); i++)
             {
-                for (size_t i = 0; i < iwad_dir_vector.size(); i++)
-                {
-                    iwad_file = epi::PathAppend(iwad_dir_vector[i], fn);
-                    if (epi::TestFileAccess(iwad_file))
-                        goto foundindoomwadpath;
-                }
+                iwad_file = epi::PathAppend(iwad_paths[i], fn);
+                if (epi::TestFileAccess(iwad_file))
+                    goto foundindoomwadpath;
             }
         }
         else
@@ -1609,18 +1711,13 @@ static void IdentifyVersion(void)
         if (!epi::TestFileAccess(iwad_file))
         {
             // Check DOOMWADPATH directories if present
-            if (!iwad_dir_vector.empty())
+            for (size_t i = 0; i < iwad_paths.size(); i++)
             {
-                for (size_t i = 0; i < iwad_dir_vector.size(); i++)
-                {
-                    iwad_file = epi::PathAppend(iwad_dir_vector[i], fn);
-                    if (epi::TestFileAccess(iwad_file))
-                        goto foundindoomwadpath;
-                }
-                FatalError("IdentifyVersion: Unable to access specified '%s'", fn.c_str());
+                iwad_file = epi::PathAppend(iwad_paths[i], fn);
+                if (epi::TestFileAccess(iwad_file))
+                    goto foundindoomwadpath;
             }
-            else
-                FatalError("IdentifyVersion: Unable to access specified '%s'", fn.c_str());
+            FatalError("IdentifyVersion: Unable to access specified '%s'", fn.c_str());
         }
 
     foundindoomwadpath:
@@ -1663,27 +1760,10 @@ static void IdentifyVersion(void)
         std::vector<SDL_MessageBoxButtonData>                     game_buttons;
         std::unordered_map<int, std::pair<std::string, FileKind>> game_paths;
 
-        int max = 1;
-
-        if (iwad_dir.compare(game_directory) != 0)
+        for (size_t i = 0; i < iwad_paths.size(); i++)
         {
-            // IWAD directory & game directory differ
-            // therefore do a second loop which will
-            // mean we check both.
-            max++;
-        }
+            location = iwad_paths[i].c_str();
 
-        for (int i = 0; i < max; i++)
-        {
-            location = (i == 0 ? iwad_dir : game_directory);
-
-            //
-            // go through the available *.wad files, attempting IWAD
-            // detection for each, adding the file if they exist.
-            //
-            // -ACB- 2000/06/08 Quit after we found a file - don't load
-            //                  more than one IWAD
-            //
             std::vector<epi::DirectoryEntry> fsd;
 
             if (!ReadDirectory(fsd, location, "*.wad"))
@@ -1734,116 +1814,6 @@ static void IdentifyVersion(void)
                                 temp_button.buttonid = test_score;
                                 temp_button.text     = game_checker[test_score].display_name;
                                 game_buttons.push_back(temp_button);
-                            }
-                        }
-                    }
-                }
-            }
-            // Check directories (only at top level of home/game directory)
-            if (ReadDirectory(fsd, location, "*.*"))
-            {
-                for (size_t j = 0; j < fsd.size(); j++)
-                {
-                    if (fsd[j].is_dir)
-                    {
-                        int test_score = CheckPackForGameFiles(fsd[j].name, kFileKindIFolder);
-                        if (test_score >= 0)
-                        {
-                            if (!game_paths.count(test_score))
-                            {
-                                game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, kFileKindIFolder));
-                                SDL_MessageBoxButtonData temp_button;
-                                temp_button.buttonid = test_score;
-                                temp_button.text     = game_checker[test_score].display_name;
-                                game_buttons.push_back(temp_button);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Separate check for DOOMWADPATH stuff if it exists - didn't want to
-        // mess with the existing stuff above
-
-        if (!iwad_dir_vector.empty())
-        {
-            for (size_t i = 0; i < iwad_dir_vector.size(); i++)
-            {
-                location = iwad_dir_vector[i].c_str();
-
-                std::vector<epi::DirectoryEntry> fsd;
-
-                if (!ReadDirectory(fsd, location, "*.wad"))
-                {
-                    LogDebug("IdentifyVersion: No WADs found in '%s' directory!\n", location.c_str());
-                }
-                else
-                {
-                    for (size_t j = 0; j < fsd.size(); j++)
-                    {
-                        if (!fsd[j].is_dir)
-                        {
-                            epi::File *game_test =
-                                epi::FileOpen(fsd[j].name, epi::kFileAccessRead | epi::kFileAccessBinary);
-                            int test_score = CheckForUniqueGameLumps(game_test);
-                            delete game_test;
-                            if (test_score >= 0)
-                            {
-                                if (!game_paths.count(test_score))
-                                {
-                                    game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, kFileKindIWAD));
-                                    SDL_MessageBoxButtonData temp_button;
-                                    temp_button.buttonid = test_score;
-                                    temp_button.text     = game_checker[test_score].display_name;
-                                    game_buttons.push_back(temp_button);
-                                }
-                            }
-                        }
-                    }
-                }
-                if (!ReadDirectory(fsd, location, "*.epk"))
-                {
-                    LogDebug("IdentifyVersion: No EPKs found in '%s' directory!\n", location.c_str());
-                }
-                else
-                {
-                    for (size_t j = 0; j < fsd.size(); j++)
-                    {
-                        if (!fsd[j].is_dir)
-                        {
-                            int test_score = CheckPackForGameFiles(fsd[j].name, kFileKindIPK);
-                            if (test_score >= 0)
-                            {
-                                if (!game_paths.count(test_score))
-                                {
-                                    game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, kFileKindIPK));
-                                    SDL_MessageBoxButtonData temp_button;
-                                    temp_button.buttonid = test_score;
-                                    temp_button.text     = game_checker[test_score].display_name;
-                                    game_buttons.push_back(temp_button);
-                                }
-                            }
-                        }
-                    }
-                }
-                if (ReadDirectory(fsd, location, "*.*"))
-                {
-                    for (size_t j = 0; j < fsd.size(); j++)
-                    {
-                        if (fsd[j].is_dir)
-                        {
-                            int test_score = CheckPackForGameFiles(fsd[j].name, kFileKindIFolder);
-                            if (test_score >= 0)
-                            {
-                                if (!game_paths.count(test_score))
-                                {
-                                    game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, kFileKindIFolder));
-                                    SDL_MessageBoxButtonData temp_button;
-                                    temp_button.buttonid = test_score;
-                                    temp_button.text     = game_checker[test_score].display_name;
-                                    game_buttons.push_back(temp_button);
-                                }
                             }
                         }
                     }
@@ -2005,8 +1975,11 @@ static void SetupLogAndDebugFiles(void)
     }
 }
 
-static void AddSingleCommandLineFile(const std::string &name, bool ignore_unknown)
+static void AddSingleCommandLineFile(const std::string &name, bool ignore_unknown, bool try_extensions = false)
 {
+    if (name == "$@") // part of our installed Linux launch script; need to catch
+        return;
+
     if (epi::IsDirectory(name))
     {
         AddDataFile(name, kFileKindFolder);
@@ -2032,21 +2005,57 @@ static void AddSingleCommandLineFile(const std::string &name, bool ignore_unknow
         kind = kFileKindDDF;
     else if (ext == ".deh" || ext == ".bex")
         kind = kFileKindDehacked;
-    else
+    else if (!ext.empty() || !try_extensions)
     {
         if (!ignore_unknown)
             FatalError("unknown file type: %s\n", name.c_str());
         return;
     }
 
-    std::string filename = epi::PathAppendIfNotAbsolute(game_directory, name);
-    AddDataFile(filename, kind);
+    if (!epi::TestFileAccess(name))
+    {
+        for (size_t i = 0; i < load_file_search_paths.size(); i++)
+        {
+            std::string test = epi::PathAppend(load_file_search_paths[i], name);
+            if (epi::TestFileAccess(test))
+            {
+                AddDataFile(test, kind);
+                return;
+            }
+            else if (ext.empty() && try_extensions)
+            {
+                static const std::vector<std::pair<std::string, FileKind>> supported_types = 
+                {
+                    {".wad", kFileKindPWAD},
+                    {".pk3", kFileKindEPK},
+                    {".epk", kFileKindEPK},
+                    {".zip", kFileKindEPK},
+                    {".rts", kFileKindRTS},
+                    {".ddf", kFileKindDDF},
+                    {".ldf", kFileKindDDF},
+                    {".deh", kFileKindDehacked},
+                    {".bex", kFileKindDehacked}
+                };
+
+                for (const std::pair<std::string, FileKind> &type : supported_types)
+                {
+                    epi::ReplaceExtension(test, type.first);
+                    if (epi::TestFileAccess(test))
+                    {
+                        AddDataFile(test, type.second);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+    else
+        AddDataFile(name, kind);
 }
 
 static void AddCommandLineFiles(void)
 {
     // first handle "loose" files (arguments before the first option)
-
     int p;
 
     for (p = 1; p < int(program_argument_list.size()) && !ArgumentIsOption(p); p++)
@@ -2054,102 +2063,18 @@ static void AddCommandLineFiles(void)
         AddSingleCommandLineFile(program_argument_list[p], false);
     }
 
-    // next handle the -file option (we allow multiple uses)
+    // next handle the -file option (we allow multiple consecutive uses)
 
     p = FindArgument("file");
 
     while (p > 0 && p < int(program_argument_list.size()) &&
            (!ArgumentIsOption(p) || epi::StringCompare(program_argument_list[p], "-file") == 0))
     {
-        // the parms after p are wadfile/lump names,
         // go until end of parms or another '-' preceded parm
         if (!ArgumentIsOption(p))
-            AddSingleCommandLineFile(program_argument_list[p], false);
+            AddSingleCommandLineFile(program_argument_list[p], false, true);
 
         p++;
-    }
-
-    // scripts....
-
-    p = FindArgument("script");
-
-    while (p > 0 && p < int(program_argument_list.size()) &&
-           (!ArgumentIsOption(p) || epi::StringCompare(program_argument_list[p], "-script") == 0))
-    {
-        // the parms after p are script filenames,
-        // go until end of parms or another '-' preceded parm
-        if (!ArgumentIsOption(p))
-        {
-            std::string ext = epi::GetExtension(program_argument_list[p]);
-            // sanity check...
-            if (epi::StringCaseCompareASCII(ext, ".wad") == 0 || epi::StringCaseCompareASCII(ext, ".pk3") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".zip") == 0 || epi::StringCaseCompareASCII(ext, ".epk") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".ddf") == 0 || epi::StringCaseCompareASCII(ext, ".deh") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".bex") == 0)
-            {
-                FatalError("Illegal filename for -script: %s\n", program_argument_list[p].c_str());
-            }
-
-            std::string filename = epi::PathAppendIfNotAbsolute(game_directory, program_argument_list[p]);
-            AddDataFile(filename, kFileKindRTS);
-        }
-
-        p++;
-    }
-
-    // dehacked/bex....
-
-    p = FindArgument("deh");
-
-    while (p > 0 && p < int(program_argument_list.size()) &&
-           (!ArgumentIsOption(p) || epi::StringCompare(program_argument_list[p], "-deh") == 0))
-    {
-        // the parms after p are Dehacked/BEX filenames,
-        // go until end of parms or another '-' preceded parm
-        if (!ArgumentIsOption(p))
-        {
-            std::string ext = epi::GetExtension(program_argument_list[p]);
-            // sanity check...
-            if (epi::StringCaseCompareASCII(ext, ".wad") == 0 || epi::StringCaseCompareASCII(ext, ".epk") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".pk3") == 0 || epi::StringCaseCompareASCII(ext, ".zip") == 0 ||
-                epi::StringCaseCompareASCII(ext, ".ddf") == 0 || epi::StringCaseCompareASCII(ext, ".rts") == 0)
-            {
-                FatalError("Illegal filename for -deh: %s\n", program_argument_list[p].c_str());
-            }
-
-            std::string filename = epi::PathAppendIfNotAbsolute(game_directory, program_argument_list[p]);
-            AddDataFile(filename, kFileKindDehacked);
-        }
-
-        p++;
-    }
-
-    // directories....
-
-    p = FindArgument("dir");
-
-    while (p > 0 && p < int(program_argument_list.size()) &&
-           (!ArgumentIsOption(p) || epi::StringCompare(program_argument_list[p], "-dir") == 0))
-    {
-        // the parms after p are directory names,
-        // go until end of parms or another '-' preceded parm
-        if (!ArgumentIsOption(p))
-        {
-            std::string dirname = epi::PathAppendIfNotAbsolute(game_directory, program_argument_list[p]);
-            AddDataFile(dirname, kFileKindFolder);
-        }
-
-        p++;
-    }
-
-    // handle -ddf option (backwards compatibility)
-
-    std::string ps = ArgumentValue("ddf");
-
-    if (!ps.empty())
-    {
-        std::string filename = epi::PathAppendIfNotAbsolute(game_directory, ps);
-        AddDataFile(filename, kFileKindFolder);
     }
 }
 
@@ -2287,6 +2212,7 @@ static void EdgeStartup(void)
 
     epi::Initialize();
     InitializeDDF();
+    CollectSearchPaths();
     IdentifyVersion();
     AddBasePack();
     AddAutoload();

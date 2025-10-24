@@ -59,7 +59,6 @@ void ParseArguments(const int argc, const char *const *argv)
     EPI_UNUSED(argv);
 
     int       win_argc = 0;
-    size_t    i;
     wchar_t **win_argv = CommandLineToArgvW(GetCommandLineW(), &win_argc);
 
     if (!win_argv)
@@ -69,7 +68,7 @@ void ParseArguments(const int argc, const char *const *argv)
 
     std::vector<std::string> argv_block;
 
-    for (i = 0; i < win_argc; i++)
+    for (int i = 0; i < win_argc; i++)
     {
         EPI_ASSERT(win_argv[i] != nullptr);
         argv_block.push_back(epi::WStringToUTF8(win_argv[i]));
@@ -77,7 +76,7 @@ void ParseArguments(const int argc, const char *const *argv)
 
     LocalFree(win_argv);
 
-    for (i = 0; i < argv_block.size(); i++)
+    for (size_t i = 0; i < argv_block.size(); i++)
     {
         // Just place argv[0] as is
         if (i == 0)

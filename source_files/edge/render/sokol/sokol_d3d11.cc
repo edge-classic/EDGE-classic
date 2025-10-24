@@ -158,15 +158,6 @@ static inline HRESULT _sapp_dxgi_Present(IDXGISwapChain *self, UINT SyncInterval
 #endif
 }
 
-static inline HRESULT _sapp_dxgi_GetFrameStatistics(IDXGISwapChain *self, DXGI_FRAME_STATISTICS *pStats)
-{
-#if defined(__cplusplus)
-    return self->GetFrameStatistics(pStats);
-#else
-    return self->lpVtbl->GetFrameStatistics(self, pStats);
-#endif
-}
-
 static inline HRESULT _sapp_dxgi_SetMaximumFrameLatency(IDXGIDevice1 *self, UINT MaxLatency)
 {
 #if defined(__cplusplus)

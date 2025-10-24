@@ -2,6 +2,7 @@
 
 [ENGLISH]
 
+MenuPreferredGame="Preferred Game";
 MenuSkill="Choose Difficulty:";
 MenuDifficulty1="Easy Does It";
 MenuDifficulty2="Not So Sticky";

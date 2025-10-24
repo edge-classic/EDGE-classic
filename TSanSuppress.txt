@@ -28,8 +28,11 @@
 called_from_lib:libgallium*
 
 # Usually triggered on shutdown on Linux; like
-# the above, not sure if it can be addressed
+# the above, not sure if they can be addressed
 deadlock:libdbus-1*
+deadlock:libX11*
+deadlock:libGLX*
+deadlock:libxcb*
 
 ##################################################
 # Ignore

@@ -2176,7 +2176,7 @@ void RenderTrueBSP(void)
 
     draw_subsector_list.clear();
 
-    render_backend->SetupMatrices3D();
+    render_backend->SetRenderLayer(kRenderLayerSolid, false);
     render_state->Clear(GL_DEPTH_BUFFER_BIT);
     render_state->Enable(GL_DEPTH_TEST);
 
@@ -2204,23 +2204,19 @@ void RenderTrueBSP(void)
     }
 
     if (v_player && v_player->ready_weapon_ >= 0)
-    {
-        render_backend->SetRenderLayer(kRenderLayerViewport);
-
+    {        
         PlayerSprite *psp = &v_player->player_sprites_[kPlayerSpriteWeapon];
 
         if (psp->state != 0)
         {
             if (!(psp->state->flags & kStateFrameFlagModel))
             {
-#ifndef EDGE_SOKOL
-                render_backend->SetupWorldMatrices2D();
-#endif
+                render_backend->SetRenderLayer(kRenderLayerViewport);
                 render_state->Disable(GL_DEPTH_TEST);
                 RenderWeaponSprites(v_player);
                 RendererColourmapEffect(v_player);
                 RendererPaletteEffect(v_player);
-                render_backend->SetupMatrices2D();
+                render_backend->SetRenderLayer(kRenderLayerHUD);
                 RenderCrosshair(v_player);
             }
             else
@@ -2228,50 +2224,45 @@ void RenderTrueBSP(void)
                 bool FlashFirst = v_player->weapons_[v_player->ready_weapon_].info->render_invert_;
                 if (!FlashFirst)
                 {
-                    render_backend->SetupMatrices3D();
+                    render_backend->SetRenderLayer(kRenderLayerSolid);
                     render_state->Clear(GL_DEPTH_BUFFER_BIT);
                     RenderWeaponModel(v_player);
                 }
-                render_backend->SetupWorldMatrices2D();
+                render_backend->SetRenderLayer(kRenderLayerViewport);
                 render_state->Disable(GL_DEPTH_TEST);
                 RenderWeaponSprites(v_player);
                 RendererColourmapEffect(v_player);
                 RendererPaletteEffect(v_player);
-                render_backend->SetupMatrices2D();
+                render_backend->SetRenderLayer(kRenderLayerHUD);
                 RenderCrosshair(v_player);
                 if (FlashFirst)
                 {
-                    render_backend->SetupMatrices3D();
+                    render_backend->SetRenderLayer(kRenderLayerSolid);
                     render_state->Enable(GL_DEPTH_TEST);
                     render_state->Clear(GL_DEPTH_BUFFER_BIT);
                     RenderWeaponModel(v_player);
                     render_state->Disable(GL_DEPTH_TEST);
-                    render_backend->SetupMatrices2D();
+                    render_backend->SetRenderLayer(kRenderLayerHUD);
                 }
             }
         }
         else
         {
-#ifndef EDGE_SOKOL
-            render_backend->SetupWorldMatrices2D();
-#endif
+            render_backend->SetRenderLayer(kRenderLayerViewport);
             render_state->Disable(GL_DEPTH_TEST);
             RendererColourmapEffect(v_player);
             RendererPaletteEffect(v_player);
-            render_backend->SetupMatrices2D();
+            render_backend->SetRenderLayer(kRenderLayerHUD);
             RenderCrosshair(v_player);
         }
     }
     else if (v_player)
     {
         render_backend->SetRenderLayer(kRenderLayerViewport);
-#ifndef EDGE_SOKOL
-        render_backend->SetupWorldMatrices2D();
-#endif
         render_state->Disable(GL_DEPTH_TEST);
         RendererColourmapEffect(v_player);
         RendererPaletteEffect(v_player);
-        render_backend->SetupMatrices2D();
+        render_backend->SetRenderLayer(kRenderLayerHUD);
         RenderCrosshair(v_player);
     }
 }

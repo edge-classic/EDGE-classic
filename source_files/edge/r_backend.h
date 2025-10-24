@@ -43,15 +43,6 @@ struct FrameStats
 class RenderBackend
 {
   public:
-    // Setup the GL matrices for drawing 2D stuff.
-    virtual void SetupMatrices2D() = 0;
-
-    // Setup the GL matrices for drawing 2D stuff within the "world" rendered by
-    // HUDRenderWorld
-    virtual void SetupWorldMatrices2D() = 0;
-
-    // Setup the GL matrices for drawing 3D stuff.
-    virtual void SetupMatrices3D() = 0;
 
     virtual void SetClearColor(RGBAColor color) = 0;
 
@@ -116,6 +107,17 @@ class RenderBackend
     bool    units_locked_ = false;
 
     std::vector<FrameFinishedCallback> on_frame_finished_;
+
+    // Setup the GL matrices for drawing 2D stuff.
+    virtual void SetupMatrices2D() = 0;
+
+    // Setup the GL matrices for drawing 2D stuff within the "world" rendered by
+    // HUDRenderWorld
+    virtual void SetupWorldMatrices2D() = 0;
+
+    // Setup the GL matrices for drawing 3D stuff.
+    virtual void SetupMatrices3D() = 0;
+
 };
 
 extern RenderBackend *render_backend;

@@ -78,33 +78,31 @@
 #include "w_files.h"
 #include "w_texture.h"
 
-#define EDGE_ENABLE_STRIFE 0
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(preferred_game, "17", kConsoleVariableFlagArchive, 1, 19)
 
 // Combination of unique lumps needed to best identify an IWAD
 const std::vector<GameCheck> game_checker = {{
-    {"Custom", "custom", {"EDGEGAME", "EDGEGAME"}},
-    {"Blasphemer", "blasphemer", {"BLASPHEM", "E1M1"}},
-    {"Freedoom 1", "freedoom1", {"FREEDOOM", "E1M1"}},
-    {"Freedoom 2", "freedoom2", {"FREEDOOM", "MAP01"}},
-    {"REKKR", "rekkr", {"REKCREDS", "E1M1"}},
-    {"HacX", "hacx", {"HACX-R", "MAP01"}},
-    {"Harmony", "harmony", {"0HAWK01", "DBIGFONT"}},         // Original Harmony Release
-    {"Harmony Compat", "harmonyc", {"0HAWK01", "DMAPINFO"}}, // Harmony Compatible Release
-    {"Chex Quest 3M", "chex3vm", {"ENDOOM", "MAP01"}},       // Chex Quest 3: Vanilla Edition
+    {20, "Custom", "custom", {"EDGEGAME", "EDGEGAME"}},
+    {10, "Blasphemer", "blasphemer", {"BLASPHEM", "E1M1"}},
+    {14, "Freedoom 1", "freedoom1", {"FREEDOOM", "E1M1"}},
+    {17, "Freedoom 2", "freedoom2", {"FREEDOOM", "MAP01"}},
+    {9, "REKKR", "rekkr", {"REKCREDS", "E1M1"}},
+    {6, "HacX", "hacx", {"HACX-R", "MAP01"}},
+    {5, "Harmony", "harmony", {"0HAWK01", "DBIGFONT"}},         // Original Harmony Release
+    {8, "Harmony Compatible", "harmonyc", {"0HAWK01", "DMAPINFO"}}, // Harmony Compatible Release
+    {3, "Chex Quest 3 (Doom 2 base)", "chex3vm", {"ENDOOM", "MAP01"}},       // Chex Quest 3: Vanilla Edition
                                                              // Modder/Doom 2 Base
-    {"Chex Quest 3", "chex3v", {"ENDOOM", "BOSSBACK"}},      // Chex Quest 3: Vanilla Edition
-    {"Chex Quest 1", "chex1", {"ENDOOM", "E4M1"}},
-    {"Heretic", "heretic", {"MUS_E1M1", "E1M1"}},
-    {"Plutonia", "plutonia", {"CAMO1", "MAP01"}},
-    {"Evilution", "tnt", {"REDTNT2", "MAP01"}},
-    {"Doom", "doom", {"BFGGA0", "E2M1"}},
-    {"Doom BFG", "doom", {"DMENUPIC", "M_MULTI"}},
-    {"Doom Demo", "doom1", {"SHOTA0", "E1M1"}},
-    {"Doom II", "doom2", {"BFGGA0", "MAP01"}},
-    {"Doom II BFG", "doom2", {"DMENUPIC", "MAP33"}},
-#if EDGE_ENABLE_STRIFE
-    {"Strife", "strife", {"VELLOGO", "RGELOGO"}} // Dev/internal use - Definitely nowhwere near playable
-#endif
+    {7, "Chex Quest 3", "chex3v", {"ENDOOM", "BOSSBACK"}},      // Chex Quest 3: Vanilla Edition
+    {4, "Chex Quest 1", "chex1", {"ENDOOM", "E4M1"}},
+    {11, "Heretic", "heretic", {"MUS_E1M1", "E1M1"}},
+    {12, "Plutonia", "plutonia", {"CAMO1", "MAP01"}},
+    {13, "Evilution", "tnt", {"REDTNT2", "MAP01"}},
+    {16, "Doom", "doom", {"BFGGA0", "E2M1"}},
+    {15, "Doom BFG", "doom", {"DMENUPIC", "M_MULTI"}},
+    {2, "Doom Demo", "doom1", {"SHOTA0", "E1M1"}},
+    {19, "Doom II", "doom2", {"BFGGA0", "MAP01"}},
+    {18, "Doom II BFG", "doom2", {"DMENUPIC", "MAP33"}},
+    {1, "Strife", "strife", {"VELLOGO", "RGELOGO"}} // Dev/internal use - Definitely nowhwere near playable
 }};
 
 class WadFile

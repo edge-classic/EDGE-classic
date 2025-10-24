@@ -27,8 +27,11 @@
 
 #include <vector>
 
+#include "con_var.h"
 #include "dm_defs.h"
 #include "epi_file.h"
+
+extern ConsoleVariable preferred_game;
 
 class DataFile;
 struct WadTextureResource
@@ -42,7 +45,11 @@ struct WadTextureResource
 
 struct GameCheck
 {
-    // Friendly string for selector dialog box (if multiple games found)
+    // Preferential scoring used for automatic IWAD selection when none
+    // are specified via params/CVAR
+    uint8_t score;
+
+    // Friendly string for Preferred IWAD menu option
     // TODO: Read EDGEGAME file/lump for custom friendly title
     const char *display_name;
 

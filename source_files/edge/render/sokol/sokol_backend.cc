@@ -33,7 +33,7 @@ constexpr int32_t kContextMaxCommand = 2 * 1024;
 
 class SokolRenderBackend : public RenderBackend
 {
-  public:
+  protected:
     void SetupMatrices2D()
     {
         sgl_viewport(0, 0, current_screen_width, current_screen_height, false);
@@ -79,6 +79,8 @@ class SokolRenderBackend : public RenderBackend
         sgl_rotate(sgl_rad(90.0f) - epi::RadiansFromBAM(view_angle), 0.0f, 0.0f, 1.0f);
         sgl_translate(-view_x, -view_y, -view_z);
     }
+
+    public:
 
     void StartFrame(int32_t width, int32_t height)
     {

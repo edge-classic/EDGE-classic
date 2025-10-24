@@ -9,6 +9,9 @@
 #include "r_misc.h"
 #include "r_modes.h"
 
+
+void SetupSkyMatrices(void);
+
 static inline const char *SafeStr(const void *s)
 {
     return s ? (const char *)s : "";
@@ -16,7 +19,7 @@ static inline const char *SafeStr(const void *s)
 
 class GLRenderBackend : public RenderBackend
 {
-  public:
+  private:
     void SetupMatrices2D()
     {
         glViewport(0, 0, current_screen_width, current_screen_height);
@@ -63,6 +66,8 @@ class GLRenderBackend : public RenderBackend
         glRotatef(90.0f - epi::DegreesFromBAM(view_angle), 0.0f, 0.0f, 1.0f);
         glTranslatef(-view_x, -view_y, -view_z);
     }
+
+    public:
 
     // CheckExtensions - Based on code by Bruce Lewis.
     void CheckExtensions()
@@ -155,8 +160,27 @@ class GLRenderBackend : public RenderBackend
 
     void SetRenderLayer(RenderLayer layer, bool clear_depth = false)
     {
-        EPI_UNUSED(layer);
-        EPI_UNUSED(clear_depth);
+        if (layer == kRenderLayerHUD)
+        {
+            SetupMatrices2D();
+        }
+        else if (layer == kRenderLayerSky)
+        {
+            SetupSkyMatrices();
+        }
+        else if (layer == kRenderLayerViewport)
+        {
+            SetupWorldMatrices2D();
+        }
+        else
+        {
+            SetupMatrices3D();
+        }
+
+        if (clear_depth)
+        {
+            glClear(GL_DEPTH_BUFFER_BIT);
+        }
     }
 
     RenderLayer GetRenderLayer()

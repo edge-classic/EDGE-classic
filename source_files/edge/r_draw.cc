@@ -34,7 +34,7 @@
 void NewScreenSize()
 {
 
-    render_backend->SetupMatrices2D();
+    render_backend->SetRenderLayer(kRenderLayerHUD);
 
     // prevent a visible border with certain cards/drivers
     render_state->ClearColor(kRGBATransparent);

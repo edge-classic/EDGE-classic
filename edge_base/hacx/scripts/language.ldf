@@ -10,6 +10,7 @@ MenuDifficulty2="Arrgh, I Need Health!";
 MenuDifficulty3="Let's Rip Them Apart!";
 MenuDifficulty4="I Am Immortal";
 MenuDifficulty5="INSANITY!";
+MenuPreferredGame="Preferred Game";
 EndGameCheck = "are you insane or maladjusted?\n"
   "Well? Yes or No!     ";
 GotArmourHelmet = "You grab a Dampener!    ";

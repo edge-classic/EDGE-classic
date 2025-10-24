@@ -113,7 +113,10 @@ std::string CurrentDirectoryGet()
     std::string    directory;
     const wchar_t *dir = _wgetcwd(nullptr, 0);
     if (dir)
+    {
         directory = epi::WStringToUTF8(dir);
+        free(dir);
+    }
     return directory; // can be empty
 }
 bool IsDirectory(std::string_view dir)
@@ -295,9 +298,12 @@ bool FileDelete(std::string_view name)
 std::string CurrentDirectoryGet()
 {
     std::string directory;
-    const char *dir = getcwd(nullptr, 0);
+    char *dir = getcwd(nullptr, 0);
     if (dir)
+    {
         directory = dir;
+        free(dir);
+    }
     return directory;
 }
 #endif

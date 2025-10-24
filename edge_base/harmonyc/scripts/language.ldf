@@ -11,6 +11,7 @@ MenuDifficulty2="Easy";
 MenuDifficulty3="Medium";
 MenuDifficulty4="Hard";
 MenuDifficulty5="Very Hard";
+MenuPreferredGame="Preferred Game";
 
 OB_Generic  = "%o was killed by %k.";
 

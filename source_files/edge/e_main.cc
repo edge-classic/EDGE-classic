@@ -1570,7 +1570,7 @@ static void IdentifyVersion(void)
         // drag-and-drop for valid IWADs Remove them from the arg list if they
         // are valid to avoid them potentially being added as PWADs
         uint8_t best_score = 0;
-        GameCheck best_game;
+        const GameCheck *best_game = nullptr;
         std::string best_path;
         FileKind best_kind = kFileKindIWAD;
         for (size_t p = 1; p < program_argument_list.size() && !ArgumentIsOption(p); p++)
@@ -1584,15 +1584,15 @@ static void IdentifyVersion(void)
                 {
                     if (test_index == 0 || test_index == preferred_game.d_)
                     {
-                        best_game = game_checker[test_index];
-                        best_score = best_game.score;
+                        best_game = &game_checker[test_index];
+                        best_score = best_game->score;
                         best_path = dnd;
                         best_kind = kFileKindIFolder;
                     }
                     else if (game_checker[test_index].score > best_score && best_score != game_checker[preferred_game.d_].score)
                     {
-                        best_game = game_checker[test_index];
-                        best_score = best_game.score;
+                        best_game = &game_checker[test_index];
+                        best_score = best_game->score;
                         best_path = dnd;
                         best_kind = kFileKindIFolder;
                     }
@@ -1606,15 +1606,15 @@ static void IdentifyVersion(void)
                 {
                     if (test_index == 0 || test_index == preferred_game.d_)
                     {
-                        best_game = game_checker[test_index];
-                        best_score = best_game.score;
+                        best_game = &game_checker[test_index];
+                        best_score = best_game->score;
                         best_path = dnd;
                         best_kind = kFileKindIPK;
                     }
                     else if (game_checker[test_index].score > best_score && best_score != game_checker[preferred_game.d_].score)
                     {
-                        best_game = game_checker[test_index];
-                        best_score = best_game.score;
+                        best_game = &game_checker[test_index];
+                        best_score = best_game->score;
                         best_path = dnd;
                         best_kind = kFileKindIPK;
                     }
@@ -1630,15 +1630,15 @@ static void IdentifyVersion(void)
                 {
                     if (test_index == 0 || test_index == preferred_game.d_)
                     {
-                        best_game = game_checker[test_index];
-                        best_score = best_game.score;
+                        best_game = &game_checker[test_index];
+                        best_score = best_game->score;
                         best_path = dnd;
                         best_kind = kFileKindIWAD;
                     }
                     else if (game_checker[test_index].score > best_score && best_score != game_checker[preferred_game.d_].score)
                     {
-                        best_game = game_checker[test_index];
-                        best_score = best_game.score;
+                        best_game = &game_checker[test_index];
+                        best_score = best_game->score;
                         best_path = dnd;
                         best_kind = kFileKindIWAD;
                     }
@@ -1646,9 +1646,9 @@ static void IdentifyVersion(void)
                 }
             }
         }
-        if (best_score > 0)
+        if (best_game && best_score > 0)
         {
-            game_base = best_game.base;
+            game_base = best_game->base;
             AddDataFile(best_path, best_kind);
             LogDebug("GAME BASE = [%s]\n", game_base.c_str());
             return;
@@ -1741,7 +1741,7 @@ static void IdentifyVersion(void)
     else
     {
         uint8_t best_score = 0;
-        GameCheck best_game;
+        const GameCheck *best_game = nullptr;
         std::string best_path;
         FileKind best_kind = kFileKindIWAD;
 
@@ -1767,15 +1767,15 @@ static void IdentifyVersion(void)
                         {
                             if (test_index == 0 || test_index == preferred_game.d_)
                             {
-                                best_game = game_checker[test_index];
-                                best_score = best_game.score;
+                                best_game = &game_checker[test_index];
+                                best_score = best_game->score;
                                 best_path = fsd[j].name;
                                 best_kind = kFileKindIWAD;
                             }
                             else if (game_checker[test_index].score > best_score && best_score != game_checker[preferred_game.d_].score)
                             {
-                                best_game = game_checker[test_index];
-                                best_score = best_game.score;
+                                best_game = &game_checker[test_index];
+                                best_score = best_game->score;
                                 best_path = fsd[j].name;
                                 best_kind = kFileKindIWAD;
                             }
@@ -1798,15 +1798,15 @@ static void IdentifyVersion(void)
                         {
                             if (test_index == 0 || test_index == preferred_game.d_)
                             {
-                                best_game = game_checker[test_index];
-                                best_score = best_game.score;
+                                best_game = &game_checker[test_index];
+                                best_score = best_game->score;
                                 best_path = fsd[j].name;
                                 best_kind = kFileKindIPK;
                             }
                             else if (game_checker[test_index].score > best_score && best_score != game_checker[preferred_game.d_].score)
                             {
-                                best_game = game_checker[test_index];
-                                best_score = best_game.score;
+                                best_game = &game_checker[test_index];
+                                best_score = best_game->score;
                                 best_path = fsd[j].name;
                                 best_kind = kFileKindIPK;
                             }
@@ -1816,11 +1816,11 @@ static void IdentifyVersion(void)
             }
         }
 
-        if (best_score == 0)
+        if (!best_game || best_score == 0)
             FatalError("IdentifyVersion: No IWADs or standalone packs found!\n");
         else
         {
-            game_base          = best_game.base;
+            game_base          = best_game->base;
             AddDataFile(best_path, best_kind);
         }            
     }
@@ -1955,7 +1955,7 @@ static void AddSingleCommandLineFile(const std::string &name, bool ignore_unknow
     if (ext == ".edm")
         FatalError("Demos are not supported\n");
 
-    FileKind kind;
+    FileKind kind = kFileKindInvalid;
 
     if (ext == ".wad")
         kind = kFileKindPWAD;
@@ -1979,7 +1979,7 @@ static void AddSingleCommandLineFile(const std::string &name, bool ignore_unknow
         for (size_t i = 0; i < load_file_search_paths.size(); i++)
         {
             std::string test = epi::PathAppend(load_file_search_paths[i], name);
-            if (epi::TestFileAccess(test))
+            if (epi::TestFileAccess(test) && kind != kFileKindInvalid)
             {
                 AddDataFile(test, kind);
                 return;
@@ -2011,7 +2011,7 @@ static void AddSingleCommandLineFile(const std::string &name, bool ignore_unknow
             }
         }
     }
-    else
+    else if (kind != kFileKindInvalid)
         AddDataFile(name, kind);
 }
 

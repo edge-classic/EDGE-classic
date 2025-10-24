@@ -11,6 +11,7 @@
 
 [ENGLISH]
 
+MenuPreferredGame="Preferred Game";
 MusicPrefix="MUS_";
 MenuDifficulty1="Whimpering Craven";
 MenuDifficulty2="Still a Novice";

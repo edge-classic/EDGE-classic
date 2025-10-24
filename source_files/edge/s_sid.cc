@@ -229,7 +229,7 @@ static ma_result ma_sid_read_pcm_frames(ma_sid *pSID, void *pFramesOut, ma_uint6
 
     if (format == ma_format_s16)
     {
-        cRSID_generateSound(pSID->SID, (unsigned char *)pFramesOut, (unsigned short)frameCount*2*sizeof(int16_t));
+        cRSID_generateSound(pSID->SID, (unsigned char *)pFramesOut, (unsigned short)frameCount * 2 * sizeof(int16_t));
         totalFramesRead = frameCount;
     }
     else

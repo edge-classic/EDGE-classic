@@ -1256,9 +1256,8 @@ void MenuDrawNewGame(void)
         else
             x = CenterMenuImage2(style, fontType, menu_new_game);
 
-        HUDStretchImage(x, 14 + style->definition_->text_[fontType].y_offset_,
-                        menu_new_game->ScaledWidth() * txtscale, menu_new_game->ScaledHeight() * txtscale,
-                        menu_new_game, 0.0, 0.0, colmap);
+        HUDStretchImage(x, 14 + style->definition_->text_[fontType].y_offset_, menu_new_game->ScaledWidth() * txtscale,
+                        menu_new_game->ScaledHeight() * txtscale, menu_new_game, 0.0, 0.0, colmap);
 
         // HUDDrawImage(x + style->definition_->text[fontType].x_offset,
         //	14 + style->definition_->text[fontType].y_offset, menu_new_game,
@@ -1278,9 +1277,8 @@ void MenuDrawNewGame(void)
                 x = CenterMenuImage2(style, fontType, menu_skill);
         }
         colmap = style->definition_->text_[fontType].colmap_;
-        HUDStretchImage(x, 38 + style->definition_->text_[fontType].y_offset_,
-                        menu_skill->ScaledWidth() * txtscale, menu_skill->ScaledHeight() * txtscale,
-                        menu_skill, 0.0, 0.0, colmap);
+        HUDStretchImage(x, 38 + style->definition_->text_[fontType].y_offset_, menu_skill->ScaledWidth() * txtscale,
+                        menu_skill->ScaledHeight() * txtscale, menu_skill, 0.0, 0.0, colmap);
 
         // HUDDrawImage(x + style->definition_->text[fontType].x_offset,
         //	38 + style->definition_->text[fontType].y_offset, menu_skill,
@@ -1412,9 +1410,8 @@ void MenuDrawEpisode(void)
         }
 
         const Colormap *colmap = style->definition_->text_[fontType].colmap_;
-        HUDStretchImage(x, 18 + style->definition_->text_[fontType].y_offset_,
-                        menu_episode->ScaledWidth() * txtscale, menu_episode->ScaledHeight() * txtscale,
-                        menu_episode, 0.0, 0.0, colmap);
+        HUDStretchImage(x, 18 + style->definition_->text_[fontType].y_offset_, menu_episode->ScaledWidth() * txtscale,
+                        menu_episode->ScaledHeight() * txtscale, menu_episode, 0.0, 0.0, colmap);
 
         // HUDDrawImage(x + episode_style->definition_->text[fontType].x_offset,
         //	38 + episode_style->definition_->text[fontType].y_offset,
@@ -2861,11 +2858,10 @@ void MenuDrawItems(Style *style, bool graphical_item)
                 textstyle = StyleDefinition::kTextSectionSelected;
                 txtscale  = style->definition_->text_[textstyle].scale_;
 
-                //Lobo: need to recalculate center because the size could be different
+                // Lobo: need to recalculate center because the size could be different
                 if (style->definition_->entry_alignment_ == StyleDefinition::kAlignmentCenter)
                 {
-                    current_menu->menu_items[j].x =
-                    CenterMenuText(style, textstyle, current_menu->menu_items[j].name);
+                    current_menu->menu_items[j].x = CenterMenuText(style, textstyle, current_menu->menu_items[j].name);
                 }
             }
         }

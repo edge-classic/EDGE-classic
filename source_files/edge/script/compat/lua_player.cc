@@ -1263,7 +1263,6 @@ static std::string GetQueryInfoFromMobj(MapObject *obj, int whatinfo)
             temp_string = std::to_string(temp_num);
         }
         break;
-
     }
 
     if (temp_string.empty())

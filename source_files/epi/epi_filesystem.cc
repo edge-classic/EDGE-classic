@@ -110,8 +110,8 @@ bool FileDelete(std::string_view name)
 }
 std::string CurrentDirectoryGet()
 {
-    std::string    directory;
-    wchar_t *dir = _wgetcwd(nullptr, 0);
+    std::string directory;
+    wchar_t    *dir = _wgetcwd(nullptr, 0);
     if (dir)
     {
         directory = epi::WStringToUTF8(dir);
@@ -298,7 +298,7 @@ bool FileDelete(std::string_view name)
 std::string CurrentDirectoryGet()
 {
     std::string directory;
-    char *dir = getcwd(nullptr, 0);
+    char       *dir = getcwd(nullptr, 0);
     if (dir)
     {
         directory = dir;

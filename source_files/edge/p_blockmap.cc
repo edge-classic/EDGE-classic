@@ -92,7 +92,8 @@ static void UpdateDLightRadius(ConsoleVariable *self)
     }
 }
 
-EDGE_DEFINE_CONSOLE_VARIABLE_WITH_CALLBACK_CLAMPED(max_dynamic_light_radius, "4", kConsoleVariableFlagArchive, UpdateDLightRadius, 0, 4)
+EDGE_DEFINE_CONSOLE_VARIABLE_WITH_CALLBACK_CLAMPED(max_dynamic_light_radius, "4", kConsoleVariableFlagArchive,
+                                                   UpdateDLightRadius, 0, 4)
 
 void CreateThingBlockmap(void)
 {

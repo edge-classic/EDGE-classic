@@ -924,8 +924,8 @@ void DDFMobjCleanUp(void)
                     if (B->type == kBenefitTypeAmmo)
                     {
                         B->sub.type = weapondefs.deh_ammo_replacements[weap_to_change]->sub.type;
-                        B->amount = HMM_MAX(B->amount, weapondefs.deh_ammo_replacements[weap_to_change]->amount);
-                        updated = true;
+                        B->amount   = HMM_MAX(B->amount, weapondefs.deh_ammo_replacements[weap_to_change]->amount);
+                        updated     = true;
                         break;
                     }
                 }
@@ -2069,7 +2069,8 @@ static void DDFMobjStateGetDEHProjectile(const char *arg, State *cur_state)
     atk->range_        = 2048.0f;
     atk->attackstyle_  = kAttackStyleProjectile;
     atk->attack_class_ = epi::BitSetFromChar('M');
-    atk->flags_ = (AttackFlags)(kAttackFlagFaceTarget | kAttackFlagInheritTracerFromTarget | kAttackFlagOffsetsLast | kAttackFlagKillFailedSpawn);
+    atk->flags_ = (AttackFlags)(kAttackFlagFaceTarget | kAttackFlagInheritTracerFromTarget | kAttackFlagOffsetsLast |
+                                kAttackFlagKillFailedSpawn);
     atk->damage_.Default(DamageClass::kDamageClassDefaultAttack);
     atk->height_ = 32;
 

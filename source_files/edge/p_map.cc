@@ -1853,7 +1853,8 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
                 if (PathTraverse(sx, sy, shoota.X, shoota.Y, kPathAddThings, ShootTraverseCallback))
                 {
                     if (shoot_check.puff)
-                        SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_check.puff, shoot_check.angle + kBAMAngle180, false);
+                        SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_check.puff, shoot_check.angle + kBAMAngle180,
+                                  false);
                     return false;
                 }
             }
@@ -1872,7 +1873,8 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
                     if (PathTraverse(sx, sy, shoota.X, shoota.Y, kPathAddThings, ShootTraverseCallback))
                     {
                         if (shoot_check.puff)
-                            SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_check.puff, shoot_check.angle + kBAMAngle180, false);
+                            SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_check.puff, shoot_check.angle + kBAMAngle180,
+                                      false);
                         return false;
                     }
                 }
@@ -1897,7 +1899,8 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
                 if (PathTraverse(sx, sy, shoota.X, shoota.Y, kPathAddThings, ShootTraverseCallback))
                 {
                     if (shoot_check.puff)
-                        SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_check.puff, shoot_check.angle + kBAMAngle180, false);
+                        SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_check.puff, shoot_check.angle + kBAMAngle180,
+                                  false);
                     return false;
                 }
             }
@@ -2705,8 +2708,7 @@ static bool RadiusAttackCallback(MapObject *thing, void *data)
 
     MapObject *source = radius_attack_check.source;
 
-    if (source && (thing->hyper_flags_ & kHyperFlagFriendlyFireImmune) &&
-        (thing->side_ & source->side_) != 0)
+    if (source && (thing->hyper_flags_ & kHyperFlagFriendlyFireImmune) && (thing->side_ & source->side_) != 0)
     {
         return true;
     }
@@ -2714,8 +2716,7 @@ static bool RadiusAttackCallback(MapObject *thing, void *data)
     // MBF21: If in same splash group, don't damage it
     // Dasho: Note, this checks the splash group of the actual
     // bomb spot and not its source
-    if (thing->info_->splash_group_ > 0 &&
-        radius_attack_check.spot->info_->splash_group_ > 0 &&
+    if (thing->info_->splash_group_ > 0 && radius_attack_check.spot->info_->splash_group_ > 0 &&
         (thing->info_->splash_group_ == radius_attack_check.spot->info_->splash_group_))
     {
         return true;
@@ -2941,16 +2942,14 @@ bool CheckSolidSectorMove(Sector *sec, bool is_ceiling, float dh)
 
     if (sec->bottom_extrafloor)
     {
-        if (!is_ceiling && dh > 0 &&
-            (sec->floor_height + dh > sec->bottom_extrafloor->bottom_height))
+        if (!is_ceiling && dh > 0 && (sec->floor_height + dh > sec->bottom_extrafloor->bottom_height))
         {
             return false;
         }
     }
     else
     {
-        if (!is_ceiling && dh > 0 &&
-            (sec->floor_height + dh > sec->ceiling_height))
+        if (!is_ceiling && dh > 0 && (sec->floor_height + dh > sec->ceiling_height))
         {
             return false;
         }

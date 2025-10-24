@@ -258,7 +258,8 @@ void                   WriteSound(int s_num);
 
 void sounds::Init()
 {
-    for (std::map<int, SoundEffectInfo *>::iterator iter = S_sfx.begin(), iter_end = S_sfx.end(); iter != iter_end; ++iter)
+    for (std::map<int, SoundEffectInfo *>::iterator iter = S_sfx.begin(), iter_end = S_sfx.end(); iter != iter_end;
+         ++iter)
     {
         delete iter->second;
     }
@@ -267,7 +268,8 @@ void sounds::Init()
 
 void sounds::Shutdown()
 {
-    for (std::map<int, SoundEffectInfo *>::iterator iter = S_sfx.begin(), iter_end = S_sfx.end(); iter != iter_end; ++iter)
+    for (std::map<int, SoundEffectInfo *>::iterator iter = S_sfx.begin(), iter_end = S_sfx.end(); iter != iter_end;
+         ++iter)
     {
         delete iter->second;
     }
@@ -515,7 +517,8 @@ void sounds::ConvertSFX(void)
 {
     bool got_one = false;
 
-    for (std::map<int, SoundEffectInfo *>::iterator iter = S_sfx.begin(), iter_end = S_sfx.end(); iter != iter_end; ++iter)
+    for (std::map<int, SoundEffectInfo *>::iterator iter = S_sfx.begin(), iter_end = S_sfx.end(); iter != iter_end;
+         ++iter)
     {
         if (iter->second == nullptr)
             continue;

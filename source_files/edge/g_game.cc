@@ -139,12 +139,12 @@ static bool HandleLevelFlag(bool *special, MapFlag flag)
     bool handled_it = false;
     if (current_map->force_on_ & (flag))
     {
-        *special = true;
+        *special   = true;
         handled_it = true;
     }
     else if (current_map->force_off_ & (flag))
     {
-        *special = false;
+        *special   = false;
         handled_it = true;
     }
     return handled_it;

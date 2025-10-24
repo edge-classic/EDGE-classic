@@ -994,18 +994,18 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
         if (mo->interpolate_ && !console_active && !paused && !menu_active && !erraticism_active && !rts_menu_active)
         {
             float along = (float)(mo->interpolation_position_ - 1 + fractional_tic) / mo->interpolation_number_;
-            mx = HMM_Lerp(mo->interpolation_from_.X, along, mo->x);
-            my = HMM_Lerp(mo->interpolation_from_.Y, along, mo->y);
-            mz = HMM_Lerp(mo->interpolation_from_.Z, along, mo->z);
-            fz = HMM_Lerp(mo->old_floor_z_, fractional_tic, mo->floor_z_);
+            mx          = HMM_Lerp(mo->interpolation_from_.X, along, mo->x);
+            my          = HMM_Lerp(mo->interpolation_from_.Y, along, mo->y);
+            mz          = HMM_Lerp(mo->interpolation_from_.Z, along, mo->z);
+            fz          = HMM_Lerp(mo->old_floor_z_, fractional_tic, mo->floor_z_);
         }
         else
         {
             float along = (float)mo->interpolation_position_ / mo->interpolation_number_;
-            mx = HMM_Lerp(mo->interpolation_from_.X, along, mo->x);
-            my = HMM_Lerp(mo->interpolation_from_.Y, along, mo->y);
-            mz = HMM_Lerp(mo->interpolation_from_.Z, along, mo->z);
-            fz = mo->floor_z_;
+            mx          = HMM_Lerp(mo->interpolation_from_.X, along, mo->x);
+            my          = HMM_Lerp(mo->interpolation_from_.Y, along, mo->y);
+            mz          = HMM_Lerp(mo->interpolation_from_.Z, along, mo->z);
+            fz          = mo->floor_z_;
         }
     }
     else
@@ -1124,7 +1124,7 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
     dthing->hover_dz     = hover_dz;
     dthing->sink_mult    = sink_mult;
 
-    dthing->mir_scale = bsp_mirror_set.XYScale();
+    dthing->mir_scale  = bsp_mirror_set.XYScale();
     dthing->mir_zscale = bsp_mirror_set.ZScale();
 
     RendererClipSpriteVertically(dsub, dthing);
@@ -1216,8 +1216,8 @@ static bool RenderThing(DrawThing *dthing, bool solid)
         ModelDefinition *md       = GetModel(mo->state_->sprite);
         const Image     *skin_img = md->skins_[mo->model_skin_];
 
-        if ((mo->flags_ & kMapObjectFlagFuzzy) || (mo->visibility_ < 0.99f) || (skin_img && skin_img->opacity_ == kOpacityComplex) ||
-            mo->hyper_flags_ & kHyperFlagNoZBufferUpdate)
+        if ((mo->flags_ & kMapObjectFlagFuzzy) || (mo->visibility_ < 0.99f) ||
+            (skin_img && skin_img->opacity_ == kOpacityComplex) || mo->hyper_flags_ & kHyperFlagNoZBufferUpdate)
         {
             is_solid = false;
         }
@@ -1273,8 +1273,8 @@ static bool RenderThing(DrawThing *dthing, bool solid)
         break;
 
     case SpriteYAlignmentMiddle: {
-        float _mz = dthing->map_z + mo->height_ * 0.5 + top_offset * mo->scale_* dthing->mir_zscale;
-        float dz  = sprite_height * 0.5 * mo->scale_* dthing->mir_zscale;
+        float _mz = dthing->map_z + mo->height_ * 0.5 + top_offset * mo->scale_ * dthing->mir_zscale;
+        float dz  = sprite_height * 0.5 * mo->scale_ * dthing->mir_zscale;
 
         gzt = _mz + dz;
         gzb = _mz - dz;
@@ -1283,7 +1283,7 @@ static bool RenderThing(DrawThing *dthing, bool solid)
 
     case SpriteYAlignmentBottomUp:
     default:
-        gzb = dthing->map_z + top_offset * mo->scale_* dthing->mir_zscale;
+        gzb = dthing->map_z + top_offset * mo->scale_ * dthing->mir_zscale;
         gzt = gzb + sprite_height * mo->scale_ * dthing->mir_zscale;
         break;
     }

@@ -9,7 +9,6 @@
 #include "r_misc.h"
 #include "r_modes.h"
 
-
 void SetupSkyMatrices(void);
 
 static inline const char *SafeStr(const void *s)
@@ -67,8 +66,7 @@ class GLRenderBackend : public RenderBackend
         glTranslatef(-view_x, -view_y, -view_z);
     }
 
-    public:
-
+  public:
     // CheckExtensions - Based on code by Bruce Lewis.
     void CheckExtensions()
     {

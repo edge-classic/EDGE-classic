@@ -314,7 +314,7 @@ void ConvertWeapon(int w_num)
                 wad::Printf("AMMOPERSHOT = %d;\n", info->ammo_per_shot);
                 if (info->ammo_per_shot == 0)
                 {
-                    WeaponInfo *add_flag = (WeaponInfo *)info;
+                    WeaponInfo *add_flag  = (WeaponInfo *)info;
                     add_flag->mbf21_flags = (info->mbf21_flags | kMBF21_REALLYUSESAMMO);
                 }
             }
@@ -329,7 +329,7 @@ void ConvertWeapon(int w_num)
         wad::Printf("AMMOPERSHOT = %d;\n", info->ammo_per_shot);
         if (info->ammo_per_shot == 0 && info->ammo != kAmmoTypeNoAmmo)
         {
-            WeaponInfo *add_flag = (WeaponInfo *)info;
+            WeaponInfo *add_flag  = (WeaponInfo *)info;
             add_flag->mbf21_flags = (info->mbf21_flags | kMBF21_REALLYUSESAMMO);
         }
     }
@@ -351,27 +351,32 @@ void ConvertWeapon(int w_num)
     if ((w_num == kwp_bfg || w_num == kwp_plasma) && info->ammo != kAmmoTypeCell)
     {
         if (info->ammo != kAmmoTypeUnused && info->ammo != kAmmoTypeNoAmmo)
-            wad::Printf("DEH_REPLACE_PICKUP_AMMO = %s(%d);\n", ammo::GetAmmo(info->ammo), ammo::pickups[info->ammo] * 2);
+            wad::Printf("DEH_REPLACE_PICKUP_AMMO = %s(%d);\n", ammo::GetAmmo(info->ammo),
+                        ammo::pickups[info->ammo] * 2);
     }
     else if (w_num == kwp_missile && info->ammo != kAmmoTypeRocket)
     {
         if (info->ammo != kAmmoTypeUnused && info->ammo != kAmmoTypeNoAmmo)
-            wad::Printf("DEH_REPLACE_PICKUP_AMMO = %s(%d);\n", ammo::GetAmmo(info->ammo), ammo::pickups[info->ammo] * 2);
+            wad::Printf("DEH_REPLACE_PICKUP_AMMO = %s(%d);\n", ammo::GetAmmo(info->ammo),
+                        ammo::pickups[info->ammo] * 2);
     }
     else if ((w_num == kwp_supershotgun || w_num == kwp_shotgun) && info->ammo != kAmmoTypeShell)
     {
         if (info->ammo != kAmmoTypeUnused && info->ammo != kAmmoTypeNoAmmo)
-            wad::Printf("DEH_REPLACE_PICKUP_AMMO = %s(%d);\n", ammo::GetAmmo(info->ammo), ammo::pickups[info->ammo] * 2);
+            wad::Printf("DEH_REPLACE_PICKUP_AMMO = %s(%d);\n", ammo::GetAmmo(info->ammo),
+                        ammo::pickups[info->ammo] * 2);
     }
     else if ((w_num == kwp_chaingun || w_num == kwp_pistol) && info->ammo != kAmmoTypeBullet)
     {
         if (info->ammo != kAmmoTypeUnused && info->ammo != kAmmoTypeNoAmmo)
-            wad::Printf("DEH_REPLACE_PICKUP_AMMO = %s(%d);\n", ammo::GetAmmo(info->ammo), ammo::pickups[info->ammo] * 2);
+            wad::Printf("DEH_REPLACE_PICKUP_AMMO = %s(%d);\n", ammo::GetAmmo(info->ammo),
+                        ammo::pickups[info->ammo] * 2);
     }
     else if ((w_num == kwp_chainsaw) && info->ammo != kAmmoTypeNoAmmo)
     {
         if (info->ammo != kAmmoTypeUnused && info->ammo != kAmmoTypeNoAmmo)
-            wad::Printf("DEH_REPLACE_PICKUP_AMMO = %s(%d);\n", ammo::GetAmmo(info->ammo), ammo::pickups[info->ammo] * 2);
+            wad::Printf("DEH_REPLACE_PICKUP_AMMO = %s(%d);\n", ammo::GetAmmo(info->ammo),
+                        ammo::pickups[info->ammo] * 2);
     }
 
     wad::Printf("AUTOMATIC = TRUE;\n");

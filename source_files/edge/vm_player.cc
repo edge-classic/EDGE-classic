@@ -1287,7 +1287,6 @@ static std::string GetQueryInfoFromMobj(MapObject *obj, int whatinfo)
             temp_string = std::to_string(temp_num);
         }
         break;
-
     }
 
     if (temp_string.empty())
@@ -1451,7 +1450,6 @@ static void MO_query_tagged(coal::VM *vm, int argc)
         vm->ReturnString(GetQueryInfoFromMobj(findme->second, whatinfo).c_str());
 }
 
-
 // mapobject.query_tid(thing tid, whatinfo)
 //
 static void MO_query_tid(coal::VM *vm, int argc)
@@ -1500,19 +1498,18 @@ static void MO_count(coal::VM *vm, int argc)
     vm->ReturnFloat(thingcount);
 }
 
-
 // mapobject.render_view_tag(x, y, w, h, tag)
 //
 static void MO_render_view_tag(coal::VM *vm, int argc)
 {
     EPI_UNUSED(argc);
 
-    float x = *vm->AccessParam(0);
-    float y = *vm->AccessParam(1);
-    float w = *vm->AccessParam(2);
-    float h = *vm->AccessParam(3);
-    double *argTag   = vm->AccessParam(4);
-    int   whattag  = (int)*argTag;
+    float   x       = *vm->AccessParam(0);
+    float   y       = *vm->AccessParam(1);
+    float   w       = *vm->AccessParam(2);
+    float   h       = *vm->AccessParam(3);
+    double *argTag  = vm->AccessParam(4);
+    int     whattag = (int)*argTag;
 
     // If this tag is not unique, it is not guaranteed which mobj
     // will actually be returned. Plan accordingly - Dasho
@@ -1533,12 +1530,12 @@ static void MO_render_view_tid(coal::VM *vm, int argc)
 {
     EPI_UNUSED(argc);
 
-    float x = *vm->AccessParam(0);
-    float y = *vm->AccessParam(1);
-    float w = *vm->AccessParam(2);
-    float h = *vm->AccessParam(3);
-    double *argtid   = vm->AccessParam(4);
-    int   whattid  = (int)*argtid;
+    float   x       = *vm->AccessParam(0);
+    float   y       = *vm->AccessParam(1);
+    float   w       = *vm->AccessParam(2);
+    float   h       = *vm->AccessParam(3);
+    double *argtid  = vm->AccessParam(4);
+    int     whattid = (int)*argtid;
 
     // TIDs should be unique but if not, it is not guaranteed which mobj
     // will actually be returned. Plan accordingly - Dasho
@@ -1552,7 +1549,6 @@ static void MO_render_view_tid(coal::VM *vm, int argc)
         vm->ReturnFloat(1);
     }
 }
-
 
 // player.query_weapon(maxdistance,whatinfo,[SecAttack])
 //

@@ -102,37 +102,37 @@ float sine_table[kSineTableSize];
 
 void FreeBSP(void);
 
-static float ApproximateAtan2(float y, float x) 
+static float ApproximateAtan2(float y, float x)
 {
     static constexpr float kHalfPi = HMM_PI32 / 2.0f;
 
     // Avoid division by zero
-    if (x == 0.0f) 
+    if (x == 0.0f)
     {
         if (y > 0.0f)
             return kHalfPi;
-        if (y < 0.0f) 
+        if (y < 0.0f)
             return -kHalfPi;
         return 0.0f; // undefined, but return 0
     }
 
     float atan;
     float z = y / x;
-    if (fabsf(z) < 1.0f) 
+    if (fabsf(z) < 1.0f)
     {
         atan = z / (1.0f + 0.28f * z * z);
-        if (x < 0.0f) 
+        if (x < 0.0f)
         {
             if (y < 0.0f)
                 return atan - HMM_PI32;
-            else 
+            else
                 return atan + HMM_PI32;
         }
-    } 
-    else 
+    }
+    else
     {
         atan = kHalfPi - z / (z * z + 0.28f);
-        if (y < 0.0f) 
+        if (y < 0.0f)
             return atan - HMM_PI32;
     }
 

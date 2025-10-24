@@ -48,8 +48,8 @@
 #include "p_spec.h"
 #include "r_state.h"
 
-extern unsigned int root_node;
-extern std::vector<PlaneMover *>       active_planes;
+extern unsigned int              root_node;
+extern std::vector<PlaneMover *> active_planes;
 
 //
 // ApproximateDistance

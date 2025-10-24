@@ -966,8 +966,7 @@ int UpdateSkyboxTextures(void)
         tmp_img_data = rgb_img_data;
     }
     culling_fog_color = tmp_img_data->AverageColor(0, sky_image->width_, 0, sky_image->height_ / 2);
-    sky_cap_color     = tmp_img_data->AverageColor(0, sky_image->width_, sky_image->height_ * 3 / 4,
-                                                   sky_image->height_);
+    sky_cap_color = tmp_img_data->AverageColor(0, sky_image->width_, sky_image->height_ * 3 / 4, sky_image->height_);
     delete tmp_img_data;
 
     if (what_palette)

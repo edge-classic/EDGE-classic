@@ -149,7 +149,8 @@ void WriteEntry(int num);
 
 void music::Init()
 {
-    for (std::map<int, MusicInfo *>::iterator iter = S_music.begin(), iter_end = S_music.end(); iter != iter_end; ++iter)
+    for (std::map<int, MusicInfo *>::iterator iter = S_music.begin(), iter_end = S_music.end(); iter != iter_end;
+         ++iter)
     {
         delete iter->second;
     }
@@ -158,7 +159,8 @@ void music::Init()
 
 void music::Shutdown()
 {
-    for (std::map<int, MusicInfo *>::iterator iter = S_music.begin(), iter_end = S_music.end(); iter != iter_end; ++iter)
+    for (std::map<int, MusicInfo *>::iterator iter = S_music.begin(), iter_end = S_music.end(); iter != iter_end;
+         ++iter)
     {
         delete iter->second;
     }
@@ -216,7 +218,8 @@ void music::ConvertMUS()
 {
     bool got_one = false;
 
-    for (std::map<int, MusicInfo *>::iterator iter = S_music.begin(), iter_end = S_music.end(); iter != iter_end; ++iter)
+    for (std::map<int, MusicInfo *>::iterator iter = S_music.begin(), iter_end = S_music.end(); iter != iter_end;
+         ++iter)
     {
         if (iter->second == nullptr)
             continue;

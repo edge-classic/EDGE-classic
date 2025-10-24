@@ -27,8 +27,7 @@
 #include "epi_color.h"
 #include "swirl_table.h"
 
-ImageData::ImageData(int width, int height, int depth)
-    : width_(width), height_(height), depth_(depth)
+ImageData::ImageData(int width, int height, int depth) : width_(width), height_(height), depth_(depth)
 {
     pixels_   = new uint8_t[width * height * depth];
     offset_x_ = offset_y_ = 0;
@@ -88,7 +87,7 @@ void ImageData::Flip()
 {
     int line_size = width_ * depth_;
 
-    uint8_t *line_data  = new uint8_t[line_size];
+    uint8_t *line_data = new uint8_t[line_size];
 
     for (int y = 0; y < height_; y++)
     {

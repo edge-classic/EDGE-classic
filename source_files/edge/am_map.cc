@@ -817,8 +817,7 @@ static void DrawKeys()
                 const Image *img = GetOtherSprite(idlestate->sprite, idlestate->frame, &flip);
 
                 if (epi::StringCaseCompareASCII("DUMMY_SPRITE", img->name_) != 0)
-                    HUDStretchImageNoOffset(key.x, key.y,
-                                            2 * map_scale * ((float)img->width_ / img->height_),
+                    HUDStretchImageNoOffset(key.x, key.y, 2 * map_scale * ((float)img->width_ / img->height_),
                                             2 * map_scale, img, 0, 0);
             }
         }
@@ -1386,7 +1385,7 @@ void AutomapRender(float x, float y, float w, float h, MapObject *focus)
 
     EPI_ASSERT(automap_style);
 
-    map_alpha       = HUDGetAlpha();
+    map_alpha = HUDGetAlpha();
     HUDSetAlpha(automap_style->definition_->bg_.translucency_);
 
     if (automap_style->background_image_)

@@ -561,7 +561,8 @@ void ParseUDMF_Block(epi::Scanner &lex, int cur_type)
         line->end->is_used_   = true;
 
         // check for zero-length line
-        line->zero_length = (fabs(line->start->x_ - line->end->x_) < kEpsilon) && (fabs(line->start->y_ - line->end->y_) < kEpsilon);
+        line->zero_length =
+            (fabs(line->start->x_ - line->end->x_) < kEpsilon) && (fabs(line->start->y_ - line->end->y_) < kEpsilon);
 
         if (line->right || line->left)
             num_real_lines++;

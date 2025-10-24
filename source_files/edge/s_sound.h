@@ -74,8 +74,8 @@ enum SoundEffectFlag
     kSoundEffectPrecious = (1 << 3),
 };
 
-constexpr float  kMinimumSoundClipDistance = 160.0f;
-constexpr float  kMinimumOccludedSoundClipDistance = 80.0f;
+constexpr float kMinimumSoundClipDistance         = 160.0f;
+constexpr float kMinimumOccludedSoundClipDistance = 80.0f;
 
 // Init/Shutdown
 void InitializeSound(void);

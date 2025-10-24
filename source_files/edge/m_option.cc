@@ -140,6 +140,7 @@ extern ConsoleVariable maximum_pickup_messages;
 extern ConsoleVariable show_endoom;
 extern ConsoleVariable confirm_quickload;
 extern ConsoleVariable confirm_quicksave;
+extern ConsoleVariable preferred_game;
 
 // extern console_variable_c automap_keydoor_text;
 
@@ -339,10 +340,10 @@ static int OptionMenuGetCurrentSwitchValue(OptionMenuItem *item)
 //
 #ifdef EDGE_WEB
 static constexpr uint8_t kOptionMenuLanguagePosition    = 10;
-static constexpr uint8_t kOptionMenuNetworkHostPosition = 12;
+static constexpr uint8_t kOptionMenuNetworkHostPosition = 13;
 #else
 static constexpr uint8_t kOptionMenuLanguagePosition    = 11;
-static constexpr uint8_t kOptionMenuNetworkHostPosition = 13;
+static constexpr uint8_t kOptionMenuNetworkHostPosition = 14;
 #endif
 
 static OptionMenuItem mainoptions[] = {
@@ -370,6 +371,9 @@ static OptionMenuItem mainoptions[] = {
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeFunction, "MenuLanguage", nullptr, 0, nullptr, OptionMenuChangeLanguage, nullptr, nullptr, 0, 0,
      0, ""},
+     {kOptionMenuItemTypeSwitch, "MenuPreferredGame", nullptr, 19, &preferred_game.d_,
+     OptionMenuUpdateConsoleVariableFromInt, "Use this IWAD by default (if present)", &preferred_game, 0, 0, 0,
+     ""},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeFunction, "MenuStartBotmatch", nullptr, 0, nullptr, OptionMenuHostNetGame, nullptr, nullptr, 0,
      0, 0, ""},
@@ -1221,6 +1225,11 @@ void OptionMenuDrawer()
                     }
                 }
             }
+            else if (current_menu == &main_optmenu && current_menu->items[i].switch_variable == &preferred_game)
+            {
+                HUDWriteText(style, fontType, (current_menu->menu_center) + 15, curry, game_checker[preferred_game.d_].display_name);
+                break;
+            }
 
             k = 0;
             for (int j = 0; j < OptionMenuGetCurrentSwitchValue(&current_menu->items[i]); j++)
@@ -1562,8 +1571,14 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
 
             *val_ptr -= 1;
 
-            if (*val_ptr < 0)
+            if (current_item->console_variable_to_change == &preferred_game)
+            {
+                if (*val_ptr < 1)
+                    *val_ptr = current_item->total_types - 1;
+            }
+            else if (*val_ptr < 0)
                 *val_ptr = current_item->total_types - 1;
+
 
             StartSoundEffect(sound_effect_pistol);
 
@@ -1641,7 +1656,12 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
 
             *val_ptr += 1;
 
-            if (*val_ptr >= current_item->total_types)
+            if (current_item->console_variable_to_change == &preferred_game)
+            {
+                if (*val_ptr > 18)
+                    *val_ptr = 1;
+            }
+            else if (*val_ptr >= current_item->total_types)
                 *val_ptr = 0;
 
             StartSoundEffect(sound_effect_pistol);

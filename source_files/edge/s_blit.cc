@@ -139,7 +139,8 @@ void UpdateSounds(MapObject *listener, BAMAngle angle)
         {
             if (ma_sound_at_end(&chan->channel_sound_))
                 chan->state_ = kChannelFinished;
-            else if (listener && ma_sound_get_attenuation_model(&chan->channel_sound_) == ma_attenuation_model_exponential)
+            else if (listener &&
+                     ma_sound_get_attenuation_model(&chan->channel_sound_) == ma_attenuation_model_exponential)
             {
                 if (CheckSightToPoint(listener, chan->position_->x, chan->position_->y, chan->position_->z))
                     ma_sound_set_min_distance(&chan->channel_sound_, kMinimumSoundClipDistance);

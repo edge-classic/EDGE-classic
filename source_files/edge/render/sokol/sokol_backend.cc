@@ -80,8 +80,7 @@ class SokolRenderBackend : public RenderBackend
         sgl_translate(-view_x, -view_y, -view_z);
     }
 
-    public:
-
+  public:
     void StartFrame(int32_t width, int32_t height)
     {
         frame_number_++;

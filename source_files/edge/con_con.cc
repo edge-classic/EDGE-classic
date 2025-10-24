@@ -418,8 +418,8 @@ static void AddChar(float x, float y, char ch, RendererVertex *&glvert, RGBAColo
     }
     else // spritesheet font
     {
-        uint8_t    px       = (uint8_t)ch % 16;
-        uint8_t    py       = 15 - (uint8_t)ch / 16;
+        uint8_t px = (uint8_t)ch % 16;
+        uint8_t py = 15 - (uint8_t)ch / 16;
 
         float tx1 = (float)(px) * 0.0625f;
         float tx2 = (float)(px + 1) * 0.0625f;
@@ -1681,7 +1681,7 @@ void ConsoleShowPosition(void)
 void ConsoleENDOOM()
 {
     if (quit_lines[0] && quit_lines[0]->endoom_bytes_.size() == kENDOOMBytesPerLine)
-    { 
+    {
         ConsoleMessage(kConsoleOnly, "\n");
         for (int i = 0; i < kENDOOMLines; i++)
         {

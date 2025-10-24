@@ -71,7 +71,7 @@
 
 extern unsigned int root_node;
 
-static bool level_active = false;
+static bool level_active  = false;
 static bool id_arg0_split = false;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(udmf_strict_namespace, "1", kConsoleVariableFlagArchive)
@@ -2214,8 +2214,8 @@ static void LoadUDMFLineDefs()
             }
             Line *ld = level_lines + cur_line;
 
-            ld->flags    = flags;
-            ld->tag      = HMM_MAX(0, tag);
+            ld->flags = flags;
+            ld->tag   = HMM_MAX(0, tag);
             if (id_arg0_split)
                 ld->arg0 = HMM_MAX(0, arg0);
             else

@@ -371,9 +371,8 @@ static OptionMenuItem mainoptions[] = {
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeFunction, "MenuLanguage", nullptr, 0, nullptr, OptionMenuChangeLanguage, nullptr, nullptr, 0, 0,
      0, ""},
-     {kOptionMenuItemTypeSwitch, "MenuPreferredGame", nullptr, 19, &preferred_game.d_,
-     OptionMenuUpdateConsoleVariableFromInt, "Use this IWAD by default (if present)", &preferred_game, 0, 0, 0,
-     ""},
+    {kOptionMenuItemTypeSwitch, "MenuPreferredGame", nullptr, 19, &preferred_game.d_,
+     OptionMenuUpdateConsoleVariableFromInt, "Use this IWAD by default (if present)", &preferred_game, 0, 0, 0, ""},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeFunction, "MenuStartBotmatch", nullptr, 0, nullptr, OptionMenuHostNetGame, nullptr, nullptr, 0,
      0, 0, ""},
@@ -678,8 +677,8 @@ static OptionMenuItem perfoptions[] = {
      OptionMenuUpdateConsoleVariableFromInt, "Only recommended for extreme monster/projectile counts",
      &distance_cull_thinkers, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Max Dynamic Light Radius", "32/64/128/256/512", 5, &max_dynamic_light_radius.d_,
-     OptionMenuUpdateConsoleVariableFromInt, "Control the maximum radius of dynamic lights",
-     &max_dynamic_light_radius, 0, 0, 0, ""},
+     OptionMenuUpdateConsoleVariableFromInt, "Control the maximum radius of dynamic lights", &max_dynamic_light_radius,
+     0, 0, 0, ""},
 };
 
 static OptionMenuDefinition perf_optmenu = {perfoptions,
@@ -1227,7 +1226,8 @@ void OptionMenuDrawer()
             }
             else if (current_menu == &main_optmenu && current_menu->items[i].switch_variable == &preferred_game)
             {
-                HUDWriteText(style, fontType, (current_menu->menu_center) + 15, curry, game_checker[preferred_game.d_].display_name);
+                HUDWriteText(style, fontType, (current_menu->menu_center) + 15, curry,
+                             game_checker[preferred_game.d_].display_name);
                 break;
             }
 
@@ -1578,7 +1578,6 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             }
             else if (*val_ptr < 0)
                 *val_ptr = current_item->total_types - 1;
-
 
             StartSoundEffect(sound_effect_pistol);
 

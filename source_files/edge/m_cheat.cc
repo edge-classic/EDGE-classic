@@ -244,28 +244,28 @@ bool CheatResponder(InputEvent *ev)
         // already had
         if (pl->armours_[kArmourTypeRed] > 0)
         {
-            pl->armours_[kArmourTypeRed] = kMaximumArmor;
+            pl->armours_[kArmourTypeRed]    = kMaximumArmor;
             pl->armours_[kArmourTypeYellow] = 0;
             pl->armours_[kArmourTypePurple] = 0;
-            pl->armours_[kArmourTypeBlue] = 0;
-            pl->armours_[kArmourTypeGreen] = 0;
+            pl->armours_[kArmourTypeBlue]   = 0;
+            pl->armours_[kArmourTypeGreen]  = 0;
         }
         else if (pl->armours_[kArmourTypeYellow] > 0)
         {
             pl->armours_[kArmourTypeYellow] = kMaximumArmor;
             pl->armours_[kArmourTypePurple] = 0;
-            pl->armours_[kArmourTypeBlue] = 0;
-            pl->armours_[kArmourTypeGreen] = 0;
+            pl->armours_[kArmourTypeBlue]   = 0;
+            pl->armours_[kArmourTypeGreen]  = 0;
         }
         else if (pl->armours_[kArmourTypePurple] > 0)
         {
             pl->armours_[kArmourTypePurple] = kMaximumArmor;
-            pl->armours_[kArmourTypeBlue] = 0;
-            pl->armours_[kArmourTypeGreen] = 0;
+            pl->armours_[kArmourTypeBlue]   = 0;
+            pl->armours_[kArmourTypeGreen]  = 0;
         }
         else
         {
-            pl->armours_[kArmourTypeBlue] = kMaximumArmor;
+            pl->armours_[kArmourTypeBlue]  = kMaximumArmor;
             pl->armours_[kArmourTypeGreen] = 0;
         }
 
@@ -291,28 +291,28 @@ bool CheatResponder(InputEvent *ev)
         // already had
         if (pl->armours_[kArmourTypeRed] > 0)
         {
-            pl->armours_[kArmourTypeRed] = kMaximumArmor;
+            pl->armours_[kArmourTypeRed]    = kMaximumArmor;
             pl->armours_[kArmourTypeYellow] = 0;
             pl->armours_[kArmourTypePurple] = 0;
-            pl->armours_[kArmourTypeBlue] = 0;
-            pl->armours_[kArmourTypeGreen] = 0;
+            pl->armours_[kArmourTypeBlue]   = 0;
+            pl->armours_[kArmourTypeGreen]  = 0;
         }
         else if (pl->armours_[kArmourTypeYellow] > 0)
         {
             pl->armours_[kArmourTypeYellow] = kMaximumArmor;
             pl->armours_[kArmourTypePurple] = 0;
-            pl->armours_[kArmourTypeBlue] = 0;
-            pl->armours_[kArmourTypeGreen] = 0;
+            pl->armours_[kArmourTypeBlue]   = 0;
+            pl->armours_[kArmourTypeGreen]  = 0;
         }
         else if (pl->armours_[kArmourTypePurple] > 0)
         {
             pl->armours_[kArmourTypePurple] = kMaximumArmor;
-            pl->armours_[kArmourTypeBlue] = 0;
-            pl->armours_[kArmourTypeGreen] = 0;
+            pl->armours_[kArmourTypeBlue]   = 0;
+            pl->armours_[kArmourTypeGreen]  = 0;
         }
         else
         {
-            pl->armours_[kArmourTypeBlue] = kMaximumArmor;
+            pl->armours_[kArmourTypeBlue]  = kMaximumArmor;
             pl->armours_[kArmourTypeGreen] = 0;
         }
 

@@ -48,7 +48,7 @@ enum FileKind
 
     kFileKindDDF,      // .ddf or .ldf file
     kFileKindRTS,      // .rts script  file
-    kFileKindDehacked,  // .deh or .bex file
+    kFileKindDehacked, // .deh or .bex file
     kFileKindInvalid
 };
 

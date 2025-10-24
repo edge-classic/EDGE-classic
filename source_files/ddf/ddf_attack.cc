@@ -375,7 +375,10 @@ void DDFAttackCleanUp(void)
             if (epi::StringPrefixCaseCompareASCII(a->atk_mobj_ref_, "deh_atk_") == 0)
             {
                 std::string real_name = a->atk_mobj_ref_.substr(8);
-                for (std::vector<MapObjectDefinition *>::reverse_iterator iter = mobjtypes.dynamic_atk_mobjtypes.rbegin(), iter_end = mobjtypes.dynamic_atk_mobjtypes.rend(); iter != iter_end; ++iter)
+                for (std::vector<MapObjectDefinition *>::reverse_iterator
+                         iter     = mobjtypes.dynamic_atk_mobjtypes.rbegin(),
+                         iter_end = mobjtypes.dynamic_atk_mobjtypes.rend();
+                     iter != iter_end; ++iter)
                 {
                     MapObjectDefinition *mobj = *iter;
                     if (epi::StringCaseCompareASCII(real_name, mobj->name_.substr(4)) == 0)
@@ -384,7 +387,7 @@ void DDFAttackCleanUp(void)
                         break;
                     }
                 }
-            }   
+            }
             else
                 a->atk_mobj_ = mobjtypes.Lookup(a->atk_mobj_ref_.c_str());
             if (a->atk_mobj_)

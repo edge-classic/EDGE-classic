@@ -101,7 +101,8 @@ void sprites::MarkEntry(int num)
 
 void sprites::SpriteDependencies()
 {
-    for (std::map<int, std::string>::iterator iter = sprnames.begin(), iter_end = sprnames.end(); iter != iter_end; ++iter)
+    for (std::map<int, std::string>::iterator iter = sprnames.begin(), iter_end = sprnames.end(); iter != iter_end;
+         ++iter)
     {
         if (iter->second != GetOriginalName(iter->first))
             frames::MarkStatesWithSprite(iter->first);

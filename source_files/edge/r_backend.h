@@ -43,7 +43,6 @@ struct FrameStats
 class RenderBackend
 {
   public:
-
     virtual void SetClearColor(RGBAColor color) = 0;
 
     virtual void StartFrame(int32_t width, int32_t height) = 0;
@@ -117,7 +116,6 @@ class RenderBackend
 
     // Setup the GL matrices for drawing 3D stuff.
     virtual void SetupMatrices3D() = 0;
-
 };
 
 extern RenderBackend *render_backend;

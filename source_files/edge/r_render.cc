@@ -545,7 +545,8 @@ static void DrawWallPart(DrawFloor *dfloor, float x1, float y1, float lz1, float
     int lit_adjust = 0;
 
     // do the N/S/W/E bizzo...
-    if ((current_map->episode_->lighting_ == kLightingModelDoom || default_lighting.d_ == kLightingModelDoom) && props->light_level > 0)
+    if ((current_map->episode_->lighting_ == kLightingModelDoom || default_lighting.d_ == kLightingModelDoom) &&
+        props->light_level > 0)
     {
         if (AlmostEquals(current_seg->vertex_1->Y, current_seg->vertex_2->Y))
             lit_adjust -= 16;
@@ -2204,7 +2205,7 @@ void RenderTrueBSP(void)
     }
 
     if (v_player && v_player->ready_weapon_ >= 0)
-    {        
+    {
         PlayerSprite *psp = &v_player->player_sprites_[kPlayerSpriteWeapon];
 
         if (psp->state != 0)

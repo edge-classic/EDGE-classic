@@ -913,7 +913,7 @@ static void MoveOneSector(Sector *sec, ScriptMoveSectorParameter *t)
         return;
 
     SolidSectorMove(sec, t->is_ceiling, dh);
-    
+
     // We don't want to interpolate RTS sector movement, as it is always considered
     // an 'instant' move
     if (t->is_ceiling)

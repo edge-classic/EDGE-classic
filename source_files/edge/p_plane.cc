@@ -117,7 +117,8 @@ static const Image *SECPIC(Sector *sec, bool is_ceiling, const Image *new_image)
 // -ACB- 1998/09/06 Remarked and Reformatted.
 // -ACB- 2001/02/04 Move to p_plane.c
 //
-static float GetSecHeightReference(const PlaneMoverDefinition *def, Sector *sec, Sector *model, const TriggerHeightReference ref)
+static float GetSecHeightReference(const PlaneMoverDefinition *def, Sector *sec, Sector *model,
+                                   const TriggerHeightReference ref)
 {
     switch (ref & kTriggerHeightReferenceMask)
     {

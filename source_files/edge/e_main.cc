@@ -1061,8 +1061,8 @@ static void PickMenuBackdrop(void)
         title_pic                        = 29999;
         Image *new_backdrop              = new Image;
         new_backdrop->name_              = menu_image->name_;
-        new_backdrop->height_     = menu_image->height_;
-        new_backdrop->width_      = menu_image->width_;
+        new_backdrop->height_            = menu_image->height_;
+        new_backdrop->width_             = menu_image->width_;
         new_backdrop->cache_             = menu_image->cache_;
         new_backdrop->is_empty_          = menu_image->is_empty_;
         new_backdrop->is_font_           = menu_image->is_font_;
@@ -1088,8 +1088,8 @@ static void PickMenuBackdrop(void)
     {
         Image *new_backdrop              = new Image;
         new_backdrop->name_              = loading_image->name_;
-        new_backdrop->height_     = loading_image->height_;
-        new_backdrop->width_      = loading_image->width_;
+        new_backdrop->height_            = loading_image->height_;
+        new_backdrop->width_             = loading_image->width_;
         new_backdrop->cache_             = loading_image->cache_;
         new_backdrop->is_empty_          = loading_image->is_empty_;
         new_backdrop->is_font_           = loading_image->is_font_;
@@ -1422,46 +1422,49 @@ static void CollectInstallSearchPaths(std::vector<std::string> &paths)
     return;
 #elif defined(_WIN32)
 #ifdef _WIN64
-    static constexpr const char *kGOGRegistryPath = "Software\\Wow6432Node\\GOG.com\\Games\\"; 
+    static constexpr const char *kGOGRegistryPath = "Software\\Wow6432Node\\GOG.com\\Games\\";
 #else
     static constexpr const char *kGOGRegistryPath = "Software\\GOG.com\\Games\\";
 #endif
     static constexpr const wchar_t *kGOGRegistrySubPath = L"path";
-    static constexpr const char *kSteamRegistryPath = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Steam App ";
+    static constexpr const char    *kSteamRegistryPath =
+        "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Steam App ";
     static constexpr const wchar_t *kSteamRegistrySubPath = L"InstallLocation";
 
-    static const std::vector<std::pair<int, std::vector<std::string>>> gog_product_paths = 
-    {
-      {1435848814, {"doom2"}},
-      {1135892318, {"base\\wads"}},
-      {1435848742, {"Plutonia", "TNT"}},
-      {1435827232, {"."}},
-      {2015545325, {"DOOM_Data\\StreamingAssets"}},
-      {1426071866, {"DOOM II_Data\\StreamingAssets"}},
-      {1413291984, {"dosdoom\\base","dosdoom\\base\\doom2","dosdoom\\base\\plutonia","dosdoom\\base\\tnt","."}}
-    };
+    static const std::vector<std::pair<int, std::vector<std::string>>> gog_product_paths = {
+        {1435848814, {"doom2"}},
+        {1135892318, {"base\\wads"}},
+        {1435848742, {"Plutonia", "TNT"}},
+        {1435827232, {"."}},
+        {2015545325, {"DOOM_Data\\StreamingAssets"}},
+        {1426071866, {"DOOM II_Data\\StreamingAssets"}},
+        {1413291984, {"dosdoom\\base", "dosdoom\\base\\doom2", "dosdoom\\base\\plutonia", "dosdoom\\base\\tnt", "."}}};
 
-    static const std::vector<std::pair<int, std::vector<std::string>>> steam_product_paths = 
-    {
-      {2280, {"base","base\\doom2","base\\plutonia","base\\tnt","rerelease","rerelease\\DOOM_Data\\StreamingAssets"}},
-      {2300, {"base","masterbase\\doom2","finaldoombase","rerelease\\DOOM II_Data\\StreamingAssets"}},
-      {2290, {"base"}},
-      {208200, {"base\\wads"}},
-      {782330, {"base\\classicwads"}}
-    };
-   
+    static const std::vector<std::pair<int, std::vector<std::string>>> steam_product_paths = {
+        {2280,
+         {"base", "base\\doom2", "base\\plutonia", "base\\tnt", "rerelease", "rerelease\\DOOM_Data\\StreamingAssets"}},
+        {2300, {"base", "masterbase\\doom2", "finaldoombase", "rerelease\\DOOM II_Data\\StreamingAssets"}},
+        {2290, {"base"}},
+        {208200, {"base\\wads"}},
+        {782330, {"base\\classicwads"}}};
+
     for (const std::pair<int, std::vector<std::string>> &product : gog_product_paths)
     {
-        HKEY key;
+        HKEY  key;
         DWORD value_type;
         DWORD value_length;
-        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, (LPCWSTR)epi::UTF8ToWString(epi::StringFormat("%s%d", kGOGRegistryPath, product.first)).c_str(), 0, KEY_READ, &key) == ERROR_SUCCESS)
+        if (RegOpenKeyExW(
+                HKEY_LOCAL_MACHINE,
+                (LPCWSTR)epi::UTF8ToWString(epi::StringFormat("%s%d", kGOGRegistryPath, product.first)).c_str(), 0,
+                KEY_READ, &key) == ERROR_SUCCESS)
         {
-            if (RegQueryValueExW(key, kGOGRegistrySubPath, NULL, &value_type, NULL, &value_length) == ERROR_SUCCESS && value_type == REG_SZ)
+            if (RegQueryValueExW(key, kGOGRegistrySubPath, NULL, &value_type, NULL, &value_length) == ERROR_SUCCESS &&
+                value_type == REG_SZ)
             {
                 std::wstring value;
                 value.resize(value_length);
-                if (RegQueryValueExW(key, kGOGRegistrySubPath, NULL, &value_type, (LPBYTE)value.data(), &value_length) == ERROR_SUCCESS)
+                if (RegQueryValueExW(key, kGOGRegistrySubPath, NULL, &value_type, (LPBYTE)value.data(),
+                                     &value_length) == ERROR_SUCCESS)
                 {
                     std::string utf8_value = epi::WStringToUTF8(value);
                     if (!utf8_value.empty())
@@ -1476,16 +1479,21 @@ static void CollectInstallSearchPaths(std::vector<std::string> &paths)
     }
     for (const std::pair<int, std::vector<std::string>> &product : steam_product_paths)
     {
-        HKEY key;
+        HKEY  key;
         DWORD value_type;
         DWORD value_length;
-        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, (LPCWSTR)epi::UTF8ToWString(epi::StringFormat("%s%d", kSteamRegistryPath, product.first)).c_str(), 0, KEY_READ, &key) == ERROR_SUCCESS)
+        if (RegOpenKeyExW(
+                HKEY_LOCAL_MACHINE,
+                (LPCWSTR)epi::UTF8ToWString(epi::StringFormat("%s%d", kSteamRegistryPath, product.first)).c_str(), 0,
+                KEY_READ, &key) == ERROR_SUCCESS)
         {
-            if (RegQueryValueExW(key, kSteamRegistrySubPath, NULL, &value_type, NULL, &value_length) == ERROR_SUCCESS && value_type == REG_SZ)
+            if (RegQueryValueExW(key, kSteamRegistrySubPath, NULL, &value_type, NULL, &value_length) == ERROR_SUCCESS &&
+                value_type == REG_SZ)
             {
                 std::wstring value;
                 value.resize(value_length);
-                if (RegQueryValueExW(key, kSteamRegistrySubPath, NULL, &value_type, (LPBYTE)value.data(), &value_length) == ERROR_SUCCESS)
+                if (RegQueryValueExW(key, kSteamRegistrySubPath, NULL, &value_type, (LPBYTE)value.data(),
+                                     &value_length) == ERROR_SUCCESS)
                 {
                     std::string utf8_value = epi::WStringToUTF8(value);
                     if (!utf8_value.empty())
@@ -1537,8 +1545,8 @@ static void IdentifyVersion(void)
     LogDebug("- Identify Version\n");
 
     // Check -iwad parameter, find out if it is the IWADs directory
-    std::string              iwad_par;
-    std::string              iwad_file;
+    std::string iwad_par;
+    std::string iwad_file;
 
     std::string s = ArgumentValue("iwad");
 
@@ -1569,10 +1577,10 @@ static void IdentifyVersion(void)
         // In the absence of the -iwad parameter, check files/dirs added via
         // drag-and-drop for valid IWADs Remove them from the arg list if they
         // are valid to avoid them potentially being added as PWADs
-        uint8_t best_score = 0;
-        const GameCheck *best_game = nullptr;
-        std::string best_path;
-        FileKind best_kind = kFileKindIWAD;
+        uint8_t          best_score = 0;
+        const GameCheck *best_game  = nullptr;
+        std::string      best_path;
+        FileKind         best_kind = kFileKindIWAD;
         for (size_t p = 1; p < program_argument_list.size() && !ArgumentIsOption(p); p++)
         {
             std::string dnd        = program_argument_list[p];
@@ -1584,17 +1592,18 @@ static void IdentifyVersion(void)
                 {
                     if (test_index == 0 || test_index == preferred_game.d_)
                     {
-                        best_game = &game_checker[test_index];
+                        best_game  = &game_checker[test_index];
                         best_score = best_game->score;
-                        best_path = dnd;
-                        best_kind = kFileKindIFolder;
+                        best_path  = dnd;
+                        best_kind  = kFileKindIFolder;
                     }
-                    else if (game_checker[test_index].score > best_score && best_score != game_checker[preferred_game.d_].score)
+                    else if (game_checker[test_index].score > best_score &&
+                             best_score != game_checker[preferred_game.d_].score)
                     {
-                        best_game = &game_checker[test_index];
+                        best_game  = &game_checker[test_index];
                         best_score = best_game->score;
-                        best_path = dnd;
-                        best_kind = kFileKindIFolder;
+                        best_path  = dnd;
+                        best_kind  = kFileKindIFolder;
                     }
                     program_argument_list.erase(program_argument_list.begin() + p--);
                 }
@@ -1606,17 +1615,18 @@ static void IdentifyVersion(void)
                 {
                     if (test_index == 0 || test_index == preferred_game.d_)
                     {
-                        best_game = &game_checker[test_index];
+                        best_game  = &game_checker[test_index];
                         best_score = best_game->score;
-                        best_path = dnd;
-                        best_kind = kFileKindIPK;
+                        best_path  = dnd;
+                        best_kind  = kFileKindIPK;
                     }
-                    else if (game_checker[test_index].score > best_score && best_score != game_checker[preferred_game.d_].score)
+                    else if (game_checker[test_index].score > best_score &&
+                             best_score != game_checker[preferred_game.d_].score)
                     {
-                        best_game = &game_checker[test_index];
+                        best_game  = &game_checker[test_index];
                         best_score = best_game->score;
-                        best_path = dnd;
-                        best_kind = kFileKindIPK;
+                        best_path  = dnd;
+                        best_kind  = kFileKindIPK;
                     }
                     program_argument_list.erase(program_argument_list.begin() + p--);
                 }
@@ -1630,17 +1640,18 @@ static void IdentifyVersion(void)
                 {
                     if (test_index == 0 || test_index == preferred_game.d_)
                     {
-                        best_game = &game_checker[test_index];
+                        best_game  = &game_checker[test_index];
                         best_score = best_game->score;
-                        best_path = dnd;
-                        best_kind = kFileKindIWAD;
+                        best_path  = dnd;
+                        best_kind  = kFileKindIWAD;
                     }
-                    else if (game_checker[test_index].score > best_score && best_score != game_checker[preferred_game.d_].score)
+                    else if (game_checker[test_index].score > best_score &&
+                             best_score != game_checker[preferred_game.d_].score)
                     {
-                        best_game = &game_checker[test_index];
+                        best_game  = &game_checker[test_index];
                         best_score = best_game->score;
-                        best_path = dnd;
-                        best_kind = kFileKindIWAD;
+                        best_path  = dnd;
+                        best_kind  = kFileKindIWAD;
                     }
                     program_argument_list.erase(program_argument_list.begin() + p--);
                 }
@@ -1740,10 +1751,10 @@ static void IdentifyVersion(void)
     }
     else
     {
-        uint8_t best_score = 0;
-        const GameCheck *best_game = nullptr;
-        std::string best_path;
-        FileKind best_kind = kFileKindIWAD;
+        uint8_t          best_score = 0;
+        const GameCheck *best_game  = nullptr;
+        std::string      best_path;
+        FileKind         best_kind = kFileKindIWAD;
 
         for (const std::string &path : iwad_paths)
         {
@@ -1767,17 +1778,18 @@ static void IdentifyVersion(void)
                         {
                             if (test_index == 0 || test_index == preferred_game.d_)
                             {
-                                best_game = &game_checker[test_index];
+                                best_game  = &game_checker[test_index];
                                 best_score = best_game->score;
-                                best_path = fsd[j].name;
-                                best_kind = kFileKindIWAD;
+                                best_path  = fsd[j].name;
+                                best_kind  = kFileKindIWAD;
                             }
-                            else if (game_checker[test_index].score > best_score && best_score != game_checker[preferred_game.d_].score)
+                            else if (game_checker[test_index].score > best_score &&
+                                     best_score != game_checker[preferred_game.d_].score)
                             {
-                                best_game = &game_checker[test_index];
+                                best_game  = &game_checker[test_index];
                                 best_score = best_game->score;
-                                best_path = fsd[j].name;
-                                best_kind = kFileKindIWAD;
+                                best_path  = fsd[j].name;
+                                best_kind  = kFileKindIWAD;
                             }
                         }
                     }
@@ -1798,17 +1810,18 @@ static void IdentifyVersion(void)
                         {
                             if (test_index == 0 || test_index == preferred_game.d_)
                             {
-                                best_game = &game_checker[test_index];
+                                best_game  = &game_checker[test_index];
                                 best_score = best_game->score;
-                                best_path = fsd[j].name;
-                                best_kind = kFileKindIPK;
+                                best_path  = fsd[j].name;
+                                best_kind  = kFileKindIPK;
                             }
-                            else if (game_checker[test_index].score > best_score && best_score != game_checker[preferred_game.d_].score)
+                            else if (game_checker[test_index].score > best_score &&
+                                     best_score != game_checker[preferred_game.d_].score)
                             {
-                                best_game = &game_checker[test_index];
+                                best_game  = &game_checker[test_index];
                                 best_score = best_game->score;
-                                best_path = fsd[j].name;
-                                best_kind = kFileKindIPK;
+                                best_path  = fsd[j].name;
+                                best_kind  = kFileKindIPK;
                             }
                         }
                     }
@@ -1820,9 +1833,9 @@ static void IdentifyVersion(void)
             FatalError("IdentifyVersion: No IWADs or standalone packs found!\n");
         else
         {
-            game_base          = best_game->base;
+            game_base = best_game->base;
             AddDataFile(best_path, best_kind);
-        }            
+        }
     }
 
     LogDebug("GAME BASE = [%s]\n", game_base.c_str());
@@ -1986,18 +1999,10 @@ static void AddSingleCommandLineFile(const std::string &name, bool ignore_unknow
             }
             else if (ext.empty() && try_extensions)
             {
-                static const std::vector<std::pair<std::string, FileKind>> supported_types = 
-                {
-                    {".wad", kFileKindPWAD},
-                    {".pk3", kFileKindEPK},
-                    {".epk", kFileKindEPK},
-                    {".zip", kFileKindEPK},
-                    {".rts", kFileKindRTS},
-                    {".ddf", kFileKindDDF},
-                    {".ldf", kFileKindDDF},
-                    {".deh", kFileKindDehacked},
-                    {".bex", kFileKindDehacked}
-                };
+                static const std::vector<std::pair<std::string, FileKind>> supported_types = {
+                    {".wad", kFileKindPWAD}, {".pk3", kFileKindEPK},      {".epk", kFileKindEPK},
+                    {".zip", kFileKindEPK},  {".rts", kFileKindRTS},      {".ddf", kFileKindDDF},
+                    {".ldf", kFileKindDDF},  {".deh", kFileKindDehacked}, {".bex", kFileKindDehacked}};
 
                 for (const std::pair<std::string, FileKind> &type : supported_types)
                 {

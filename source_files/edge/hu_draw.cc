@@ -835,7 +835,7 @@ void HUDDrawImageTitleWS(const Image *title_image)
     CenterX -= TempWidth / 2;
 
     // 3. Draw it.
-    //Lobo 2025: we need to ignore offsets for TITLESCREENs to line up with what most other ports do
+    // Lobo 2025: we need to ignore offsets for TITLESCREENs to line up with what most other ports do
     HUDStretchImageNoOffset(CenterX, -0.1f, TempWidth, TempHeight + 0.1f, title_image, 0.0, 0.0);
 }
 
@@ -1296,7 +1296,7 @@ void HUDDrawText(float x, float y, const char *str, float size)
     if (!str)
         return;
 
-    float cy = y;
+    float cy      = y;
     float total_h = (size > 0 ? size : HUDStringHeight(str)) * current_scale;
 
     if (current_y_alignment >= 0)

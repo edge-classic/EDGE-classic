@@ -1670,9 +1670,11 @@ static void CheckMissileSpawn(MapObject *projectile)
     if (projectile->tics_ < 1)
         projectile->tics_ = 1;
 
-    HMM_Vec3 check_pos = {{projectile->momentum_.X * 0.5f, projectile->momentum_.Y * 0.5f, projectile->momentum_.Z  * 0.5f}};
+    HMM_Vec3 check_pos = {
+        {projectile->momentum_.X * 0.5f, projectile->momentum_.Y * 0.5f, projectile->momentum_.Z * 0.5f}};
 
-    while (PointToDistance(projectile->x, projectile->y, projectile->x + check_pos.X, projectile->y + check_pos.Y) > projectile->radius_)
+    while (PointToDistance(projectile->x, projectile->y, projectile->x + check_pos.X, projectile->y + check_pos.Y) >
+           projectile->radius_)
     {
         check_pos *= 0.5f;
     }
@@ -1728,14 +1730,16 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty, floa
     // -AJA- projz now handles crouching
     float      projx          = source->x;
     float      projy          = source->y;
-    float      projz          = source->z + (attack->height_ * ((source->height_ > 0 && source->info_->height_ > 0) ? source->height_ / source->info_->height_ : 1.0f));
+    float      projz          = source->z + (attack->height_ * ((source->height_ > 0 && source->info_->height_ > 0)
+                                                                    ? source->height_ / source->info_->height_
+                                                                    : 1.0f));
     Sector    *cur_source_sec = source->subsector_->sector;
     BAMAngle   angle          = 0;
     float      slope          = 0.0f;
     MapObject *projectile     = nullptr;
 
     if (cur_source_sec->sink_depth > 0 && !cur_source_sec->extrafloor_used && !cur_source_sec->height_sector &&
-             AlmostEquals(source->z, cur_source_sec->floor_height))
+        AlmostEquals(source->z, cur_source_sec->floor_height))
         projz -= (source->height_ * 0.5 * cur_source_sec->sink_depth);
 
     if (attack->flags_ & kAttackFlagOffsetsLast)
@@ -5427,7 +5431,9 @@ void A_Mushroom(MapObject *mo)
     // Now launch mushroom cloud
     if (!mushroom_mobj)
     {
-        for (std::vector<MapObjectDefinition *>::reverse_iterator iter = mobjtypes.dynamic_atk_mobjtypes.rbegin(), iter_end = mobjtypes.dynamic_atk_mobjtypes.rend(); iter != iter_end; ++iter)
+        for (std::vector<MapObjectDefinition *>::reverse_iterator iter     = mobjtypes.dynamic_atk_mobjtypes.rbegin(),
+                                                                  iter_end = mobjtypes.dynamic_atk_mobjtypes.rend();
+             iter != iter_end; ++iter)
         {
             MapObjectDefinition *mobj = *iter;
             if (mobj->name_ == "atk:MANCUBUS_FIREBALL")

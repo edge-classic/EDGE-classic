@@ -210,11 +210,11 @@ float FindSurroundingHeight(const TriggerHeightReference ref, const Sector *sec)
 //
 float FindRaiseToTexture(const PlaneMoverDefinition *def, Sector *sec)
 {
-    int   i;
-    Side *side;
-    float minsize = (float)INT_MAX;
-    int   secnum  = sec - level_sectors;
-    const TriggerHeightReference ref = def->destref_;
+    int                          i;
+    Side                        *side;
+    float                        minsize = (float)INT_MAX;
+    int                          secnum  = sec - level_sectors;
+    const TriggerHeightReference ref     = def->destref_;
 
     if (ref & kTriggerHeightReferenceCeiling)
     {

@@ -48,10 +48,10 @@ ImageData *RGBFromPalettised(ImageData *src, const uint8_t *palette, int opacity
 {
     if (src->depth_ == 1)
     {
-        int        bpp     = (opacity == kOpacitySolid) ? 3 : 4;
-        ImageData *dest    = new ImageData(src->width_, src->height_, bpp);
-        dest->width_  = src->width_;
-        dest->height_ = src->height_;
+        int        bpp  = (opacity == kOpacitySolid) ? 3 : 4;
+        ImageData *dest = new ImageData(src->width_, src->height_, bpp);
+        dest->width_    = src->width_;
+        dest->height_   = src->height_;
         for (int y = 0; y < src->height_; y++)
             for (int x = 0; x < src->width_; x++)
             {

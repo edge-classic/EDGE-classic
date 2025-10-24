@@ -340,7 +340,8 @@ static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category,
 
     chan->boss_ = (flags & kSoundEffectBoss) ? true : false;
 
-    bool attenuate = (!chan->boss_ && pos && category != kCategoryWeapon && category != kCategoryPlayer && category != kCategoryUi);
+    bool attenuate =
+        (!chan->boss_ && pos && category != kCategoryWeapon && category != kCategoryPlayer && category != kCategoryUi);
 
     chan->ref_config_            = ma_audio_buffer_config_init(ma_format_f32, 2, buf->length_, buf->data_, NULL);
     chan->ref_config_.sampleRate = buf->frequency_;
@@ -351,7 +352,7 @@ static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category,
                                              : (MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_NO_SPATIALIZATION),
                                    NULL, &chan->channel_sound_);
     if (attenuate)
-    {       
+    {
         ma_sound_set_attenuation_model(&chan->channel_sound_, ma_attenuation_model_exponential);
         if (CheckSightToPoint(players[display_player]->map_object_, pos->x, pos->y, pos->z))
             ma_sound_set_min_distance(&chan->channel_sound_, kMinimumSoundClipDistance);

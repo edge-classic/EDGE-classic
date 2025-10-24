@@ -88,11 +88,11 @@ const std::vector<GameCheck> game_checker = {{
     {17, "Freedoom 2", "freedoom2", {"FREEDOOM", "MAP01"}},
     {9, "REKKR", "rekkr", {"REKCREDS", "E1M1"}},
     {6, "HacX", "hacx", {"HACX-R", "MAP01"}},
-    {5, "Harmony", "harmony", {"0HAWK01", "DBIGFONT"}},         // Original Harmony Release
-    {8, "Harmony Compatible", "harmonyc", {"0HAWK01", "DMAPINFO"}}, // Harmony Compatible Release
-    {3, "Chex Quest 3 (Doom 2 base)", "chex3vm", {"ENDOOM", "MAP01"}},       // Chex Quest 3: Vanilla Edition
-                                                             // Modder/Doom 2 Base
-    {7, "Chex Quest 3", "chex3v", {"ENDOOM", "BOSSBACK"}},      // Chex Quest 3: Vanilla Edition
+    {5, "Harmony", "harmony", {"0HAWK01", "DBIGFONT"}},                // Original Harmony Release
+    {8, "Harmony Compatible", "harmonyc", {"0HAWK01", "DMAPINFO"}},    // Harmony Compatible Release
+    {3, "Chex Quest 3 (Doom 2 base)", "chex3vm", {"ENDOOM", "MAP01"}}, // Chex Quest 3: Vanilla Edition
+                                                                       // Modder/Doom 2 Base
+    {7, "Chex Quest 3", "chex3v", {"ENDOOM", "BOSSBACK"}},             // Chex Quest 3: Vanilla Edition
     {4, "Chex Quest 1", "chex1", {"ENDOOM", "E4M1"}},
     {11, "Heretic", "heretic", {"MUS_E1M1", "E1M1"}},
     {12, "Plutonia", "plutonia", {"CAMO1", "MAP01"}},
@@ -1313,9 +1313,9 @@ void ReadUMAPINFOLumps(void)
             epi::StringUpperASCII(mapname);
             // Check that the name adheres to either EXMX or MAPXX format per
             // the standard
-            int epinum = -1;
+            int epinum   = -1;
             int levelnum = -1;
-            
+
             if (epi::StringPrefixCompare(mapname, "MAP") == 0)
             {
                 for (auto c : mapname.substr(3))
@@ -1591,7 +1591,7 @@ void ReadUMAPINFOLumps(void)
                                 }
                             }
                             else
-                                temp_level->f_end_.text_flat_ = "FLOOR4_8"; 
+                                temp_level->f_end_.text_flat_ = "FLOOR4_8";
                         }
                         else
                         {
@@ -1699,7 +1699,7 @@ void ReadUMAPINFOLumps(void)
                 ReadRADScript(ba_rts, "UMAPINFO");
             }
 
-           // Validate episode entry
+            // Validate episode entry
             bool good_epi = false;
             for (auto g : gamedefs)
             {

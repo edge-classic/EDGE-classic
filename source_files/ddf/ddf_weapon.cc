@@ -32,7 +32,7 @@
 #include "epi_str_util.h"
 #include "p_action.h"
 
-extern int ParseBenefitString(const char *info, char *name, char *param, float *value, float *limit);
+extern int  ParseBenefitString(const char *info, char *name, char *param, float *value, float *limit);
 extern bool BenefitTryAmmo(const char *name, Benefit *be, int num_vals);
 
 std::vector<std::string> flag_tests;
@@ -130,7 +130,7 @@ static const DDFCommandList weapon_commands[] = {
     DDF_FIELD("Y_ADJUST", dummy_weapon, y_adjust_, DDFMainGetFloat),
     DDF_FIELD("IGNORE_CROSSHAIR_SCALING", dummy_weapon, ignore_crosshair_scaling_, DDFMainGetBoolean),
 
-    { "DEH_REPLACE_PICKUP_AMMO", DDFWReplacePickupAmmo, 0, nullptr },
+    {"DEH_REPLACE_PICKUP_AMMO", DDFWReplacePickupAmmo, 0, nullptr},
 
     {nullptr, nullptr, 0, nullptr}};
 
@@ -490,7 +490,7 @@ static void WeaponFinishEntry(void)
                          dynamic_weapon->ammopershot_[ATK]);
             dynamic_weapon->ammopershot_[ATK] = 0;
         }
-        
+
         // zero values for ammopershot really mean infinite ammo (unless dealing with Dehacked or otherwise overruled)
         if (dynamic_weapon->ammopershot_[ATK] == 0 && !(dynamic_weapon->specials_[ATK] & WeaponFlagEnforceAmmoType))
             dynamic_weapon->ammo_[ATK] = kAmmunitionTypeNoAmmo;
@@ -840,7 +840,8 @@ static void DDFWStateGetDEHProjectile(const char *arg, State *cur_state)
     atk->range_        = 2048.0f;
     atk->attackstyle_  = kAttackStyleProjectile;
     atk->attack_class_ = epi::BitSetFromChar('M');
-    atk->flags_        = (AttackFlags)(kAttackFlagPlayer | kAttackFlagInheritTracerFromTarget | kAttackFlagOffsetsLast | kAttackFlagKillFailedSpawn);
+    atk->flags_        = (AttackFlags)(kAttackFlagPlayer | kAttackFlagInheritTracerFromTarget | kAttackFlagOffsetsLast |
+                                kAttackFlagKillFailedSpawn);
     atk->damage_.Default(DamageClass::kDamageClassDefaultAttack);
     atk->height_ = 32.0f;
 
@@ -1211,7 +1212,9 @@ WeaponDefinitionContainer::~WeaponDefinitionContainer()
         delete w;
         w = nullptr;
     }
-    for (std::unordered_map<WeaponDefinition *, Benefit *>::iterator iter = deh_ammo_replacements.begin(), iter_end = deh_ammo_replacements.end(); iter != iter_end; ++iter)
+    for (std::unordered_map<WeaponDefinition *, Benefit *>::iterator iter     = deh_ammo_replacements.begin(),
+                                                                     iter_end = deh_ammo_replacements.end();
+         iter != iter_end; ++iter)
     {
         Benefit *b = iter->second;
         delete b;

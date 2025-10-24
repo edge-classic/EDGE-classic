@@ -33,14 +33,14 @@
 #include "p_blockmap.h" // HACK!
 #include "p_spec.h"
 
-constexpr float kBoomCarryFactor = 0.09375f;
-constexpr float kUseRange        = 64.0f;
-constexpr float kUseZRange       = 32.0f;
-constexpr float kMeleeRange      = 64.0f;
-constexpr float kMissileRange    = 2000.0f;
-constexpr float kOnFloorZ        = (float)INT_MIN;
-constexpr float kOnCeilingZ      = (float)INT_MAX;
-constexpr uint8_t kMaxThinkLoop  = 64;
+constexpr float   kBoomCarryFactor = 0.09375f;
+constexpr float   kUseRange        = 64.0f;
+constexpr float   kUseZRange       = 32.0f;
+constexpr float   kMeleeRange      = 64.0f;
+constexpr float   kMissileRange    = 2000.0f;
+constexpr float   kOnFloorZ        = (float)INT_MIN;
+constexpr float   kOnCeilingZ      = (float)INT_MAX;
+constexpr uint8_t kMaxThinkLoop    = 64;
 
 // -ACB- 2004/07/22 Moved here since its playsim related
 #define EDGE_DAMAGE_COMPUTE(var, dam)                                                                                  \

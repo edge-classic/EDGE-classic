@@ -453,7 +453,8 @@ const StateRange weapon_range[] = {
 
 void frames::Init()
 {
-    for (std::map<int, State *>::iterator iter = new_states.begin(), iter_end = new_states.end(); iter != iter_end; ++iter)
+    for (std::map<int, State *>::iterator iter = new_states.begin(), iter_end = new_states.end(); iter != iter_end;
+         ++iter)
     {
         delete iter->second;
     }
@@ -463,7 +464,8 @@ void frames::Init()
 
 void frames::Shutdown()
 {
-    for (std::map<int, State *>::iterator iter = new_states.begin(), iter_end = new_states.end(); iter != iter_end; ++iter)
+    for (std::map<int, State *>::iterator iter = new_states.begin(), iter_end = new_states.end(); iter != iter_end;
+         ++iter)
     {
         delete iter->second;
     }
@@ -749,7 +751,8 @@ bool frames::SpreadGroupPass(bool alt_jumps)
     }
 
     // Iterate a second time for new states above the MBF range
-    for (std::map<int, State *>::iterator iter = new_states.begin(), iter_end = new_states.end(); iter != iter_end; ++iter)
+    for (std::map<int, State *>::iterator iter = new_states.begin(), iter_end = new_states.end(); iter != iter_end;
+         ++iter)
     {
         if (iter->first < (int)kTotalMBFStates)
             continue;

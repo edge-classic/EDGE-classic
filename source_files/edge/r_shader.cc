@@ -322,7 +322,7 @@ class dynlight_shader_c : public AbstractShader
     }
 
     void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, BlendingMode blending,
-                          bool masked, void *data, ShaderCoordinateFunction func)
+                  bool masked, void *data, ShaderCoordinateFunction func)
     {
         if (WhatType() == kDynamicLightTypeNone)
             return;
@@ -501,7 +501,7 @@ class plane_glow_c : public AbstractShader
     }
 
     void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, BlendingMode blending,
-                          bool masked, void *data, ShaderCoordinateFunction func)
+                  bool masked, void *data, ShaderCoordinateFunction func)
     {
         const Sector *sec = mo->subsector_->sector;
 
@@ -665,7 +665,7 @@ class wall_glow_c : public AbstractShader
     }
 
     void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, BlendingMode blending,
-                          bool masked, void *data, ShaderCoordinateFunction func)
+                  bool masked, void *data, ShaderCoordinateFunction func)
     {
         const Sector *sec = mo->subsector_->sector;
 

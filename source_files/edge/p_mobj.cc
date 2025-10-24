@@ -265,7 +265,7 @@ static void BounceOffWall(MapObject *mo, Line *wall)
     angle = wall_angle + diff;
 
     // calculate new momentum
-    mo->speed_     *= mo->info_->bounce_speed_;
+    mo->speed_ *= mo->info_->bounce_speed_;
     mo->angle_      = angle;
     mo->momentum_.X = epi::BAMCos(angle) * mo->speed_;
     mo->momentum_.Y = epi::BAMSin(angle) * mo->speed_;
@@ -1330,7 +1330,8 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props)
                 {
                     if (mo->info_->maxfall_ > 0 && -mo->momentum_.Z > hurt_momz)
                     {
-                        if (!(mo->player_->cheats_ & kCheatingGodMode) && mo->player_->powers_[kPowerTypeInvulnerable] < 1)
+                        if (!(mo->player_->cheats_ & kCheatingGodMode) &&
+                            mo->player_->powers_[kPowerTypeInvulnerable] < 1)
                             StartSoundEffect(mo->info_->fallpain_sound_, GetSoundEffectCategory(mo), mo);
                         else
                             StartSoundEffect(mo->info_->oof_sound_, GetSoundEffectCategory(mo), mo);
@@ -1801,10 +1802,8 @@ static void P_MobjThinker(MapObject *mobj)
 
 static inline bool CheckThingBoundingBoxOverlap(const MapObject *A, const MapObject *B)
 {
-    return (A->x + A->radius_ <= B->x - B->radius_ ||
-            A->x - A->radius_ >= B->x + B->radius_ ||
-            A->y + A->radius_ <= B->y - B->radius_ ||
-            A->y - A->radius_ >= B->y + B->radius_)
+    return (A->x + A->radius_ <= B->x - B->radius_ || A->x - A->radius_ >= B->x + B->radius_ ||
+            A->y + A->radius_ <= B->y - B->radius_ || A->y - A->radius_ >= B->y + B->radius_)
                ? false
                : true;
 }
@@ -1830,13 +1829,13 @@ void MapObject::ClearStaleReferences()
         bool remove_it = false;
         if (above_object_->IsRemoved())
             remove_it = true;
-        else if (z + height_ > above_object_->z) // doesn't meet criteria now
+        else if (z + height_ > above_object_->z)                     // doesn't meet criteria now
             remove_it = true;
         else if (!CheckThingBoundingBoxOverlap(this, above_object_)) // not in contact with each other anymore
             remove_it = true;
-        else if (!(above_object_->flags_ & kMapObjectFlagSolid)) // maybe it turned into a corpse or something?
+        else if (!(above_object_->flags_ & kMapObjectFlagSolid))     // maybe it turned into a corpse or something?
             remove_it = true;
-        
+
         if (remove_it)
         {
             ceiling_z_ = above_object_->ceiling_z_;
@@ -1852,13 +1851,13 @@ void MapObject::ClearStaleReferences()
         bool remove_it = false;
         if (below_object_->IsRemoved())
             remove_it = true;
-        else if (z < below_object_->z + below_object_->height_) // doesn't meet criteria now
+        else if (z < below_object_->z + below_object_->height_)      // doesn't meet criteria now
             remove_it = true;
         else if (!CheckThingBoundingBoxOverlap(this, below_object_)) // not in contact with each other anymore
             remove_it = true;
-        else if (!(below_object_->flags_ & kMapObjectFlagSolid)) // maybe it turned into a corpse or something?
+        else if (!(below_object_->flags_ & kMapObjectFlagSolid))     // maybe it turned into a corpse or something?
             remove_it = true;
-        
+
         if (remove_it)
         {
             floor_z_ = below_object_->floor_z_;

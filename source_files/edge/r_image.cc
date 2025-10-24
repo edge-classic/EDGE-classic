@@ -234,8 +234,7 @@ static void AddImageToMap(ImageMap &map, const char *name, Image *image)
 //
 
 Image::Image()
-    : width_(0), height_(0),
-      name_("_UNINIT_"), source_type_(kImageSourceDummy), source_palette_(-1), cache_()
+    : width_(0), height_(0), name_("_UNINIT_"), source_type_(kImageSourceDummy), source_palette_(-1), cache_()
 {
     EPI_CLEAR_MEMORY(&source_, ImageSource, 1);
     EPI_CLEAR_MEMORY(&animation_, ImageAnimation, 1);
@@ -253,8 +252,8 @@ void StoreBlurredImage(const Image *image)
     {
         img->blurred_version_                     = new Image;
         img->blurred_version_->name_              = std::string(img->name_).append("_BLURRED");
-        img->blurred_version_->height_     = img->height_;
-        img->blurred_version_->width_      = img->width_;
+        img->blurred_version_->height_            = img->height_;
+        img->blurred_version_->width_             = img->width_;
         img->blurred_version_->is_empty_          = img->is_empty_;
         img->blurred_version_->is_font_           = img->is_font_;
         img->blurred_version_->liquid_type_       = img->liquid_type_;
@@ -286,8 +285,8 @@ static Image *NewImage(int width, int height, int opacity = kOpacityUnknown)
 {
     Image *rim = new Image;
 
-    rim->width_  = width;
-    rim->height_ = height;
+    rim->width_    = width;
+    rim->height_   = height;
     rim->offset_x_ = rim->offset_y_ = 0;
     rim->scale_x_ = rim->scale_y_ = 1.0f;
     rim->opacity_                 = opacity;
@@ -2166,8 +2165,8 @@ void AnimateImageSet(const Image **images, int number, int speed)
         {
             Image *dupe_image           = new Image;
             dupe_image->name_           = rim->name_;
-            dupe_image->height_  = rim->height_;
-            dupe_image->width_   = rim->width_;
+            dupe_image->height_         = rim->height_;
+            dupe_image->width_          = rim->width_;
             dupe_image->cache_          = rim->cache_;
             dupe_image->is_empty_       = rim->is_empty_;
             dupe_image->is_font_        = rim->is_font_;

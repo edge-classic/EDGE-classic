@@ -11,6 +11,7 @@
 
 [ENGLISH]
 
+MenuPreferredGame="Preferred Game";
 MenuWhichEpisode="Which Episode?";
 M_EPI1_Desc="Homecoming";
 M_EPI2_Desc="Downfall";

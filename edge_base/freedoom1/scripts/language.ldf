@@ -10,6 +10,7 @@ MenuDifficulty2="Will This Hurt?";
 MenuDifficulty3="Bring On The Pain.";
 MenuDifficulty4="Extreme Carnage.";
 MenuDifficulty5="MAYHEM!";
+MenuPreferredGame="Preferred Game";
 
 MenuWhichEpisode="Choose Episode:";
 

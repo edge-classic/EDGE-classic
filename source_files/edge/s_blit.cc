@@ -59,7 +59,7 @@ BAMAngle listen_angle;
 
 extern int sound_device_frequency;
 
-SoundChannel::SoundChannel() : state_(kChannelEmpty), data_(nullptr)
+SoundChannel::SoundChannel() : state_(kChannelEmpty), data_(nullptr), definition_(nullptr), position_(nullptr)
 {
     EPI_CLEAR_MEMORY(&channel_sound_, ma_sound, 1);
     EPI_CLEAR_MEMORY(&ref_config_, ma_audio_buffer_config, 1);
@@ -88,7 +88,9 @@ void FreeSoundChannels(void)
 
         if (chan && chan->data_)
         {
-            chan->data_ = nullptr;
+            chan->data_       = nullptr;
+            chan->definition_ = nullptr;
+            chan->position_   = nullptr;
             ma_sound_uninit(&chan->channel_sound_);
             ma_audio_buffer_uninit(&chan->ref_);
         }
@@ -105,8 +107,10 @@ void KillSoundChannel(int k)
 
     if (chan->state_ != kChannelEmpty)
     {
-        chan->data_  = nullptr;
-        chan->state_ = kChannelEmpty;
+        chan->data_       = nullptr;
+        chan->definition_ = nullptr;
+        chan->position_   = nullptr;
+        chan->state_      = kChannelEmpty;
         ma_sound_stop(&chan->channel_sound_);
         ma_sound_uninit(&chan->channel_sound_);
         ma_audio_buffer_uninit(&chan->ref_);
@@ -139,13 +143,18 @@ void UpdateSounds(MapObject *listener, BAMAngle angle)
         {
             if (ma_sound_at_end(&chan->channel_sound_))
                 chan->state_ = kChannelFinished;
-            else if (listener &&
-                     ma_sound_get_attenuation_model(&chan->channel_sound_) == ma_attenuation_model_exponential)
+            else if (chan->position_)
             {
-                if (CheckSightToPoint(listener, chan->position_->x, chan->position_->y, chan->position_->z))
-                    ma_sound_set_min_distance(&chan->channel_sound_, kMinimumSoundClipDistance);
-                else
-                    ma_sound_set_min_distance(&chan->channel_sound_, kMinimumOccludedSoundClipDistance);
+                ma_sound_set_position(&chan->channel_sound_, chan->position_->x, chan->position_->z,
+                                      -chan->position_->y);
+                if (listener &&
+                    ma_sound_get_attenuation_model(&chan->channel_sound_) == ma_attenuation_model_exponential)
+                {
+                    if (CheckSightToPoint(listener, chan->position_->x, chan->position_->y, chan->position_->z))
+                        ma_sound_set_min_distance(&chan->channel_sound_, kMinimumSoundClipDistance);
+                    else
+                        ma_sound_set_min_distance(&chan->channel_sound_, kMinimumOccludedSoundClipDistance);
+                }
             }
         }
 

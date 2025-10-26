@@ -15,6 +15,7 @@
 - Removed "Simple Skies" performance menu option
   - Broke too many maps to be worth the potential improvement
 - Added support for linedef id/arg0 parameter split in support of cross-port UDMF efforts
+- Sound channels playing sfx from a valid mobj will now update their origin coordinates each tick
 
 ## Compatibility Fixes
 

@@ -27,7 +27,7 @@ extern ConsoleVariable application_name;
 // This is used for configuration file and save game compatibility reasons,
 // and should not be changeable by the user unlike the displayed version
 // in the branding.cfg file - Dasho
-constexpr uint8_t kInternalConfigVersion = 5;
+constexpr uint8_t kInternalConfigVersion = 6;
 extern bool       show_old_config_warning;
 
 //--- editor settings ---

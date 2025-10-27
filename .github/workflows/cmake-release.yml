@@ -43,7 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Download w64devkit
-        run: invoke-webrequest https://github.com/skeeto/w64devkit/releases/download/v2.3.0/w64devkit-x86-2.3.0.7z.exe -outfile ${{github.workspace}}\w64devkit.exe
+        run: invoke-webrequest https://github.com/skeeto/w64devkit/releases/download/v2.2.0/w64devkit-x86-2.2.0.7z.exe -outfile ${{github.workspace}}\w64devkit.exe
       - name: Extract w64devkit
         run: ${{github.workspace}}\w64devkit.exe -y
       - name: Download SDL2-devel

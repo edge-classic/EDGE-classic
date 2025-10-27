@@ -4,7 +4,7 @@
 - New LUA/COAL function: hud.kill_sound(SFXname) which will stop a sound if it is currently playing.
 
 ## General Improvements/Changes
-- Episode menu item positioning updated to allow for up to ten visible episodes
+- Episode menu item positioning updated to allow for up to ten visible episodes (projected UMAPINFO maximum)
 - Restored support for C64 PSID/RSID music tracks
 - Added "Indexed+Fake Contrast" to Lighting Mode choices in the Video Options menu
 - Removed manual tiling and forced promotion of textures to power-of-two sizes
@@ -16,6 +16,12 @@
   - Broke too many maps to be worth the potential improvement
 - Added support for linedef id/arg0 parameter split in support of cross-port UDMF efforts
 - Sound channels playing sfx from a valid mobj will now update their origin coordinates each tick
+- Updated PL_MPEG to optimized fork with SIMD (SSE2/NEON) paths to reduce MPEG playback overhead
+- Added current working directory, default XDG/Freedoom install directories (Unix), and default GOG/Steam installation paths (Windows) to list of locations searched for compatible IWADs
+- SDL Dialog IWAD selector removed; replaced with the "Preferred Game" Options Menu item
+  - The Preferred Game, if present in any search path, will be loaded on program start if the `-iwad` parameter is absent
+    - EC standalone games (i.e., EPKs or WADs with the EDGEGAME lump) are an exception and will always take precedence in order to support releases that are bundled with an executable
+    - If the Preferred Game is not detected, another IWAD will be selected. IWADs that are more likely to have community/external content will take precedence (for instance, Doom 2 before Doom 1, Doom 1 before Heretic, etc)
 
 ## Compatibility Fixes
 
@@ -86,3 +92,4 @@
 - Fixed mobjs retaining "above/below" mobj references when not applicable, causing certain items to "hang" in the air
 - Fixed certain menu option items (jumping, mouselook, etc) being overridden when loading a game and not appropriate, (i.e. no forcing of these via DDFLEVL/UMAPINFO)
 - Fixed rendering artifacts when viewing mobjs through a camera portal whose view height is not 1:1 with the partner area
+- Fixed vertex interpolation of MDL/MD2/MD3 model frames (fractional tics were previously not accounted for)

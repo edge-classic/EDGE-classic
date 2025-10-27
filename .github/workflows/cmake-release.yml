@@ -13,7 +13,7 @@ env:
 jobs:
 
   build-msvc:
-    runs-on: windows-latest
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
       - name: Configure CMake MSVC
@@ -39,7 +39,7 @@ jobs:
             CHANGELOG.md
           retention-days: ${{env.RETENTION_DAYS}} 
   build-mingw32:
-    runs-on: windows-latest
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
       - name: Download w64devkit
@@ -47,13 +47,13 @@ jobs:
       - name: Extract w64devkit
         run: ${{github.workspace}}\w64devkit.exe -y
       - name: Download SDL2-devel
-        run: invoke-webrequest https://github.com/libsdl-org/SDL/releases/download/release-2.32.6/SDL2-devel-2.32.6-mingw.zip -outfile ${{github.workspace}}\sdl2-devel.zip
+        run: invoke-webrequest https://github.com/libsdl-org/SDL/releases/download/release-2.32.10/SDL2-devel-2.32.10-mingw.zip -outfile ${{github.workspace}}\sdl2-devel.zip
       - name: Extract SDL2-devel
         run: expand-archive -path ${{github.workspace}}\sdl2-devel.zip -destinationpath ${{github.workspace}}
       - name: Copy SDL2-devel contents to w64devkit
         run: |
-          robocopy ${{github.workspace}}\SDL2-2.32.6\i686-w64-mingw32 ${{github.workspace}}\w64devkit\i686-w64-mingw32 /s ; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
-          robocopy ${{github.workspace}}\SDL2-2.32.6\i686-w64-mingw32 ${{github.workspace}}\w64devkit /s ; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
+          robocopy ${{github.workspace}}\SDL2-2.32.10\i686-w64-mingw32 ${{github.workspace}}\w64devkit\i686-w64-mingw32 /s ; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
+          robocopy ${{github.workspace}}\SDL2-2.32.10\i686-w64-mingw32 ${{github.workspace}}\w64devkit /s ; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
       - name: Set environment variables and build
         run: |
           $env:Path = "${{github.workspace}}\w64devkit\bin;" + $env:Path
@@ -62,7 +62,7 @@ jobs:
           cmake --build build --config ${{env.BUILD_TYPE}}
           strip ${{github.workspace}}\edge-classic.exe
       - name: Copy SDL2 DLL
-        run: copy-item -path ${{github.workspace}}\SDL2-2.32.6\i686-w64-mingw32\bin\SDL2.dll -destination ${{github.workspace}}
+        run: copy-item -path ${{github.workspace}}\SDL2-2.32.10\i686-w64-mingw32\bin\SDL2.dll -destination ${{github.workspace}}
       - uses: actions/upload-artifact@v4
         with:
           name: edge-classic-mingw32
@@ -80,14 +80,14 @@ jobs:
             CHANGELOG.md
           retention-days: ${{env.RETENTION_DAYS}}     
   build-web-player:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     
     steps:      
     - uses: actions/checkout@v4
 
     - uses: mymindstorm/setup-emsdk@v14
       with: 
-        version: 4.0.8
+        version: latest
             
     - name: Configure CMake        
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE="${EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"

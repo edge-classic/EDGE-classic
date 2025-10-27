@@ -148,6 +148,7 @@ void LuaCallGlobalFunction(lua_State *L, const char *function_name, MapObject *m
 {
     EDGE_ZoneScoped;
 
+#ifdef EDGE_CLASSIC
     // If we try and call a lua script from DDF(e.g. LUA_RUN_SCRIPT()), but are running COAL, then log a warning and do
     // nothing
     if (GetCOALDetected())
@@ -155,6 +156,7 @@ void LuaCallGlobalFunction(lua_State *L, const char *function_name, MapObject *m
         LogWarning("Error calling LUA function '%s': No LUAHUDS present\n", function_name);
     }
     else
+#endif
     {
 
         int top = lua_gettop(L);

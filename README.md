@@ -83,6 +83,7 @@ An optional texture pack to enhance the experience can be found [here.](https://
 - Optional Dynamic Sound Reverb
 - Optional Pistol Start feature
 - Support for image/spritesheet and TrueType fonts
+- Support for MPEG video playback for startup videos, intermissions and in-level events (via RTS)
 - A load of longstanding bugs fixed (see full changelog)
 
 Bugfixes and detailed changes can be found in CHANGELOG.txt

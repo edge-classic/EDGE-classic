@@ -22,8 +22,9 @@ The following options can be passed to CMake to control certain features:
   - PC speaker sound effect playback
   - MUSINFO-based music changers
   - UMAPINFO parsing and application
-- EDGE_SANITIZE (default OFF): Will build with AddressSanitizer support. Suppressions can be found in ASanSuppress.txt.
-- EDGE_SANITIZE_THREADS (default OFF): Will build with ThreadSanitizer support. Suppressions can be found in TSanSuppress.txt. This option is mutually exclusive with EDGE_SANITIZE and only works with non-MSVC builds.
+- EDGE_SANITIZE (default OFF): Will build with AddressSanitizer support. This option is mutually exclusive with EDGE_SANITIZE_THREADS and EDGE_SANITIZE_UB. Suppressions can be found in ASanSuppress.txt.
+- EDGE_SANITIZE_THREADS (default OFF): Will build with ThreadSanitizer support. Suppressions can be found in TSanSuppress.txt. This option is mutually exclusive with EDGE_SANITIZE and EDGE_SANITIZE_UB and only works with non-MSVC builds.
+- EDGE_SANITIZE_UB (default OFF): Will build with UndefinedBehaviorSanitizer support. This option is mutually exclusive with EDGE_SANITIZE and EDGE_SANITIZE_THREADS and only works with non-MSVC builds.
 - EDGE_PROFILING (default OFF): Will build with support for the Tracy profiler.
 - EDGE_EXTRA_CHECKS (default OFF): Will perform extra validation checks when launching/running the program for development purposes.
 

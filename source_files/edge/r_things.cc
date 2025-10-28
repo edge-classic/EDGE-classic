@@ -989,7 +989,7 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
     // position interpolation
 
     // This applies to kStateFrameFlagModel and kMapObjectFlagFloat
-    if (mo->interpolation_number_ > 1)
+    if (mo->interpolation_number_ > 0)
     {
         if (mo->interpolate_ && !console_active && !paused && !menu_active && !erraticism_active && !rts_menu_active)
         {
@@ -1001,7 +1001,7 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
         }
         else
         {
-            float along = (float)mo->interpolation_position_ / mo->interpolation_number_;
+            float along = (float)(mo->interpolation_position_ - 1) / mo->interpolation_number_;
             mx          = HMM_Lerp(mo->interpolation_from_.X, along, mo->x);
             my          = HMM_Lerp(mo->interpolation_from_.Y, along, mo->y);
             mz          = HMM_Lerp(mo->interpolation_from_.Z, along, mo->z);

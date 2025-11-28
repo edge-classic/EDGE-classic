@@ -621,11 +621,26 @@ static void RenderSkybox(void)
 
     RGBAColor fc_to_use = current_map->outdoor_fog_color_;
     float     fd_to_use = 0.01f * current_map->outdoor_fog_density_;
+    BlendingMode blend     = kBlendingNoZBuffer;
     // check for sector fog
     if (fc_to_use == kRGBANoValue)
     {
         fc_to_use = view_properties->fog_color;
         fd_to_use = view_properties->fog_density;
+    }
+    if (draw_culling.d_)
+    {
+        fc_to_use = kRGBANoValue;
+        fd_to_use = 0.0f;
+        blend     = (BlendingMode)(blend | kBlendingNoFog);
+    }
+    else if (fc_to_use != kRGBANoValue)
+    {
+#ifdef EDGE_SOKOL
+        fd_to_use *= (current_sky_stretch == kSkyStretchVanilla ? 0.009f : 0.003f);
+#else
+        fd_to_use *= (current_sky_stretch == kSkyStretchVanilla ? 0.015f : 0.005f);
+#endif
     }
 
     RGBAColor unit_col =
@@ -634,7 +649,7 @@ static void RenderSkybox(void)
     // top
     RendererVertex *glvert =
         BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxTop], (GLuint)kTextureEnvironmentDisable,
-                        0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
+                        0, 0, blend, fc_to_use, fd_to_use);
 
     glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v0, v0}};
@@ -653,7 +668,7 @@ static void RenderSkybox(void)
 
     // bottom
     glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxBottom],
-                             (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
+                             (GLuint)kTextureEnvironmentDisable, 0, 0, blend, fc_to_use, fd_to_use);
 
     glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v0, v0}};
@@ -672,7 +687,7 @@ static void RenderSkybox(void)
 
     // north
     glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxNorth],
-                             (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
+                             (GLuint)kTextureEnvironmentDisable, 0, 0, blend, fc_to_use, fd_to_use);
 
     glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v0, v0}};
@@ -691,7 +706,7 @@ static void RenderSkybox(void)
 
     // east
     glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxEast],
-                             (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
+                             (GLuint)kTextureEnvironmentDisable, 0, 0, blend, fc_to_use, fd_to_use);
 
     glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v0, v0}};
@@ -710,7 +725,7 @@ static void RenderSkybox(void)
 
     // south
     glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxSouth],
-                             (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
+                             (GLuint)kTextureEnvironmentDisable, 0, 0, blend, fc_to_use, fd_to_use);
 
     glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v0, v0}};
@@ -729,7 +744,7 @@ static void RenderSkybox(void)
 
     // west
     glvert = BeginRenderUnit(GL_QUADS, 4, GL_MODULATE, fake_box[SK].texture[kSkyboxWest],
-                             (GLuint)kTextureEnvironmentDisable, 0, 0, kBlendingNoZBuffer, fc_to_use, fd_to_use);
+                             (GLuint)kTextureEnvironmentDisable, 0, 0, blend, fc_to_use, fd_to_use);
 
     glvert->rgba                   = unit_col;
     glvert->texture_coordinates[0] = {{v0, v0}};

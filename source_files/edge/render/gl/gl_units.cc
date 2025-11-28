@@ -358,7 +358,7 @@ void RenderCurrentUnits(void)
             else
                 state->Disable(GL_FOG);
         }
-        else if (!draw_culling.d_)
+        else if (!draw_culling.d_ || (unit->blending & kBlendingNoFog))
             state->Disable(GL_FOG);
 
         if (active_pass != unit->pass)
@@ -458,7 +458,7 @@ void RenderCurrentUnits(void)
                 state->ActiveTexture(GL_TEXTURE0 + t);
             }
 
-            if (draw_culling.d_)
+            if (draw_culling.d_ && !(unit->blending & kBlendingNoFog))
             {
                 if (unit->pass > 0)
                     state->Disable(GL_FOG);

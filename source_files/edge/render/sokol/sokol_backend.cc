@@ -11,6 +11,11 @@
 #include "epi.h"
 #include "i_video.h"
 
+#ifdef _WIN32
+__declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+__declspec(dllexport) unsigned AmdPowerXpressRequestHighPerformance = 0x00000001;
+#endif
+
 // clang-format on
 
 extern ConsoleVariable vsync;

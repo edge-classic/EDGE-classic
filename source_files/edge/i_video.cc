@@ -449,7 +449,7 @@ void FinishFrame(void)
 
         if (!single_tics)
         {
-            if (framerate_limit.d_ >= kTicRate)
+            if (!vsync.d_ && framerate_limit.d_ >= kTicRate)
             {
                 uint64_t        target_time = 1000000ull / framerate_limit.d_;
                 static uint64_t start_time;

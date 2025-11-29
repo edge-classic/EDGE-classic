@@ -43,6 +43,7 @@
 #include "hu_style.h"
 #include "i_system.h"
 #include "p_local.h"
+#include "r_backend.h"
 #include "r_draw.h"
 #include "r_misc.h"
 #include "r_modes.h"
@@ -1801,6 +1802,11 @@ void IntermissionDrawer(void)
     if (background_camera_map_object)
     {
         HUDRenderWorld(0, 0, 320, 200, background_camera_map_object, 0);
+#ifndef EDGE_SOKOL
+        // Dasho - Need to setup the 2D matrics for legacy GL else the intermission
+        // stats won't be drawn right
+        render_backend->SetRenderLayer(kRenderLayerHUD);
+#endif
     }
     else
     {

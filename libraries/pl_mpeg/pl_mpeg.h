@@ -146,10 +146,10 @@ See below for detailed the API documentation.
 #include <stdint.h>
 #include <stdio.h>
 
-#if defined(__ARM_NEON)
+#if defined(__ARM_NEON) || defined(__ARM_NEON__)
 #include <arm_neon.h>
-#elif defined(__SSE2__)
-#include <emmintrin.h>
+#elif defined(__SSE__) || defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 1)
+#include <xmmintrin.h>
 #endif
 
 

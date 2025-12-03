@@ -209,7 +209,7 @@ bool DoMove(MapObject *actor, bool path)
     // similar for high friction areas, but I've afforded a little more traction
     // for monsters on ice/low friction
     if (fric < 0.0f || AlmostEquals(fric, kFrictionDefault))
-        fric = 1.0f;
+        fric = kFrictionDefault;
     else if (fric < kFrictionDefault)
     {
         factor *= 32;

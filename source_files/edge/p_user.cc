@@ -401,7 +401,7 @@ static void MovePlayer(Player *player)
         }
 
         if (fric < 0.0f || AlmostEquals(fric, kFrictionDefault))
-            fric = 1.0f;
+            fric = kFrictionDefault;
         else if (fric > kFrictionDefault)
             fric *= factor;
         else

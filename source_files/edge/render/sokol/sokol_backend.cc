@@ -34,14 +34,16 @@ constexpr int32_t kContextMaxCommand = 2 * 1024;
 class SokolRenderBackend : public RenderBackend
 {
   protected:
-    void SetupMatrices2D()
+    void SetupMatrices2D(bool flip)
     {
         sgl_viewport(0, 0, current_screen_width, current_screen_height, false);
 
         sgl_matrix_mode_projection();
         sgl_load_identity();
-        sgl_ortho(0.0f, (float)current_screen_width, 0.0f, (float)current_screen_height, -1.0f, 1.0f);
-
+        if (flip)
+            sgl_ortho((float)current_screen_width, 0.0f, 0.0f, (float)current_screen_height, -1.0f, 1.0f);
+        else
+            sgl_ortho(0.0f, (float)current_screen_width, 0.0f, (float)current_screen_height, -1.0f, 1.0f);
         sgl_matrix_mode_modelview();
         sgl_load_identity();
     }
@@ -52,9 +54,12 @@ class SokolRenderBackend : public RenderBackend
 
         sgl_matrix_mode_projection();
         sgl_load_identity();
-        sgl_ortho((float)view_window_x, (float)view_window_width, (float)view_window_y, (float)view_window_height,
-                  -1.0f, 1.0f);
-
+        if (fliplevels.d_)
+            sgl_ortho((float)view_window_width, (float)view_window_x, (float)view_window_y, (float)view_window_height,
+                    -1.0f, 1.0f);
+        else
+            sgl_ortho((float)view_window_x, (float)view_window_width, (float)view_window_y, (float)view_window_height,
+                    -1.0f, 1.0f);
         sgl_matrix_mode_modelview();
         sgl_load_identity();
     }
@@ -68,9 +73,14 @@ class SokolRenderBackend : public RenderBackend
         sgl_matrix_mode_projection();
         sgl_load_identity();
 
-        sgl_frustum(-view_x_slope * renderer_near_clip.f_, view_x_slope * renderer_near_clip.f_,
-                    -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
-                    renderer_far_clip.f_);
+        if (fliplevels.d_)
+            sgl_frustum(view_x_slope * renderer_near_clip.f_, -view_x_slope * renderer_near_clip.f_,
+                        -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
+                        renderer_far_clip.f_);
+        else
+            sgl_frustum(-view_x_slope * renderer_near_clip.f_, view_x_slope * renderer_near_clip.f_,
+                        -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
+                        renderer_far_clip.f_);
 
         // calculate look-at matrix
         sgl_matrix_mode_modelview();
@@ -353,7 +363,7 @@ class SokolRenderBackend : public RenderBackend
     {
         if (layer == kRenderLayerHUD)
         {
-            SetupMatrices2D();
+            SetupMatrices2D(false);
         }
         else if (layer == kRenderLayerSky && context_change)
         {

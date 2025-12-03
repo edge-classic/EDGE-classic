@@ -21,7 +21,7 @@
 //
 // Setup the GL matrices for drawing 2D stuff.
 //
-void SetupMatrices2D(void)
+void SetupMatrices2D(bool flip)
 {
     glViewport(0, 0, current_screen_width, current_screen_height);
 
@@ -168,7 +168,7 @@ void RendererInit(void)
 
     AllocateDrawStructs();
 
-    SetupMatrices2D();
+    SetupMatrices2D(false);
 }
 
 //--- editor settings ---

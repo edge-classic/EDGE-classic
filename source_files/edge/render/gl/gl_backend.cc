@@ -19,14 +19,16 @@ static inline const char *SafeStr(const void *s)
 class GLRenderBackend : public RenderBackend
 {
   private:
-    void SetupMatrices2D()
+    void SetupMatrices2D(bool flip)
     {
         glViewport(0, 0, current_screen_width, current_screen_height);
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        glOrtho(0.0f, (float)current_screen_width, 0.0f, (float)current_screen_height, -1.0f, 1.0f);
-
+        if (flip)
+            glOrtho((float)current_screen_width, 0.0f, 0.0f, (float)current_screen_height, -1.0f, 1.0f);
+        else
+            glOrtho(0.0f, (float)current_screen_width, 0.0f, (float)current_screen_height, -1.0f, 1.0f);
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
     }
@@ -37,8 +39,12 @@ class GLRenderBackend : public RenderBackend
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        glOrtho((float)view_window_x, (float)view_window_width, (float)view_window_y, (float)view_window_height, -1.0f,
-                1.0f);
+        if (fliplevels.d_)
+            glOrtho((float)view_window_width, (float)view_window_x, (float)view_window_y, (float)view_window_height, -1.0f,
+                    1.0f);
+        else
+            glOrtho((float)view_window_x, (float)view_window_width, (float)view_window_y, (float)view_window_height, -1.0f,
+                    1.0f);
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
@@ -53,9 +59,14 @@ class GLRenderBackend : public RenderBackend
 
         glLoadIdentity();
 
-        glFrustum(-view_x_slope * renderer_near_clip.f_, view_x_slope * renderer_near_clip.f_,
-                  -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
-                  renderer_far_clip.f_);
+         if (fliplevels.d_)
+            glFrustum(view_x_slope * renderer_near_clip.f_, -view_x_slope * renderer_near_clip.f_,
+                    -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
+                    renderer_far_clip.f_);
+        else
+            glFrustum(-view_x_slope * renderer_near_clip.f_, view_x_slope * renderer_near_clip.f_,
+                    -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
+                    renderer_far_clip.f_);
 
         // calculate look-at matrix
         glMatrixMode(GL_MODELVIEW);
@@ -160,7 +171,7 @@ class GLRenderBackend : public RenderBackend
     {
         if (layer == kRenderLayerHUD)
         {
-            SetupMatrices2D();
+            SetupMatrices2D(false);
         }
         else if (layer == kRenderLayerSky)
         {

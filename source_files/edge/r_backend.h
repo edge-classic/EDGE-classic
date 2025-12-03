@@ -2,8 +2,11 @@
 #pragma once
 #include <functional>
 
+#include "con_var.h"
 #include "dm_defs.h"
 #include "epi_color.h"
+
+extern ConsoleVariable fliplevels;
 
 struct PassInfo
 {
@@ -100,15 +103,15 @@ class RenderBackend
         return max_texture_size_;
     }
 
+    // Setup the GL matrices for drawing 2D stuff.
+    virtual void SetupMatrices2D(bool flip) = 0;
+
   protected:
     int32_t max_texture_size_ = 0;
     int64_t frame_number_;
     bool    units_locked_ = false;
 
     std::vector<FrameFinishedCallback> on_frame_finished_;
-
-    // Setup the GL matrices for drawing 2D stuff.
-    virtual void SetupMatrices2D() = 0;
 
     // Setup the GL matrices for drawing 2D stuff within the "world" rendered by
     // HUDRenderWorld

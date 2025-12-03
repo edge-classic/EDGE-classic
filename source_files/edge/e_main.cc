@@ -103,7 +103,7 @@
 extern ImageData *ReadAsEpiBlock(Image *rim);
 
 extern ConsoleVariable busy_wait;
-
+extern ConsoleVariable fliplevels;
 extern ConsoleVariable gamma_correction;
 
 extern void CollectCrosshairs();
@@ -491,6 +491,9 @@ static void SetGlobalVariables(void)
     strict_errors = ddf_strict.d_ ? true : false;
     lax_errors    = ddf_lax.d_ ? true : false;
     no_warnings   = ddf_quiet.d_ ? true : false;
+
+    if (FindArgument("fliplevels") > 0)
+        fliplevels = 1;
 }
 
 //

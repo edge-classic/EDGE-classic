@@ -1,6 +1,7 @@
-
+#include "con_var.h"
 #include "sokol_local.h"
 
+extern ConsoleVariable fliplevels;
 extern SkyStretch current_sky_stretch;
 
 void SetupSkyMatrices(void)
@@ -13,9 +14,14 @@ void SetupSkyMatrices(void)
         // sgl_push_matrix();
         sgl_load_identity();
 
-        sgl_frustum(view_x_slope * renderer_near_clip.f_, -view_x_slope * renderer_near_clip.f_,
-                    -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
-                    renderer_far_clip.f_);
+        if (fliplevels.d_)
+            sgl_frustum(-view_x_slope * renderer_near_clip.f_, view_x_slope * renderer_near_clip.f_,
+                        -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
+                        renderer_far_clip.f_);
+        else
+            sgl_frustum(view_x_slope * renderer_near_clip.f_, -view_x_slope * renderer_near_clip.f_,
+                        -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
+                        renderer_far_clip.f_);
 
         sgl_matrix_mode_modelview();
         // sgl_push_matrix();
@@ -30,9 +36,14 @@ void SetupSkyMatrices(void)
         // sgl_push_matrix();
         sgl_load_identity();
 
-        sgl_frustum(-view_x_slope * renderer_near_clip.f_, view_x_slope * renderer_near_clip.f_,
-                    -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
-                    renderer_far_clip.f_ * 4.0);
+        if (fliplevels.d_)
+            sgl_frustum(view_x_slope * renderer_near_clip.f_, -view_x_slope * renderer_near_clip.f_,
+                        -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
+                        renderer_far_clip.f_ * 4.0);
+        else
+            sgl_frustum(-view_x_slope * renderer_near_clip.f_, view_x_slope * renderer_near_clip.f_,
+                        -view_y_slope * renderer_near_clip.f_, view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
+                        renderer_far_clip.f_ * 4.0);
 
         sgl_matrix_mode_modelview();
         // sgl_push_matrix();

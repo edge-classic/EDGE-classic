@@ -61,6 +61,7 @@ extern std::unordered_map<GLuint, GLint> texture_clamp_t;
 
 extern float ApproximateDistance(float dx, float dy, float dz);
 
+extern ConsoleVariable fliplevels;
 extern ConsoleVariable draw_culling;
 extern ConsoleVariable cull_fog_color;
 extern bool            need_to_draw_sky;
@@ -1013,9 +1014,19 @@ void MD2RenderModel(MD2Model *md, const Image *skin_img, bool is_weapon, int fra
         blending = (BlendingMode)(blending | kBlendingNoZBuffer);
 
     if (render_mirror_set.Reflective())
-        blending = (BlendingMode)(blending | kBlendingCullFront);
+    {
+        if (fliplevels.d_)
+            blending = (BlendingMode)(blending | kBlendingCullBack);
+        else
+            blending = (BlendingMode)(blending | kBlendingCullFront);
+    }
     else
-        blending = (BlendingMode)(blending | kBlendingCullBack);
+    {
+        if (fliplevels.d_)
+            blending = (BlendingMode)(blending | kBlendingCullFront);
+        else
+            blending = (BlendingMode)(blending | kBlendingCullBack);
+    }
 
     data.map_object_ = mo;
     data.model_      = md;

@@ -54,6 +54,7 @@
 
 extern ConsoleVariable debug_fps;
 extern ConsoleVariable debug_position;
+extern ConsoleVariable fliplevels;
 
 static CheatSequence cheat_powerup[9] = {
     {0, 0},
@@ -84,6 +85,7 @@ static CheatSequence cheat_keys            = {0, 0};
 static CheatSequence cheat_no_clipping     = {0, 0};
 static CheatSequence cheat_no_clipping2    = {0, 0};
 static CheatSequence cheat_hall_of_mirrors = {0, 0};
+static CheatSequence cheat_flip_level      = {0, 0};
 
 static CheatSequence cheat_give_weapon[11] = {
     {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0},
@@ -457,6 +459,13 @@ bool CheatResponder(InputEvent *ev)
         // 'mus' cheat for changing music
         StartMenuMessageInput(language["MusicQ"], M_ChangeMusicCheat);
     }
+    else if (CheckCheatSequence(&cheat_flip_level, key))
+    {
+        if (fliplevels.d_)
+            fliplevels = 0;
+        else
+            fliplevels = 1;
+    }
     else if (CheckCheatSequence(&cheat_show_stats, key))
     {
         debug_fps      = debug_fps.d_ ? 0 : 1;
@@ -500,6 +509,7 @@ void CheatInitialize(void)
     cheat_keys.sequence       = language["idunlock"];
     cheat_loaded.sequence     = language["idloaded"];
     cheat_take_all.sequence   = language["idtakeall"];
+    cheat_flip_level.sequence = language["flipme"];
 
     for (i = 0; i < 11; i++)
     {

@@ -15,6 +15,7 @@ EDGE_DEFINE_CONSOLE_VARIABLE(renderer_far_clip, "64000", kConsoleVariableFlagArc
 EDGE_DEFINE_CONSOLE_VARIABLE(draw_culling, "0", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(draw_culling_distance, "3000", kConsoleVariableFlagArchive, 1000.0f, 16000.0f)
 EDGE_DEFINE_CONSOLE_VARIABLE(cull_fog_color, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(fliplevels, "0", kConsoleVariableFlagNone)
 
 void RenderBackend::SoftInit(void)
 {
@@ -52,5 +53,5 @@ void RenderBackend::Init()
 
     AllocateDrawStructs();
 
-    SetupMatrices2D();
+    SetupMatrices2D(false);
 }

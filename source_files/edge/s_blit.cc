@@ -28,6 +28,7 @@
 #include <list>
 
 #include "AlmostEquals.h"
+#include "con_var.h"
 #include "dm_state.h"
 #include "epi.h"
 #include "epi_sdl.h"
@@ -40,6 +41,8 @@
 #include "s_cache.h"
 #include "s_music.h"
 #include "s_sound.h"
+
+extern ConsoleVariable fliplevels;
 
 SoundChannel *mix_channels[kMaximumSoundChannels];
 int           total_channels;
@@ -130,8 +133,14 @@ void UpdateSounds(MapObject *listener, BAMAngle angle)
     ma_engine_listener_set_position(&sound_engine, 0, listen_x, listen_z, -listen_y);
 
     if (listener)
-        ma_engine_listener_set_direction(&sound_engine, 0, epi::BAMCos(angle), epi::BAMTan(listener->vertical_angle_),
-                                         -epi::BAMSin(angle));
+    {
+        if (fliplevels.d_)
+            ma_engine_listener_set_direction(&sound_engine, 0, epi::BAMCos(angle - kBAMAngle180), epi::BAMTan(listener->vertical_angle_),
+                                            -epi::BAMSin(angle));
+        else
+            ma_engine_listener_set_direction(&sound_engine, 0, epi::BAMCos(angle), epi::BAMTan(listener->vertical_angle_),
+                                            -epi::BAMSin(angle));
+    }
     else
         ma_engine_listener_set_direction(&sound_engine, 0, 0, 0, 0);
 

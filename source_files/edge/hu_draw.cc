@@ -47,6 +47,7 @@ extern ConsoleLine    *quit_lines[kENDOOMLines];
 extern int             console_cursor;
 extern const Font     *endoom_font;
 extern ConsoleVariable video_overlay;
+extern ConsoleVariable fliplevels;
 
 static Font *default_font;
 
@@ -1595,7 +1596,13 @@ void HUDRenderAutomap(float x, float y, float w, float h, MapObject *player, int
         }
     }
 
+    if (fliplevels.d_)
+        render_backend->SetupMatrices2D(true);
+
     AutomapRender(x, y, w, h, player);
+
+    if (fliplevels.d_)
+        render_backend->SetupMatrices2D(false);
 
     HUDPopScissor();
 }

@@ -1381,7 +1381,7 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
     if (!weak_spot && damage >= 0.1f && inflictor && inflictor->current_attack_ &&
         0 == (inflictor->current_attack_->attack_class_ & ~target->info_->resistance_))
     {
-        damage = HMM_MAX(0.1f, damage * target->info_->resist_multiply_);
+        damage = HMM_MAX(0.05f, damage * target->info_->resist_multiply_);
     }
 
     // -ACB- 1998/07/12 Use Visibility Enum
@@ -1473,9 +1473,9 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
             if (0 == (inflictor->current_attack_->attack_class_ & ~arm_info->immunity_))
                 return; /* immune : we can go home early! */
 
-            if (damage > 0.1f && 0 == (inflictor->current_attack_->attack_class_ & ~arm_info->resistance_))
+            if (damage > 0.05f && 0 == (inflictor->current_attack_->attack_class_ & ~arm_info->resistance_))
             {
-                damage = HMM_MAX(0.1f, damage * arm_info->resist_multiply_);
+                damage = HMM_MAX(0.05f, damage * arm_info->resist_multiply_);
             }
         }
 
@@ -1650,13 +1650,17 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
 
     // enter pain states
     float pain_chance;
+    bool resistance_spot = false; 
+
+    if (inflictor && inflictor->current_attack_ &&
+             0 == (inflictor->current_attack_->attack_class_ & ~target->info_->resistance_))
+        resistance_spot = true;
 
     if (target->flags_ & kMapObjectFlagSkullFly)
         pain_chance = 0;
     else if (weak_spot && target->info_->weak_.painchance_ >= 0)
         pain_chance = target->info_->weak_.painchance_;
-    else if (target->info_->resist_painchance_ >= 0 && inflictor && inflictor->current_attack_ &&
-             0 == (inflictor->current_attack_->attack_class_ & ~target->info_->resistance_))
+    else if (resistance_spot && target->info_->resist_painchance_ >= 0)
         pain_chance = target->info_->resist_painchance_;
     else
         pain_chance = target->pain_chance_; // Lobo 2023: use dynamic painchance
@@ -1671,6 +1675,9 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
 
         if (weak_spot)
             state = MapObjectFindLabel(target, "WEAKPAIN");
+
+        if (resistance_spot)
+            state = MapObjectFindLabel(target, "RESISTANCEPAIN");
 
         if (state == 0 && damtype && damtype->pain_.label_ != "")
         {

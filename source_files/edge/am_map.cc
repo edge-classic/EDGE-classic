@@ -767,6 +767,30 @@ std::string Aux2StringReplaceAll(std::string str, const std::string &from, const
     return str;
 }
 
+// Lobo: default to showing the keycard instead of the skullkey for non-boom doors
+static int GetKeyNumber(int KeyType)
+{
+    int converted = KeyType;
+   
+    //If it doesn't matter Card or Skull, prefer card and swap it in.
+    switch (KeyType)
+    {
+        case (kDoorKeyBlueCard | kDoorKeyBlueSkull):
+            converted = kDoorKeyBlueCard;
+            break;
+
+        case (kDoorKeyRedCard | kDoorKeyRedSkull):
+            converted = kDoorKeyRedCard;
+             break;
+
+        case (kDoorKeyYellowCard | kDoorKeyYellowSkull):
+            converted = kDoorKeyYellowCard;
+            break;
+    }
+    return converted;
+}
+
+
 // Lobo 2023: draw some key info in the middle of a line
 static void DrawKeys()
 {
@@ -789,9 +813,12 @@ static void DrawKeys()
 
     for (const AutomapKey &key : automap_keys)
     {
-        TheObject = mobjtypes.LookupDoorKey(key.type);
+        
+        //TheObject = mobjtypes.LookupDoorKey(key.type);
+        TheObject = mobjtypes.LookupDoorKey(GetKeyNumber(key.type));
         if (!TheObject)
             continue; // Very rare, only zombiesTC hits this so far
+
 
         if (automap_keydoor_text.d_ == 1)
         {
@@ -939,6 +966,7 @@ static bool CheckSimiliarRegions(Sector *front, Sector *back)
     return (F || B) ? false : true;
 }
 
+
 //
 // Determines visible lines, draws them.
 //
@@ -992,15 +1020,26 @@ static void AddWall(const Line *line)
                         if (automap_keydoor_text.d_ > 0)
                             automap_keys.push_back({midx, midy, (int)kDoorKeyStrictlyAllKeys});
                     }
+                    else if (line->special->keys_ == (kDoorKeyRedCard | kDoorKeyRedSkull | kDoorKeyBlueCard | kDoorKeyBlueSkull | kDoorKeyYellowCard
+                                     | kDoorKeyYellowSkull))
+                    {
+                        l->color = kRGBAFuchsia;
+                        DrawMLineDoor(l); // orange
+                        GetKeyNumber(line->special->keys_);
+                        if (automap_keydoor_text.d_ > 0)
+                            automap_keys.push_back(
+                                {midx, midy,
+                                 (int)(line->special->keys_)});
+                    }
                     else if (line->special->keys_ & (kDoorKeyBlueSkull | kDoorKeyBlueCard))
                     {
                         l->color = kRGBABlue;
                         DrawMLineDoor(l); // blue
+                        GetKeyNumber(line->special->keys_);
                         if (automap_keydoor_text.d_ > 0)
                             automap_keys.push_back(
                                 {midx, midy,
-                                 (int)(line->special->keys_ & kDoorKeyBlueSkull ? kDoorKeyBlueSkull
-                                                                                : kDoorKeyBlueCard)});
+                                 (int)(line->special->keys_)});
                     }
                     else if (line->special->keys_ & (kDoorKeyYellowSkull | kDoorKeyYellowCard))
                     {
@@ -1009,8 +1048,7 @@ static void AddWall(const Line *line)
                         if (automap_keydoor_text.d_ > 0)
                             automap_keys.push_back(
                                 {midx, midy,
-                                 (int)(line->special->keys_ & kDoorKeyYellowSkull ? kDoorKeyYellowSkull
-                                                                                  : kDoorKeyYellowCard)});
+                                 (int)(line->special->keys_)});
                     }
                     else if (line->special->keys_ & (kDoorKeyRedSkull | kDoorKeyRedCard))
                     {
@@ -1019,7 +1057,7 @@ static void AddWall(const Line *line)
                         if (automap_keydoor_text.d_ > 0)
                             automap_keys.push_back(
                                 {midx, midy,
-                                 (int)(line->special->keys_ & kDoorKeyRedSkull ? kDoorKeyRedSkull : kDoorKeyRedCard)});
+                                 (int)(line->special->keys_)});
                     }
                     else if (line->special->keys_ & (kDoorKeyGreenSkull | kDoorKeyGreenCard))
                     {
@@ -1028,8 +1066,7 @@ static void AddWall(const Line *line)
                         if (automap_keydoor_text.d_ > 0)
                             automap_keys.push_back(
                                 {midx, midy,
-                                 (int)(line->special->keys_ & kDoorKeyGreenSkull ? kDoorKeyGreenSkull
-                                                                                 : kDoorKeyGreenCard)});
+                                 (int)(line->special->keys_)});
                     }
                     else
                     {

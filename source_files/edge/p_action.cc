@@ -2133,11 +2133,17 @@ int MissileContact(MapObject *object, MapObject *target)
     if (object->hyper_flags_ & kHyperFlagInvulnerable)
         return 0;
 
-    if (!weak_spot && object->current_attack_ &&
-        0 == (object->current_attack_->attack_class_ & ~target->info_->immunity_))
+    if (!weak_spot && source->current_attack_ &&
+        0 == (source->current_attack_->attack_class_ & ~target->info_->immunity_))
     {
+        int state = 0;
+        state = MapObjectFindLabel(target, "IMMUNITYHIT");
+        if (state != 0)
+            MapObjectSetStateDeferred(target, state, 0);
+
         return 0;
     }
+
 
     // support for "tunnelling" missiles, which should only do damage at
     // the first impact.
@@ -2246,9 +2252,15 @@ int BulletContact(MapObject *source, MapObject *target, float damage, const Dama
     if (target->hyper_flags_ & kHyperFlagInvulnerable)
         return 0;
 
+
     if (!weak_spot && source->current_attack_ &&
         0 == (source->current_attack_->attack_class_ & ~target->info_->immunity_))
     {
+        int state = 0;
+        state = MapObjectFindLabel(target, "IMMUNITYHIT");
+        if (state != 0)
+            MapObjectSetStateDeferred(target, state, 0);
+
         return 0;
     }
 
@@ -2604,7 +2616,15 @@ static void SprayAttack(MapObject *mo)
             continue;
 
         if (0 == (attack->attack_class_ & ~target->info_->immunity_))
-            continue;
+        {
+            int state = 0;
+            state = MapObjectFindLabel(target, "IMMUNITYHIT");
+            if (state != 0)
+                MapObjectSetStateDeferred(target, state, 0);
+
+                continue;
+        }
+            
 
         float damage;
         EDGE_DAMAGE_COMPUTE(damage, &attack->damage_);

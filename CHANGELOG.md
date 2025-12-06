@@ -1,8 +1,8 @@
 # CHANGELOG for EDGE-Classic 1.52 (since EDGE-Classic 1.51)
 
 ## New Features
-- New DDFTHING state: RESISTANCE_PAIN. Used simlarly to WEAK_PAIN, a creature with a Resistance class assigned will go into this state when it is hurt by a corresponding attack class.
-
+- New DDFTHING state: RESISTANCE_PAIN. Similar to WEAK_PAIN, a creature with a Resistance class assigned *MAY* go into this state when it is hurt by a corresponding attack class. RESISTANCE_PAINCHANCE controls the probability of going into this state (100% always, 0% never).
+- New DDFTHING state: IMMUNITY_HIT. A creature with an IMMUNITY class assigned will *ALWAYS* go into this state when it is hit by a corresponding attack class.
 
 ## General Improvements/Changes
 - Keyed doors on automap improved

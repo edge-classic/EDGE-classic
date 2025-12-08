@@ -2133,8 +2133,8 @@ int MissileContact(MapObject *object, MapObject *target)
     if (object->hyper_flags_ & kHyperFlagInvulnerable)
         return 0;
 
-    if (!weak_spot && source->current_attack_ &&
-        0 == (source->current_attack_->attack_class_ & ~target->info_->immunity_))
+    if (!weak_spot && object->current_attack_ &&
+        0 == (object->current_attack_->attack_class_ & ~target->info_->immunity_))
     {
         int state = 0;
         state = MapObjectFindLabel(target, "IMMUNITYHIT");

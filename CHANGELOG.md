@@ -8,6 +8,8 @@
 - Keyed doors on automap improved
   - shows correct key type (card or skull), with preference for card if either key will do. 
   - "Any Key" doors coloured purple.
+- Restored `flipme` cheat and `fliplevels` CVAR
+- Adjusted fog density calculations when drawing sky textures/skyboxes
 
 
 ## General Bugfixes

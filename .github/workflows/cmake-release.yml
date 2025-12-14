@@ -57,7 +57,7 @@ jobs:
       - name: Set environment variables and build
         run: |
           $env:Path = "${{github.workspace}}\w64devkit\bin;" + $env:Path
-          cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_FLAGS="-isystem ${{github.workspace}}\w64devkit\include" -G "MinGW Makefiles"
+          cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DEDGE_LEGACY_GL=ON -DCMAKE_CXX_FLAGS="-isystem ${{github.workspace}}\w64devkit\include" -G "MinGW Makefiles"
           cmake --build build --target GenerateEPKS
           cmake --build build --config ${{env.BUILD_TYPE}}
           strip ${{github.workspace}}\edge-classic.exe
@@ -78,29 +78,4 @@ jobs:
             *.dll
             *.epk
             CHANGELOG.md
-          retention-days: ${{env.RETENTION_DAYS}}     
-  build-web-player:
-    runs-on: ubuntu-24.04
-    
-    steps:      
-    - uses: actions/checkout@v4
-
-    - uses: mymindstorm/setup-emsdk@v14
-      with: 
-        version: latest
-            
-    - name: Configure CMake        
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE="${EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
-
-    - name: Setup Preloads
-      run: git clone https://github.com/edge-classic/web-player-wads ${{github.workspace}}/web-player-wads && cp ${{github.workspace}}/web-player-wads/freedoom/freedoom2.wad ${{github.workspace}}/web/preload/ && cp ${{github.workspace}}/web-player-wads/blasphemer/blasphem.wad ${{github.workspace}}/web/preload/
-
-    - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-  
-    - uses: actions/upload-artifact@v4
-      with:
-        name: edge-classic-web-player
-        path: |
-          ${{github.workspace}}/web/site
-        retention-days: ${{env.RETENTION_DAYS}}
+          retention-days: ${{env.RETENTION_DAYS}}

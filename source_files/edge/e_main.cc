@@ -186,7 +186,7 @@ EDGE_DEFINE_CONSOLE_VARIABLE(log_filename, "edge-classic.log", kConsoleVariableF
 EDGE_DEFINE_CONSOLE_VARIABLE(config_filename, "edge-classic.cfg", kConsoleVariableFlagNoReset)
 EDGE_DEFINE_CONSOLE_VARIABLE(debug_filename, "debug.txt", kConsoleVariableFlagNoReset)
 EDGE_DEFINE_CONSOLE_VARIABLE(window_title, "EDGE-Classic", kConsoleVariableFlagNoReset)
-EDGE_DEFINE_CONSOLE_VARIABLE(edge_version, "1.51", kConsoleVariableFlagNoReset)
+EDGE_DEFINE_CONSOLE_VARIABLE(edge_version, "1.52", kConsoleVariableFlagNoReset)
 EDGE_DEFINE_CONSOLE_VARIABLE(team_name, "EDGE Team", kConsoleVariableFlagNoReset)
 EDGE_DEFINE_CONSOLE_VARIABLE(application_name, "EDGE-Classic", kConsoleVariableFlagNoReset)
 EDGE_DEFINE_CONSOLE_VARIABLE(homepage, "https://edge-classic.github.io", kConsoleVariableFlagNoReset)

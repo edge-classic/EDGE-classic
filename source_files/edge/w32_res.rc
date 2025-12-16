@@ -18,8 +18,8 @@ MAIN_MENU MENU DISCARDABLE
 MAIN_ICON ICON "edge-classic.ico"
 
 1 VERSIONINFO
-FILEVERSION 1, 5, 1, 0
-PRODUCTVERSION 1, 5, 1, 0
+FILEVERSION 1, 5, 2, 0
+PRODUCTVERSION 1, 5, 2, 0
 FILEFLAGSMASK 0x0
 FILEOS 0x40004 // VOS_NT_WINDOWS32
 FILETYPE 1     // VFT_APP
@@ -32,12 +32,12 @@ BEGIN
     BEGIN
       VALUE "CompanyName",      "The EDGE Team\0"
       VALUE "FileDescription",  "Enhanced Doom Gaming Engine - Classic Edition\0"
-      VALUE "FileVersion",      "1.51\0"
-      VALUE "InternalName",     "EDGE151\0"
+      VALUE "FileVersion",      "1.52\0"
+      VALUE "InternalName",     "EDGE152\0"
       VALUE "LegalCopyright",   "\251 The EDGE Team, et al., GNU General Public License v3\0"
       VALUE "OriginalFilename", "edge-classic.exe\0"
       VALUE "ProductName",      "EDGE-Classic\0"
-      VALUE "ProductVersion",   "1.51\0"
+      VALUE "ProductVersion",   "1.52\0"
     END
   END
   BLOCK "VarFileInfo"

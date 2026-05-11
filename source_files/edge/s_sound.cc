@@ -354,7 +354,9 @@ static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category,
     if (attenuate)
     {
         ma_sound_set_attenuation_model(&chan->channel_sound_, ma_attenuation_model_exponential);
-        if (CheckSightToPoint(players[display_player]->map_object_, pos->x, pos->y, pos->z))
+        
+        // Lobo 2026: possible to get here before we actually have a player mobj so make sure
+        if (players[display_player]->map_object_ && CheckSightToPoint(players[display_player]->map_object_, pos->x, pos->y, pos->z))
             ma_sound_set_min_distance(&chan->channel_sound_, kMinimumSoundClipDistance);
         else
             ma_sound_set_min_distance(&chan->channel_sound_, kMinimumOccludedSoundClipDistance);

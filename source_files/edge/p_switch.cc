@@ -231,10 +231,17 @@ void UpdateButtons(void)
                 FatalError("INTERNAL ERROR: bwhere is kButtonNone!\n");
             }
 
-            if (b->off_sound)
+            // Lobo 2026: we dont' want to play the switch SFX on walkable lines even though they have a switch texture
+            if (b->line->special->type_ != kLineTriggerWalkable)
             {
-                StartSoundEffect(b->off_sound, kCategoryLevel, &b->line->front_sector->sound_effects_origin);
+                if (b->off_sound)
+                {
+                    StartSoundEffect(b->off_sound, kCategoryLevel, &b->line->front_sector->sound_effects_origin);
+                }
             }
+
+
+            
 
             EPI_CLEAR_MEMORY(b, Button, 1);
         }

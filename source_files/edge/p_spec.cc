@@ -1729,6 +1729,10 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special, int tag, 
             line->special = (special->newtrignum_ <= 0) ? nullptr : LookupLineType(special->newtrignum_);
         }
 
+        // Lobo 2026: we dont' want to play the switch SFX on walkable lines even though they have a switch texture
+        if (line->special && line->special->type_ == kLineTriggerWalkable)
+            playedSound = true;
+
         ChangeSwitchTexture(line, line->special && (special->newtrignum_ == 0), special->special_flags_, playedSound);
     }
     return true;

@@ -761,7 +761,7 @@ static void PL_ammo_type(coal::VM *vm, int argc)
     EPI_UNUSED(argc);
     int ATK = (int)*vm->AccessParam(0);
 
-    if (ATK < 1 || ATK > 2)
+    if (ATK < 1 || ATK > 4)
         FatalError("player.ammo_type: bad attack number: %d\n", ATK);
 
     ATK--;
@@ -785,7 +785,7 @@ static void PL_ammo_pershot(coal::VM *vm, int argc)
     EPI_UNUSED(argc);
     int ATK = (int)*vm->AccessParam(0);
 
-    if (ATK < 1 || ATK > 2)
+    if (ATK < 1 || ATK > 4)
         FatalError("player.ammo_pershot: bad attack number: %d\n", ATK);
 
     ATK--;
@@ -809,7 +809,7 @@ static void PL_clip_ammo(coal::VM *vm, int argc)
     EPI_UNUSED(argc);
     int ATK = (int)*vm->AccessParam(0);
 
-    if (ATK < 1 || ATK > 2)
+    if (ATK < 1 || ATK > 4)
         FatalError("player.clip_ammo: bad attack number: %d\n", ATK);
 
     ATK--;
@@ -833,7 +833,7 @@ static void PL_clip_size(coal::VM *vm, int argc)
     EPI_UNUSED(argc);
     int ATK = (int)*vm->AccessParam(0);
 
-    if (ATK < 1 || ATK > 2)
+    if (ATK < 1 || ATK > 4)
         FatalError("player.clip_size: bad attack number: %d\n", ATK);
 
     ATK--;

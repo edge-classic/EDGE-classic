@@ -1049,8 +1049,16 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props)
                     if (map_object_hit_sky)
                         RemoveMissile(mo);
                     else
-                        ExplodeMissile(mo);
-
+                    {
+                        if(mo->hyper_flags_ & kHyperFlagInvulnerable || mo->hyper_flags_ & kHyperFlagImmortal)
+                        {
+                            // If it's a bouncer but invulnerable/immortal then we want it to NOT explode when it hits a mobj
+                            BounceOffPlane(mo, 0.0f);
+                        }
+                        else
+                            ExplodeMissile(mo);
+                    
+                    }
                     return;
                 }
 

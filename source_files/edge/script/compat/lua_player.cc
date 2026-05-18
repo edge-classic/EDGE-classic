@@ -738,7 +738,7 @@ static int PL_ammo_type(lua_State *L)
 {
     int ATK = (int)luaL_checknumber(L, 1);
 
-    if (ATK < 1 || ATK > 2)
+    if (ATK < 1 || ATK > 4)
         FatalError("player.ammo_type: bad attack number: %d\n", ATK);
 
     ATK--;
@@ -762,7 +762,7 @@ static int PL_ammo_pershot(lua_State *L)
 {
     int ATK = (int)luaL_checknumber(L, 1);
 
-    if (ATK < 1 || ATK > 2)
+    if (ATK < 1 || ATK > 4)
         FatalError("player.ammo_pershot: bad attack number: %d\n", ATK);
 
     ATK--;
@@ -786,7 +786,7 @@ static int PL_clip_ammo(lua_State *L)
 {
     int ATK = (int)luaL_checknumber(L, 1);
 
-    if (ATK < 1 || ATK > 2)
+    if (ATK < 1 || ATK > 4)
         FatalError("player.clip_ammo: bad attack number: %d\n", ATK);
 
     ATK--;
@@ -810,7 +810,7 @@ static int PL_clip_size(lua_State *L)
 {
     int ATK = (int)luaL_checknumber(L, 1);
 
-    if (ATK < 1 || ATK > 2)
+    if (ATK < 1 || ATK > 4)
         FatalError("player.clip_size: bad attack number: %d\n", ATK);
 
     ATK--;
@@ -1801,7 +1801,7 @@ static void CreateLuaTable_Attacks(lua_State *L, WeaponDefinition *objWep)
 static void CreateLuaTable_Weapon(lua_State *L, WeaponDefinition *objWep)
 {
     std::string temp_value;
-    int         NumberOfItems = 3;        // how many fields in a row
+    int         NumberOfItems = 4;        // how many fields in a row
     lua_createtable(L, 0, NumberOfItems); // our WEAPON table
 
     //---------------
@@ -1814,10 +1814,15 @@ static void CreateLuaTable_Weapon(lua_State *L, WeaponDefinition *objWep)
 
     //---------------
     // weapon.zoomfactor
-    // float temp_num2   = 90.0f / objWep->zoom_fov;
     float temp_num2 = objWep->zoom_factor_;
     lua_pushnumber(L, temp_num2);
     lua_setfield(L, -2, "zoom_factor"); // add to WEAPON Table
+    //---------------
+
+    //---------------
+    // weapon.sharedclip
+    lua_pushboolean(L, objWep->shared_clip_ ? 1 : 0);
+    lua_setfield(L, -2, "shared_clip"); // add to WEAPON Table
     //---------------
 
     //---------------

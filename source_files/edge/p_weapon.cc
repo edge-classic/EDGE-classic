@@ -1963,7 +1963,13 @@ void A_WeaponJump(MapObject *mo)
     }
 }
 
-// Lobo: what the hell is this function for?
+
+// Lobo 2026: this action() is a mess, looks like it was copy/pasted and slightly tweaked from some other action.
+// Otherwise why the hell would it have a percentage input to decide which attack to apply it too? Shoddy.
+// FIXME: do an alternative variant, but with a more descriptive name and proper argument handling for the attack parameter.
+
+// Explanation: Add 1 ammo to clip, and, if it's not enough to fill the clip, then Jump to a certain state.
+// Name possibly comes from "D.o J.ump if N.ot E.nough"?
 void A_WeaponDJNE(MapObject *mo)
 {
     Player       *p   = mo->player_;

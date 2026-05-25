@@ -291,13 +291,13 @@ PatchFont::PatchFont(FontDefinition *definition)
     {
         patch_font_cache_.height = definition_->default_size_;
         patch_font_cache_.width  = definition_->default_size_ * (Nom.image_width / Nom.image_height);
-        patch_font_cache_.ratio  = patch_font_cache_.width / patch_font_cache_.height;
+        patch_font_cache_.ratio  = float(patch_font_cache_.width) / float(patch_font_cache_.height);
     }
     else
     {
         patch_font_cache_.width  = Nom.image_width;
         patch_font_cache_.height = Nom.image_height;
-        patch_font_cache_.ratio  = Nom.image_width / Nom.image_height;
+        patch_font_cache_.ratio  = float(Nom.image_width) / float(Nom.image_height);
     }
     spacing_ = definition_->spacing_;
 }

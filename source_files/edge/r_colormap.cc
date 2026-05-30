@@ -765,7 +765,7 @@ class ColormapShader : public AbstractShader
         if (fade_texture_ == 0 ||
             (current_map->episode_->lighting_ != kLightingModelUnset &&
              lighting_model_ != current_map->episode_->lighting_) ||
-            (default_lighting.d_ != lighting_model_))
+            (current_map->episode_->lighting_ == kLightingModelUnset && default_lighting.d_ != lighting_model_))
         {
             if (fade_texture_ != 0)
             {

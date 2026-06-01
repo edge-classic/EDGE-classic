@@ -15,14 +15,14 @@ jobs:
   build-msvc:
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Configure CMake MSVC
         run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
       - name: Build MSVC
         run: |
           cmake --build build --target GenerateEPKS
           cmake --build build --config ${{env.BUILD_TYPE}}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: edge-classic-msvc
           path: |
@@ -38,10 +38,11 @@ jobs:
             *.epk
             CHANGELOG.md
           retention-days: ${{env.RETENTION_DAYS}} 
+
   build-mingw32:
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Download w64devkit
         run: invoke-webrequest https://github.com/skeeto/w64devkit/releases/download/v2.1.0/w64devkit-x86-2.1.0.exe -outfile ${{github.workspace}}\w64devkit.exe
       - name: Extract w64devkit
@@ -63,7 +64,7 @@ jobs:
           strip ${{github.workspace}}\edge-classic.exe
       - name: Copy SDL2 DLL
         run: copy-item -path ${{github.workspace}}\SDL2-2.32.10\i686-w64-mingw32\bin\SDL2.dll -destination ${{github.workspace}}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: edge-classic-mingw32
           path: |
@@ -78,4 +79,22 @@ jobs:
             *.dll
             *.epk
             CHANGELOG.md
+          retention-days: ${{env.RETENTION_DAYS}}
+
+  build-linux:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsdl2-dev
+      - name: Configure CMake
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DEDGE_SOKOL_GL=ON
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --target appdir
+      - uses: actions/upload-artifact@v7
+        with:
+          name: edge-classic-linux
+          path: ${{github.workspace}}/build/edge-classic.zip
           retention-days: ${{env.RETENTION_DAYS}}

@@ -1185,11 +1185,24 @@ void ScriptJumpOn(RADScriptTrigger *R, void *param)
         cache_state = FindScriptStateByLabel(R->info, label);
         R->state    = cache_state;
     }
-    else
+    else //if we are here then they cancelled out of a menu
     {
-        cache_state  = R->info->first_state;
-        R->state     = cache_state;
-        R->activated = false;
+        if (count == 1) // Only 1 menu option so just assume "Cancel" is the same as "OK"
+        {
+            label = jm->labels[0]; //always just grab the only option
+
+            // FIXME: do this in a post-parsing analysis
+            cache_state = FindScriptStateByLabel(R->info, label);
+            R->state    = cache_state;
+        }
+        else
+        {
+            cache_state  = R->info->first_state;
+            R->state     = cache_state;
+            R->activated = false;
+        }
+
+        
     }
 
     if (!cache_state && label)

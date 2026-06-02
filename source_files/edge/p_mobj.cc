@@ -1181,7 +1181,7 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props)
                 mo->momentum_.X = mo->momentum_.Y = 0;
             }
         }
-    } while (xmove || ymove);
+    } while (!AlmostEquals(xmove, 0.0f) || !AlmostEquals(ymove, 0.0f)); //while (xmove || ymove);
 
     if ((mo->extended_flags_ & kExtendedFlagNoFriction) || (mo->flags_ & kMapObjectFlagSkullFly))
         return;

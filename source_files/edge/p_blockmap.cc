@@ -32,7 +32,6 @@
 #include "AlmostEquals.h"
 #include "dm_defs.h"
 #include "dm_state.h"
-#include "edge_profiling.h"
 #include "epi.h"
 #include "epi_doomdefs.h"
 #include "i_defs_gl.h" // needed for r_shader.h
@@ -765,8 +764,6 @@ bool BlockmapThingIterator(float x1, float y1, float x2, float y2, bool (*func)(
 void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2, float z2, void (*func)(MapObject *, void *),
                           void *data)
 {
-    EDGE_ZoneScoped;
-
     int lx = LightmapGetX(x1) - 1;
     int ly = LightmapGetY(y1) - 1;
     int hx = LightmapGetX(x2) + 1;
@@ -816,7 +813,6 @@ void SectorGlowIterator(Sector *sec, float x1, float y1, float z1, float x2, flo
     EPI_UNUSED(x2);
     EPI_UNUSED(y2);
     EPI_UNUSED(z2);
-    EDGE_ZoneScoped;
 
     for (MapObject *mo = sec->glow_things; mo; mo = mo->dynamic_light_next_)
     {

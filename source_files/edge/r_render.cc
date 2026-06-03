@@ -33,7 +33,6 @@
 #include "AlmostEquals.h"
 #include "dm_defs.h"
 #include "dm_state.h"
-#include "edge_profiling.h"
 #include "epi.h"
 #include "epi_doomdefs.h"
 #include "g_game.h"
@@ -866,8 +865,6 @@ static void DrawGlass(DrawFloor *dfloor, float c, float f, float tex_top_h, MapS
 static void DrawTile(Seg *seg, DrawFloor *dfloor, float lz1, float lz2, float rz1, float rz2, float tex_z, int flags,
                      MapSurface *surf)
 {
-    EDGE_ZoneScoped;
-
     // tex_z = texturing top, in world coordinates
 
     const Image *image = surf->image;
@@ -980,8 +977,6 @@ static inline float SafeImageHeight(const Image *image)
 static void ComputeWallTiles(Seg *seg, DrawFloor *dfloor, int sidenum, float f_min, float c_max,
                              bool mirror_sub = false)
 {
-    EDGE_ZoneScoped;
-
     Line       *ld = seg->linedef;
     Side       *sd = ld->side[sidenum];
     Sector     *sec, *other;
@@ -1536,8 +1531,6 @@ static void RenderSeg(DrawFloor *dfloor, Seg *seg, bool mirror_sub = false)
 
 static void RenderPlane(DrawFloor *dfloor, float h, MapSurface *surf, int face_dir)
 {
-    EDGE_ZoneScoped;
-
     float orig_h = h;
 
     render_mirror_set.Height(h);
@@ -1786,8 +1779,6 @@ void RenderSubList(std::list<DrawSubsector *> &dsubs, bool for_mirror)
 
 static void RenderSubsector(DrawSubsector *dsub, bool mirror_sub)
 {
-    EDGE_ZoneScoped;
-
     Subsector *sub = dsub->subsector;
 
 #if (DEBUG >= 1)
@@ -2039,8 +2030,6 @@ void UpdateSectorInterpolation(Sector *sector)
 //
 void RenderTrueBSP(void)
 {
-    EDGE_ZoneScoped;
-
     FuzzUpdate();
 
     ClearBSP();
@@ -2270,8 +2259,6 @@ void RenderTrueBSP(void)
 
 void RenderView(int x, int y, int w, int h, MapObject *camera, bool full_height, float expand_w)
 {
-    EDGE_ZoneScoped;
-
     view_window_x      = x;
     view_window_y      = y;
     view_window_width  = w;
@@ -2393,8 +2380,6 @@ static void DLIT_Flood(MapObject *mo, void *dataptr)
 
 void EmulateFloodPlane(const DrawFloor *dfloor, const Sector *flood_ref, int face_dir, float h1, float h2)
 {
-    EDGE_ZoneScoped;
-
     EPI_UNUSED(dfloor);
 
     if (render_mirror_set.TotalActive() > 0)

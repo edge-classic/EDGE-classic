@@ -327,8 +327,6 @@ SoundEffectDefinition *LookupEffectDef(const SoundEffect *s)
 static void S_PlaySound(int idx, const SoundEffectDefinition *def, int category, const Position *pos, int flags,
                         SoundData *buf)
 {
-    EDGE_ZoneScoped;
-
     SoundChannel *chan = mix_channels[idx];
 
     chan->state_ = kChannelPlaying;

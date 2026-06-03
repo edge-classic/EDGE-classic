@@ -33,7 +33,6 @@
 #endif
 #include "dm_defs.h"
 #include "dm_state.h"
-#include "edge_profiling.h"
 #include "epi_color.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
@@ -967,8 +966,6 @@ static void RendererClipSpriteVertically(DrawSubsector *dsub, DrawThing *dthing)
 
 void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
 {
-    EDGE_ZoneScoped;
-
     /* Visit a single thing that exists in the current subsector */
 
     EPI_ASSERT(mo->state_);
@@ -1132,8 +1129,6 @@ void BSPWalkThing(DrawSubsector *dsub, MapObject *mo)
 
 static void RenderModel(DrawThing *dthing)
 {
-    EDGE_ZoneScoped;
-
     MapObject *mo = dthing->map_object;
 
     ModelDefinition *md = GetModel(mo->state_->sprite);
@@ -1205,8 +1200,6 @@ static void DLIT_Thing(MapObject *mo, void *dataptr)
 
 static bool RenderThing(DrawThing *dthing, bool solid)
 {
-    EDGE_ZoneScoped;
-
     ec_frame_stats.draw_things++;
 
     if (dthing->is_model)
@@ -1595,8 +1588,6 @@ bool RenderThings(DrawFloor *dfloor, bool solid)
     //
     // -ACB- 2004/08/17
     //
-
-    EDGE_ZoneScoped;
 
     DrawThing *head_dt;
 

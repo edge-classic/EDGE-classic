@@ -122,8 +122,6 @@ void KillSoundChannel(int k)
 
 void UpdateSounds(MapObject *listener, BAMAngle angle)
 {
-    EDGE_ZoneScoped;
-
     ma_sound_group_set_volume(&sfx_node, sound_effect_volume.f_ * 0.5f);
 
     listen_x = listener ? listener->x : 0;

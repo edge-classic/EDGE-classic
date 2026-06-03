@@ -26,7 +26,6 @@
 #include "AlmostEquals.h"
 #include "dm_state.h"
 #include "e_player.h"
-#include "edge_profiling.h"
 #include "epi.h"
 #include "i_defs_gl.h"
 #include "im_data.h"
@@ -268,8 +267,6 @@ static void EnableCustomEnvironment(GLuint env, bool enable)
 //
 void RenderCurrentUnits(void)
 {
-    EDGE_ZoneScoped;
-
     if (render_backend->RenderUnitsLocked())
     {
         FatalError("RenderCurrentUnits - Render units are locked");

@@ -311,10 +311,10 @@ SoundEffect *SoundEffectDefinitionContainer::GetEffect(const char *name, bool er
         if (error)
         {
             // exception for our builtin SECRET sound
-            if (DDFCompareName(name, "SECRET") == 0)
-                return nullptr;
-            else
+            if (DDFCompareName(name, "SECRET") != 0)
                 DDFWarnError("Unknown SFX: '%.8s'\n", name);
+                
+            return nullptr;
         }
   
     }

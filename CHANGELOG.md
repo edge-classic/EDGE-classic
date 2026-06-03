@@ -5,6 +5,6 @@
 
 ## General Improvements/Changes
 
-
+- Removed Tracy profiler integration; retained basic rendering status (set debug_fps to '3' to view)
 
 ## General Bugfixes

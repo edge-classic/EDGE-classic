@@ -31,7 +31,6 @@
 #include "AlmostEquals.h"
 #include "dm_defs.h"
 #include "dm_state.h"
-#include "edge_profiling.h"
 #include "epi.h"
 #include "epi_doomdefs.h"
 #include "g_game.h"
@@ -170,8 +169,6 @@ static void BSPWalkMirror(DrawSubsector *dsub, Seg *seg, BAMAngle left, BAMAngle
 //
 static void BSPWalkSeg(DrawSubsector *dsub, Seg *seg)
 {
-    EDGE_ZoneScoped;
-
     // ignore segs sitting on current mirror
     if (bsp_mirror_set.SegOnPortal(seg))
         return;
@@ -464,8 +461,6 @@ static void BSPWalkSeg(DrawSubsector *dsub, Seg *seg)
 //
 static bool BSPCheckBBox(const float *bspcoord)
 {
-    EDGE_ZoneScoped;
-
     if (bsp_mirror_set.TotalActive() > 0)
     {
         // a flipped bbox may no longer be axis aligned, hence we
@@ -644,8 +639,6 @@ static inline void AddNewDrawFloor(DrawSubsector *dsub, Extrafloor *ef, float fl
 //
 static void BSPWalkSubsector(int num)
 {
-    EDGE_ZoneScoped;
-
     Subsector *sub    = &level_subsectors[num];
     Sector    *sector = sub->sector;
 
@@ -878,8 +871,6 @@ static void BSPWalkSubsector(int num)
 //
 void BSPWalkNode(unsigned int bspnum)
 {
-    EDGE_ZoneScoped;
-
     BSPNode *node;
     int      side;
 

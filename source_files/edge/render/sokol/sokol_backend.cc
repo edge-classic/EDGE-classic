@@ -191,8 +191,6 @@ class SokolRenderBackend : public RenderBackend
 
     void FinishFrame()
     {
-        EDGE_ZoneNamedN(ZoneFinishFrame, "BackendFinishFrame", true);
-
         RendererEndFrame();
 
         if (sgl_num_vertices())
@@ -200,15 +198,8 @@ class SokolRenderBackend : public RenderBackend
             sgl_context_draw(context_pool_[current_context_]);
         }
 
-        {
-            EDGE_ZoneNamedN(ZoneDrawEndPass, "DrawEndPass", true);
-            sg_end_pass();
-        }
-
-        {
-            EDGE_ZoneNamedN(ZoneDrawCommit, "DrawCommit", true);
-            sg_commit();
-        }
+        sg_end_pass();
+        sg_commit();
 
         for (auto itr = on_frame_finished_.begin(); itr != on_frame_finished_.end(); itr++)
         {

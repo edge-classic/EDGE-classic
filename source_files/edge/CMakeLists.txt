@@ -195,7 +195,6 @@ set (EDGE_LINK_LIBRARIES
   ajbsp
   ddf
   epi
-  edge_tracy
   ${SDL2_LIBRARIES}
   almostequals
   fluidlite
@@ -222,10 +221,6 @@ if (EDGE_CLASSIC)
     m4p
     opalmidi
   )
-endif()
-
-if (EDGE_PROFILING)
-  list (APPEND EDGE_LINK_LIBRARIES TracyClient)
 endif()
 
 if (EDGE_SOKOL)

@@ -16,7 +16,6 @@ add_subdirectory(stb)
 if (NOT EMSCRIPTEN OR (EMSCRIPTEN AND EDGE_WEB_MULTITHREADED))
   add_subdirectory(thread)
 endif()
-add_subdirectory(tracy)
 
 if (EDGE_CLASSIC)
   add_subdirectory(libcRSID)

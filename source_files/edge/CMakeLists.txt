@@ -142,25 +142,18 @@ else()
   list (APPEND EDGE_SOURCE_FILES ${EDGE_SOKOL_SOURCE_FILES})
 endif()
 
-if (EDGE_CLASSIC)
-  list (APPEND 
-    EDGE_SOURCE_FILES
-    l_deh.cc
-    p_umapinfo.cc
-    s_doom.cc
-    s_m4p.cc
-    s_midi_ec.cc
-    s_sid.cc
-    vm_coal.cc
-    vm_hud.cc
-    vm_player.cc    
-  )
-else()
-  list (APPEND
-    EDGE_SOURCE_FILES 
-    s_midi.cc  
-  )
-endif()
+list (APPEND 
+  EDGE_SOURCE_FILES
+  l_deh.cc
+  p_umapinfo.cc
+  s_doom.cc
+  s_m4p.cc
+  s_midi.cc
+  s_sid.cc
+  vm_coal.cc
+  vm_hud.cc
+  vm_player.cc    
+)
 
 if (EMSCRIPTEN)
   list (APPEND EDGE_SOURCE_FILES i_web.cc)
@@ -212,16 +205,14 @@ if (NOT EMSCRIPTEN OR (EMSCRIPTEN AND EDGE_WEB_MULTITHREADED))
   list (APPEND EDGE_LINK_LIBRARIES thread)
 endif()
 
-if (EDGE_CLASSIC)
-  list (APPEND
-    EDGE_LINK_LIBRARIES
-    coal
-    dehacked
-    libcRSID
-    m4p
-    opalmidi
-  )
-endif()
+list (APPEND
+  EDGE_LINK_LIBRARIES
+  coal
+  dehacked
+  libcRSID
+  m4p
+  opalmidi
+)
 
 if (EDGE_SOKOL)
   list(APPEND EDGE_LINK_LIBRARIES sokol)

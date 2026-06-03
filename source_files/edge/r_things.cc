@@ -28,9 +28,7 @@
 #include <map>
 
 #include "AlmostEquals.h"
-#ifdef EDGE_CLASSIC
 #include "coal.h"
-#endif
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "epi_color.h"
@@ -61,17 +59,12 @@
 #include "r_texgl.h"
 #include "r_units.h"
 #include "script/compat/lua_compat.h"
-#ifdef EDGE_CLASSIC
 #include "vm_coal.h"
-#endif
 #include "w_model.h"
 #include "w_sprite.h"
 
-#ifdef EDGE_CLASSIC
 extern coal::VM *ui_vm;
 extern double    COALGetFloat(coal::VM *vm, const char *mod_name, const char *var_name);
-#endif
-
 extern bool erraticism_active;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(crosshair_image, "None", kConsoleVariableFlagArchive)
@@ -399,7 +392,7 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
     float tx2 = tx1 + w;
 
     float ty1 = -psp_y + image->ScaledOffsetY() - ((h - image->ScaledHeight()) * 0.5f);
-#ifdef EDGE_CLASSIC
+
     if (LuaUseLuaHUD())
     {
         // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
@@ -414,12 +407,7 @@ static void RenderPSprite(PlayerSprite *psp, int which, Player *player, RegionPr
             ty1 += COALGetFloat(ui_vm, "hud", "universal_y_adjust") +
                    player->weapons_[player->ready_weapon_].info->y_adjust_;
     }
-#else
-    // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
-    if ((state->flags & kStateFrameFlagWeapon) && (player->ready_weapon_ >= 0))
-        ty1 += LuaGetFloat(LuaGetGlobalVM(), "hud", "universal_y_adjust") +
-               player->weapons_[player->ready_weapon_].info->y_adjust_;
-#endif
+
     float ty2 = ty1 + h;
 
     float x1b, y1b, x1t, y1t, x2b, y2b, x2t, y2t; // screen coords
@@ -815,7 +803,7 @@ void RenderWeaponModel(Player *p)
     }
 
     float bias = 0.0f;
-#ifdef EDGE_CLASSIC
+
     if (LuaUseLuaHUD())
     {
         bias =
@@ -825,9 +813,7 @@ void RenderWeaponModel(Player *p)
     {
         bias = COALGetFloat(ui_vm, "hud", "universal_y_adjust") + p->weapons_[p->ready_weapon_].info->y_adjust_;
     }
-#else
-    bias = LuaGetFloat(LuaGetGlobalVM(), "hud", "universal_y_adjust") + p->weapons_[p->ready_weapon_].info->y_adjust_;
-#endif
+
     bias /= 5;
     bias += w->model_bias_;
 

@@ -48,9 +48,6 @@ if (EDGE_SOKOL_GL OR EDGE_SOKOL_GLES3 OR EDGE_SOKOL_D3D11)
   set (EDGE_SOKOL ON)
 endif()
 
-# Optional Features
-option(EDGE_CLASSIC "Enable default features for EDGE-Classic" ON)
-
 # Development 
 option(EDGE_SANITIZE "Enable code sanitizing" OFF)
 option(EDGE_SANITIZE_THREADS "Enable thread sanitizing (No-op with MSVC)" OFF)
@@ -231,10 +228,6 @@ if (EDGE_SOKOL)
   endif()
 else()
   find_package(OpenGL REQUIRED)
-endif()
-
-if (EDGE_CLASSIC)
-  add_definitions(-DEDGE_CLASSIC)
 endif()
 
 if (EDGE_EXTRA_CHECKS)

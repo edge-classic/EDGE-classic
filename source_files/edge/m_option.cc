@@ -199,9 +199,7 @@ static void OptionMenuChangeMonitorSize(int key_pressed, ConsoleVariable *consol
 static void OptionMenuChangeKicking(int key_pressed, ConsoleVariable *console_variable);
 static void OptionMenuChangeWeaponSwitch(int key_pressed, ConsoleVariable *console_variable);
 static void OptionMenuChangeMipMap(int key_pressed, ConsoleVariable *console_variable);
-#ifdef EDGE_CLASSIC
 static void OptionMenuChangePCSpeakerMode(int key_pressed, ConsoleVariable *console_variable);
-#endif
 
 // -ES- 1998/08/20 Added resolution options
 // -ACB- 1998/08/29 Moved to top and tried different system
@@ -560,10 +558,8 @@ static OptionMenuItem soundoptions[] = {
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeFunction, "MIDI Instrument Set", nullptr, 0, nullptr, OptionMenuChangeSoundfont, nullptr,
      nullptr, 0, 0, 0, ""},
-#ifdef EDGE_CLASSIC
     {kOptionMenuItemTypeBoolean, "PC Speaker Mode", YesNo, 2, &pc_speaker_mode, OptionMenuChangePCSpeakerMode,
      "Music will be Off while this is enabled", nullptr, 0, 0, 0, ""},
-#endif
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr, nullptr, 0, 0, 0, ""},
     {kOptionMenuItemTypeSwitch, "Dynamic Reverb", "None/Headphones/Speakers", 3, &dynamic_reverb.d_,
      OptionMenuUpdateConsoleVariableFromInt, "Adds reverb to sounds in normal areas. Headphones-Weak, Speakers-Strong",
@@ -2115,7 +2111,6 @@ static void OptionMenuChangeWeaponSwitch(int key_pressed, ConsoleVariable *conso
     level_flags.weapon_switch = global_flags.weapon_switch;
 }
 
-#ifdef EDGE_CLASSIC
 static void OptionMenuChangePCSpeakerMode(int key_pressed, ConsoleVariable *console_variable)
 {
     EPI_UNUSED(key_pressed);
@@ -2125,7 +2120,6 @@ static void OptionMenuChangePCSpeakerMode(int key_pressed, ConsoleVariable *cons
     SoundCacheClearAll();
     RestartMIDI();
 }
-#endif
 
 //
 // OptionMenuChangeLanguage

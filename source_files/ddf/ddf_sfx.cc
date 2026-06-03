@@ -291,6 +291,7 @@ SoundEffect *SoundEffectDefinitionContainer::GetEffect(const char *name, bool er
     if (!name || !name[0] || DDFCompareName(name, "NULL") == 0)
         return nullptr;
 
+
     // count them
     for (std::vector<SoundEffectDefinition *>::reverse_iterator iter = rbegin(), iter_end = rend(); iter != iter_end;
          iter++)
@@ -308,9 +309,14 @@ SoundEffect *SoundEffectDefinitionContainer::GetEffect(const char *name, bool er
     if (count == 0)
     {
         if (error)
-            DDFWarnError("Unknown SFX: '%.8s'\n", name);
-
-        return nullptr;
+        {
+            // exception for our builtin SECRET sound
+            if (DDFCompareName(name, "SECRET") == 0)
+                return nullptr;
+            else
+                DDFWarnError("Unknown SFX: '%.8s'\n", name);
+        }
+  
     }
 
     // -AJA- optimisation to save some memory

@@ -28,16 +28,12 @@
 #include "epi_filesystem.h"
 #include "epi_str_compare.h"
 #include "epi_str_util.h"
-#ifdef EDGE_CLASSIC
 #include "l_deh.h"
-#endif
 #include "miniz.h"
 #include "r_image.h"
 #include "script/compat/lua_compat.h"
 #include "snd_types.h"
-#ifdef EDGE_CLASSIC
 #include "vm_coal.h"
-#endif
 #include "w_files.h"
 #include "w_wad.h"
 
@@ -665,7 +661,6 @@ static void ProcessDDFInPack(PackFile *pack)
                 DDFAddFile(type, data, source);
                 continue;
             }
-#ifdef EDGE_CLASSIC
             if (ent.HasExtension(".deh") || ent.HasExtension(".bex"))
             {
                 LogPrint("Converting DEH file%s: %s\n", pack->is_folder_ ? "" : " in EPK", ent.name_.c_str());
@@ -678,11 +673,10 @@ static void ProcessDDFInPack(PackFile *pack)
 
                 continue;
             }
-#endif
         }
     }
 }
-#ifdef EDGE_CLASSIC
+
 static void ProcessCOALAPIInPack(PackFile *pack)
 {
     DataFile *df = pack->parent_;
@@ -751,7 +745,7 @@ static void ProcessCOALHUDInPack(PackFile *pack)
         }
     }
 }
-#endif
+
 static void ProcessLuaAPIInPack(PackFile *pack)
 {
     DataFile *df = pack->parent_;
@@ -798,13 +792,11 @@ static void ProcessLuaHUDInPack(PackFile *pack)
             PackEntry &ent = pack->directories_[dir].entries_[entry];
             if (epi::StringCaseCompareASCII(epi::GetFilename(ent.name_), "edge_hud.lua") == 0)
             {
-#ifdef EDGE_CLASSIC // This part only matters if in a potentially mixed Lua/COAL environment
                 if (epi::StringPrefixCaseCompareASCII(bare_filename, "edge_defs") != 0)
                 {
                     LuaSetLuaHUDDetected(true);
                     SetCOALDetected(false);
                 }
-#endif
                 int            length   = -1;
                 const uint8_t *raw_data = pack->LoadEntry(dir, entry, length);
                 std::string    data((const char *)raw_data);
@@ -1340,14 +1332,11 @@ void ProcessAllInPack(DataFile *df, size_t file_index)
     ProcessDDFInPack(df->pack_);
 
     // COAL
-#ifdef EDGE_CLASSIC
     // parse COALAPI only from edge_defs folder or `edge_defs.epk`
     if ((df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEEPK) && file_index == 0)
         ProcessCOALAPIInPack(df->pack_);
     ProcessCOALHUDInPack(df->pack_);
-#endif
     // LUA
-
     // parse lua api  only from edge_defs folder or `edge_defs.epk`
     if ((df->kind_ == kFileKindEFolder || df->kind_ == kFileKindEEPK) && file_index == 0)
         ProcessLuaAPIInPack(df->pack_);

@@ -22,9 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef EDGE_CLASSIC
 #include "coal.h"
-#endif
 #include "ddf_types.h"
 #include "dm_state.h"
 #include "e_input.h"
@@ -38,12 +36,10 @@
 #include "m_argv.h"
 #include "m_random.h"
 #include "script/compat/lua_compat.h"
-#ifdef EDGE_CLASSIC
 #include "vm_coal.h"
 
 extern coal::VM *ui_vm;
 extern void      COALSetFloat(coal::VM *vm, const char *mod_name, const char *var_name, double value);
-#endif
 
 // only true if packets are exchanged with a server
 bool network_game = false;
@@ -168,14 +164,11 @@ void GrabTicCommands(void)
 
         memcpy(&p->command_, p->input_commands_ + buf, sizeof(EventTicCommand));
     }
-#ifdef EDGE_CLASSIC
+
     if (LuaUseLuaHUD())
         LuaSetFloat(LuaGetGlobalVM(), "sys", "gametic", game_tic);
     else
         COALSetFloat(ui_vm, "sys", "gametic", game_tic);
-#else
-    LuaSetFloat(LuaGetGlobalVM(), "sys", "gametic", game_tic);
-#endif
 
     game_tic++;
 }

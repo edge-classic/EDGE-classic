@@ -21,9 +21,7 @@
 #include "epi.h"
 #include "epi_filesystem.h"
 #include "epi_str_util.h"
-#ifdef EDGE_CLASSIC
 #include "m4p.h"
-#endif
 
 SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
 {
@@ -57,7 +55,6 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
             data[offset + 4] == '}' && data[offset + 5] == 'u')
             return kSoundMIDI;
     }
-#ifdef EDGE_CLASSIC
     if (data[0] == 'M' && data[1] == 'U' && data[2] == 'S')
     {
         return kSoundMUS;
@@ -88,7 +85,6 @@ SoundFormat DetectSoundFormat(uint8_t *data, int song_len)
     {
         return kSoundPCSpeaker;
     }
-#endif
     return kSoundUnknown;
 }
 
@@ -107,7 +103,6 @@ SoundFormat SoundFilenameToFormat(std::string_view filename)
         return kSoundMP3;
     if (ext == ".mid" || ext == ".midi")
         return kSoundMIDI;
-#ifdef EDGE_CLASSIC
     if (ext == ".mus")
         return kSoundMUS;
     if (ext == ".xmi")
@@ -120,13 +115,11 @@ SoundFormat SoundFilenameToFormat(std::string_view filename)
     // the VGMPF Wiki they are valid DMX file extensions
     if (ext == ".dsp" || ext == ".pcs" || ext == ".gsp" || ext == ".gsw")
         return kSoundDoom;
-
     // Will actually result in checking the first byte to further determine if
     // it's Doom or PC Speaker format; the above kSoundDoom stuff is
     // unconditional which is why I didn't throw it up there
     if (ext == ".lmp")
         return kSoundPCSpeaker;
-#endif
     return kSoundUnknown;
 }
 

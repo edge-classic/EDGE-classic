@@ -34,14 +34,12 @@ enum DDFMusicType
     kDDFMusicOGG,
     kDDFMusicMP3,
     kDDFMusicFLAC,
-#ifdef EDGE_CLASSIC
     kDDFMusicMUS,
     kDDFMusicM4P,
     kDDFMusicSID,
     kDDFMusicIMF280,
     kDDFMusicIMF560,
     kDDFMusicIMF700,
-#endif
     kTotalDDFMusicTypes
 };
 

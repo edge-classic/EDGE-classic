@@ -147,9 +147,7 @@ void StartupMusic(void)
     // Add our built-in options first so they take precedence over a soundfont that might
     // somehow have the same file stem
     available_soundfonts.emplace("Default");
-#ifdef EDGE_CLASSIC
     available_soundfonts.emplace("OPL Emulation");
-#endif
 
     // Create home directory soundfont folder if it doesn't aleady exist
     if (!epi::IsDirectory(soundfont_dir))

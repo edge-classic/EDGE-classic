@@ -21,7 +21,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 option(EDGE_SOKOL_GL "Sokol GL" OFF)
 option(EDGE_SOKOL_GLES3 "Sokol GLES3" OFF)
 option(EDGE_SOKOL_D3D11 "Sokol D3D11" OFF)
-option(EDGE_LEGACY_GL "Legacy GL Renderer" OFF)
+option(EDGE_LEGACY_GL "Legacy GL Renderer" ON)
 
 # Web Player
 option(EDGE_WEB_MULTITHREADED "Build multithreaded web player" OFF)
@@ -48,14 +48,10 @@ if (EDGE_SOKOL_GL OR EDGE_SOKOL_GLES3 OR EDGE_SOKOL_D3D11)
   set (EDGE_SOKOL ON)
 endif()
 
-# Optional Features
-option(EDGE_CLASSIC "Enable default features for EDGE-Classic" ON)
-
 # Development 
 option(EDGE_SANITIZE "Enable code sanitizing" OFF)
 option(EDGE_SANITIZE_THREADS "Enable thread sanitizing (No-op with MSVC)" OFF)
 option(EDGE_SANITIZE_UB "Enable undefined behavior sanitizing (No-op with MSVC)" OFF)
-option(EDGE_PROFILING "Enable Profiling" OFF)
 option(EDGE_EXTRA_CHECKS "Enable diagnostic checks/functions" OFF)
 
 include("${CMAKE_SOURCE_DIR}/cmake/EDGEClassic.cmake")
@@ -232,15 +228,6 @@ if (EDGE_SOKOL)
   endif()
 else()
   find_package(OpenGL REQUIRED)
-endif()
-
-if (EDGE_CLASSIC)
-  add_definitions(-DEDGE_CLASSIC)
-endif()
-
-if (EDGE_PROFILING)
-  # these must be defined for all source files
-  add_compile_definitions(EDGE_PROFILING TRACY_ENABLE)
 endif()
 
 if (EDGE_EXTRA_CHECKS)

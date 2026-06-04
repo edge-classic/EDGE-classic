@@ -48,7 +48,6 @@
 #include "dm_state.h"
 #include "dstrings.h"
 #include "e_input.h"
-#include "edge_profiling.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
 #include "epi_sdl.h"
@@ -90,9 +89,7 @@
 #include "sv_chunk.h"
 #include "sv_main.h"
 #include "version.h"
-#ifdef EDGE_CLASSIC
 #include "vm_coal.h"
-#endif
 #include "w_epk.h"
 #include "w_files.h"
 #include "w_model.h"
@@ -641,8 +638,6 @@ static bool wipe_gl_active = false;
 
 void EdgeDisplay(void)
 {
-    EDGE_ZoneScoped;
-
     // Start the frame - should we need to.
     StartFrame();
 
@@ -656,14 +651,10 @@ void EdgeDisplay(void)
         {
         case kGameStateLevel:
             PaletteTicker();
-#ifdef EDGE_CLASSIC
             if (LuaUseLuaHUD())
                 LuaRunHUD();
             else
                 COALRunHUD();
-#else
-            LuaRunHUD();
-#endif
             if (need_save_screenshot)
             {
                 // don't draw menu in save game shots
@@ -671,14 +662,8 @@ void EdgeDisplay(void)
                 CreateSaveScreenshot();
                 need_save_screenshot = false;
             }
-            {
-                EDGE_ZoneNamedN(ZoneHUDDrawer, "HUDDrawer", true);
-                HUDDrawer();
-            }
-            {
-                EDGE_ZoneNamedN(ZoneScriptDrawer, "ScriptDrawer", true);
-                ScriptDrawer();
-            }
+            HUDDrawer();
+            ScriptDrawer();
             break;
 
         case kGameStateIntermission:
@@ -697,73 +682,54 @@ void EdgeDisplay(void)
             break;
         }
 
+        if (wipe_gl_active)
         {
-            EDGE_ZoneNamedN(ZoneWipe, "Wipe", true);
-
-            if (wipe_gl_active)
+            // -AJA- Wipe code for GL.  Sorry for all this ugliness, but it just
+            //       didn't fit into the existing wipe framework.
+            if (DoWipe())
             {
-                // -AJA- Wipe code for GL.  Sorry for all this ugliness, but it just
-                //       didn't fit into the existing wipe framework.
-                if (DoWipe())
-                {
-                    StopWipe();
-                    wipe_gl_active = false;
-                }
+                StopWipe();
+                wipe_gl_active = false;
             }
+        }
 
-            // save the current screen if about to wipe
-            if (need_wipe)
-            {
-                need_wipe      = false;
-                wipe_gl_active = true;
+        // save the current screen if about to wipe
+        if (need_wipe)
+        {
+            need_wipe      = false;
+            wipe_gl_active = true;
 
-                InitializeWipe(wipe_method);
-            }
+            InitializeWipe(wipe_method);
         }
 
         if (paused)
             DisplayPauseImage();
 
+        // menus go directly to the screen
+        if (draw_menu)
         {
-            EDGE_ZoneNamedN(ZoneDrawMenu, "DrawMenu", true);
-
-            // menus go directly to the screen
-            if (draw_menu)
-            {
-                MenuDrawer(); // menu is drawn even on top of everything (except console)
-            }
+            MenuDrawer(); // menu is drawn even on top of everything (except console)
         }
     }
     else
     {
-        EDGE_ZoneNamedN(ZoneMovieDrawer, "MovieDrawer", true);
         MovieDrawer();
     }
 
     // process mouse and keyboard events
-    {
-        EDGE_ZoneNamedN(ZoneNetworkUpdate, "NetworkUpdate", true);
-        NetworkUpdate();
-    }
+    NetworkUpdate();
 
-    {
-        EDGE_ZoneNamedN(ZoneConsoleDraw, "ConsoleDraw", true);
+    if (!playing_movie)
+        ConsoleDrawer();
 
-        if (!playing_movie)
-            ConsoleDrawer();
-    }
-
+    if (!need_wipe && epi::StringCompare(video_overlay.s_, "None") != 0)
     {
-        EDGE_ZoneNamedN(ZoneHudOverlays, "HudOverlays", true);
-        if (!need_wipe && epi::StringCompare(video_overlay.s_, "None") != 0)
-        {
-            ImageData   *ov_data = available_overlays[video_overlay.s_].first;
-            unsigned int tex_id  = available_overlays[video_overlay.s_].second;
-            if (ov_data && tex_id)
-                HUDRawFromTexID(0, 0, current_screen_width, current_screen_height, tex_id, kOpacityComplex, 0, 0,
-                                (float)current_screen_width / ov_data->width_,
-                                (float)current_screen_height / ov_data->height_, HUDGetAlpha());
-        }
+        ImageData   *ov_data = available_overlays[video_overlay.s_].first;
+        unsigned int tex_id  = available_overlays[video_overlay.s_].second;
+        if (ov_data && tex_id)
+            HUDRawFromTexID(0, 0, current_screen_width, current_screen_height, tex_id, kOpacityComplex, 0, 0,
+                            (float)current_screen_width / ov_data->width_,
+                            (float)current_screen_height / ov_data->height_, HUDGetAlpha());
     }
 
     if (gamma_correction.f_ < 0)
@@ -2145,10 +2111,8 @@ void EdgeShutdown(void)
             ClosePackFile(df);
         delete df;
     }
-#ifdef EDGE_CLASSIC
     if (GetCOALDetected())
         ShutdownCOAL();
-#endif
 }
 
 static void EdgeStartup(void)
@@ -2201,9 +2165,7 @@ static void EdgeStartup(void)
 
     DDFCleanUp();
     SetLanguage();
-#ifdef EDGE_CLASSIC
     ReadUMAPINFOLumps();
-#endif
 
 #ifdef EDGE_EXTRA_CHECKS
     LogDebug("String Hash Registry:\n\n");
@@ -2245,7 +2207,6 @@ static void EdgeStartup(void)
     InitializeSound();
     NetworkInitialize();
     CheatInitialize();
-#ifdef EDGE_CLASSIC
     if (LuaUseLuaHUD())
     {
         LuaInit();
@@ -2256,10 +2217,6 @@ static void EdgeStartup(void)
         InitializeCOAL();
         COALLoadScripts();
     }
-#else
-    LuaInit();
-    LuaLoadScripts();
-#endif
 }
 
 static void InitialState(void)
@@ -2428,8 +2385,6 @@ void EdgeIdle(void)
 //
 void EdgeTicker(void)
 {
-    EDGE_ZoneScoped;
-
     DoBigGameStuff();
 
     // Update display, next frame, with current state.

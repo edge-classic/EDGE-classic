@@ -40,9 +40,7 @@
 #include "m_random.h"
 #include "p_mobj.h"
 #include "r_defs.h"
-#ifdef EDGE_CLASSIC
 #include "s_doom.h"
-#endif
 #include "s_mp3.h"
 #include "s_ogg.h"
 #include "s_sound.h"
@@ -66,7 +64,6 @@ static void LoadSilence(SoundData *buf)
 
     EPI_CLEAR_MEMORY(buf->data_, float, length * 2);
 }
-#ifdef EDGE_CLASSIC
 static bool LoadDoom(SoundData *buf, const uint8_t *lump, int length)
 {
     return LoadDoomSound(buf, lump, length);
@@ -75,7 +72,6 @@ static bool LoadPCSpeaker(SoundData *buf, const uint8_t *lump, int length)
 {
     return LoadPCSpeakerSound(buf, lump, length);
 }
-#endif
 static bool LoadWav(SoundData *buf, const uint8_t *lump, int length)
 {
     return LoadWAVSound(buf, lump, length);
@@ -217,7 +213,6 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
     case kSoundMP3:
         OK = LoadMP3(buf, data, length);
         break;
-#ifdef EDGE_CLASSIC
     // Double-check first byte here because pack filename detection could
     // return kSoundPCSpeaker for either
     case kSoundPCSpeaker:
@@ -230,7 +225,6 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
     case kSoundDoom:
         OK = LoadDoom(buf, data, length);
         break;
-#endif
     default:
         OK = false;
         break;

@@ -30,14 +30,12 @@ enum SoundFormat
     kSoundOGG,
     kSoundMP3,
     kSoundMIDI,
-#ifdef EDGE_CLASSIC
     kSoundM4P,
     kSoundMUS,
     kSoundSID,
     kSoundIMF, // Used with DDFPLAY; not in auto-detection
     kSoundDoom,
     kSoundPCSpeaker
-#endif
 };
 
 // determine sound format from the file.

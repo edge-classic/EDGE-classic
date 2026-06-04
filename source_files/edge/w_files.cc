@@ -39,18 +39,14 @@
 #include "ddf_style.h"
 #include "ddf_switch.h"
 #include "ddf_wadfixes.h"
-#ifdef EDGE_CLASSIC
 #include "deh_edge.h"
-#endif
 #include "dm_state.h"
 #include "dstrings.h"
 #include "epi.h"
 #include "epi_file.h"
 #include "epi_filesystem.h"
 #include "i_system.h"
-#ifdef EDGE_CLASSIC
 #include "l_deh.h"
-#endif
 #include "rad_trig.h"
 #include "w_epk.h"
 #include "w_wad.h"
@@ -102,7 +98,7 @@ extern void ProcessFixersForWAD(DataFile *df);
 extern void ProcessWad(DataFile *df, size_t file_index);
 
 extern std::string BuildXGLNodesForWAD(DataFile *df);
-#ifdef EDGE_CLASSIC
+
 static void DEH_ConvertFile(const std::string &filename)
 {
     epi::File *F = epi::FileOpen(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
@@ -128,7 +124,7 @@ static void DEH_ConvertFile(const std::string &filename)
     delete F;
     delete[] data;
 }
-#endif
+
 static void W_ExternalDDF(DataFile *df)
 {
     DDFType type = DDFFilenameToType(df->name_);
@@ -219,12 +215,10 @@ void ProcessFile(DataFile *df)
     }
     else if (df->kind_ == kFileKindDehacked)
     {
-#ifdef EDGE_CLASSIC
         // handle stand-alone DeHackEd patches
         LogPrint("Converting DEH file: %s\n", df->name_.c_str());
 
         DEH_ConvertFile(df->name_);
-#endif
     }
 
     // handle fixer-uppers   [ TODO support it for EPK files too ]

@@ -34,10 +34,8 @@
 #include "m_misc.h"
 #include "s_flac.h"
 #include "s_midi.h"
-#ifdef EDGE_CLASSIC
 #include "s_m4p.h"
 #include "s_sid.h"
-#endif
 #include "s_mp3.h"
 #include "s_ogg.h"
 #include "s_sound.h"
@@ -149,7 +147,6 @@ void ChangeMusic(int entry_number, bool loop)
 
     SoundFormat fmt = kSoundUnknown;
 
-#ifdef EDGE_CLASSIC
     // IMF Music is the outlier in that it must be predefined in DDFPLAY with
     // the appropriate IMF frequency, as there is no way of determining this
     // from file information alone
@@ -168,18 +165,7 @@ void ChangeMusic(int entry_number, bool loop)
             fmt = SoundFilenameToFormat(play->info_);
         }
     }
-#else
-    if (play->infotype_ == kDDFMusicDataLump)
-    {
-        // lumps must use auto-detection based on their contents
-        fmt = DetectSoundFormat(data, length);
-    }
-    else
-    {
-        // for FILE and PACK, use the file extension
-        fmt = SoundFilenameToFormat(play->info_);
-    }
-#endif
+
     // NOTE: players are responsible for freeing 'data'
 
     switch (fmt)
@@ -196,7 +182,6 @@ void ChangeMusic(int entry_number, bool loop)
         delete F;
         music_player = PlayFLACMusic(data, length, loop);
         break;
-#ifdef EDGE_CLASSIC
     case kSoundM4P:
         delete F;
         music_player = PlayM4PMusic(data, length, loop);
@@ -210,7 +195,6 @@ void ChangeMusic(int entry_number, bool loop)
         music_player = PlayIMFMusic(data, length, loop, play->type_);
         break;
     case kSoundMUS:
-#endif
     case kSoundMIDI:
         delete F;
         music_player = PlayMIDIMusic(data, length, loop);

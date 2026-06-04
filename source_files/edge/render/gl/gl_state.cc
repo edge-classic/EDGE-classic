@@ -1,6 +1,17 @@
 
 #include "r_state.h"
 
+static void(APIENTRY *ec_glActiveTexture)(GLenum)                    = nullptr;
+static void(APIENTRY *ec_glMultiTexCoord2fv)(GLenum, const GLfloat *) = nullptr;
+
+void LoadGL13Procs()
+{
+    ec_glActiveTexture    = (void(APIENTRY *)(GLenum))SDL_GL_GetProcAddress("glActiveTexture");
+    ec_glMultiTexCoord2fv = (void(APIENTRY *)(GLenum, const GLfloat *))SDL_GL_GetProcAddress("glMultiTexCoord2fv");
+    if (!ec_glActiveTexture || !ec_glMultiTexCoord2fv)
+        FatalError("OpenGL 1.3 entry points unavailable");
+}
+
 class GLRenderState : public RenderState
 {
   public:
@@ -157,7 +168,7 @@ class GLRenderState : public RenderState
         }
 
         active_texture_ = activeTexture;
-        glActiveTexture(active_texture_);
+        ec_glActiveTexture(active_texture_);
     }
 
     void BindTexture(GLuint textureid)
@@ -375,7 +386,7 @@ class GLRenderState : public RenderState
         if (tex == GL_TEXTURE0 && enable_texture_2d_[1] == false)
             glTexCoord2fv((GLfloat *)coords);
         else
-            glMultiTexCoord2fv(tex, (GLfloat *)coords);
+            ec_glMultiTexCoord2fv(tex, (GLfloat *)coords);
     }
 
     void Hint(GLenum target, GLenum mode)

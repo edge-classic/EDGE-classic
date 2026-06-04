@@ -67,20 +67,129 @@ static RenderBatch *current_batch = nullptr;
 #endif
 
 #ifdef BSP_MULTITHREAD
-#define THREAD_U64 uint64_t
-#include "thread.h"
+#ifdef __APPLE__
+#include <SDL_thread.h>
+#else
+#include <SDL2/SDL_thread.h>
+#endif
 
 constexpr int32_t kMaxRenderBatch = 65536 / 4;
 
+struct BSPSignal
+{
+    SDL_mutex *mutex;
+    SDL_cond  *cond;
+    int        value;
+};
+
+static void BSPSignalInit(BSPSignal *sig)
+{
+    sig->mutex = SDL_CreateMutex();
+    sig->cond  = SDL_CreateCond();
+    sig->value = 0;
+}
+
+static void BSPSignalTerm(BSPSignal *sig)
+{
+    SDL_DestroyCond(sig->cond);
+    SDL_DestroyMutex(sig->mutex);
+}
+
+static void BSPSignalRaise(BSPSignal *sig)
+{
+    SDL_LockMutex(sig->mutex);
+    sig->value = 1;
+    SDL_UnlockMutex(sig->mutex);
+    SDL_CondSignal(sig->cond);
+}
+
+static int BSPSignalWait(BSPSignal *sig, int timeout_ms)
+{
+    int timed_out = 0;
+    SDL_LockMutex(sig->mutex);
+    while (sig->value == 0)
+    {
+        if (timeout_ms < 0)
+            SDL_CondWait(sig->cond, sig->mutex);
+        else if (SDL_CondWaitTimeout(sig->cond, sig->mutex, (Uint32)timeout_ms) == SDL_MUTEX_TIMEDOUT)
+        {
+            timed_out = 1;
+            break;
+        }
+    }
+    if (!timed_out)
+        sig->value = 0;
+    SDL_UnlockMutex(sig->mutex);
+    return !timed_out;
+}
+
+struct BSPQueue
+{
+    BSPSignal    data_ready;
+    BSPSignal    space_open;
+    SDL_atomic_t count;
+    SDL_atomic_t head;
+    SDL_atomic_t tail;
+    void       **values;
+    int          size;
+};
+
+static void BSPQueueInit(BSPQueue *q, int size, void **values, int count)
+{
+    q->values = values;
+    q->size   = size;
+    BSPSignalInit(&q->data_ready);
+    BSPSignalInit(&q->space_open);
+    SDL_AtomicSet(&q->head, 0);
+    SDL_AtomicSet(&q->tail, count > size ? size : count);
+    SDL_AtomicSet(&q->count, count > size ? size : count);
+}
+
+static int BSPQueueProduce(BSPQueue *q, void *value, int timeout_ms)
+{
+    while (SDL_AtomicGet(&q->count) == q->size)
+    {
+        if (timeout_ms == 0)
+            return 0;
+        if (BSPSignalWait(&q->space_open, timeout_ms) == 0)
+            return 0;
+    }
+    int tail                  = SDL_AtomicAdd(&q->tail, 1);
+    q->values[tail % q->size] = value;
+    if (SDL_AtomicAdd(&q->count, 1) == 0)
+        BSPSignalRaise(&q->data_ready);
+    return 1;
+}
+
+static void *BSPQueueConsume(BSPQueue *q, int timeout_ms)
+{
+    while (SDL_AtomicGet(&q->count) == 0)
+    {
+        if (timeout_ms == 0)
+            return nullptr;
+        if (BSPSignalWait(&q->data_ready, timeout_ms) == 0)
+            return nullptr;
+    }
+    int   head               = SDL_AtomicAdd(&q->head, 1);
+    void *retval             = q->values[head % q->size];
+    if (SDL_AtomicAdd(&q->count, -1) == q->size)
+        BSPSignalRaise(&q->space_open);
+    return retval;
+}
+
+static int BSPQueueCount(BSPQueue *q)
+{
+    return SDL_AtomicGet(&q->count);
+}
+
 struct BSPThread
 {
-    thread_ptr_t        thread_;
-    thread_signal_t     signal_start_;
-    thread_atomic_int_t traverse_finished_;
-
-    thread_queue_t      queue_;
-    RenderBatch        *render_queue_[kMaxRenderBatch];
-    thread_atomic_int_t exit_flag_;
+    SDL_Thread  *thread_;
+    BSPSignal    signal_start_;
+    SDL_atomic_t traverse_finished_;
+    BSPQueue queue_;
+    RenderBatch *render_queue_[kMaxRenderBatch];
+    SDL_atomic_t exit_flag_;
 };
 
 static struct BSPThread bsp_thread;
@@ -927,11 +1036,11 @@ static int32_t BSPTraverseProc(void *thread_data)
 {
     EPI_UNUSED(thread_data);
 
-    while (thread_atomic_int_load(&bsp_thread.exit_flag_) == 0)
+    while (SDL_AtomicGet(&bsp_thread.exit_flag_) == 0)
     {
-        if (thread_signal_wait(&bsp_thread.signal_start_, THREAD_SIGNAL_WAIT_INFINITE))
+        if (BSPSignalWait(&bsp_thread.signal_start_, -1))
         {
-            if (thread_atomic_int_load(&bsp_thread.exit_flag_))
+            if (SDL_AtomicGet(&bsp_thread.exit_flag_))
             {
                 break;
             }
@@ -946,7 +1055,7 @@ static int32_t BSPTraverseProc(void *thread_data)
                 BSPQueueRenderBatch(current_batch);
             }
 
-            thread_atomic_int_store(&bsp_thread.traverse_finished_, 1);
+            SDL_AtomicSet(&bsp_thread.traverse_finished_, 1);
         }
     }
 
@@ -958,7 +1067,7 @@ static uint32_t    render_batch_counter = 0;
 
 void BSPQueueRenderBatch(RenderBatch *batch)
 {
-    thread_queue_produce(&bsp_thread.queue_, batch, 100);
+    BSPQueueProduce(&bsp_thread.queue_, batch, 100);
 }
 
 // TODO: This isn't really a ring buffer
@@ -1014,7 +1123,7 @@ void BSPQueueDrawSubsector(DrawSubsector *subsector)
 
 RenderBatch *BSPReadRenderBatch()
 {
-    RenderBatch *batch = (RenderBatch *)thread_queue_consume(&bsp_thread.queue_, 0);
+    RenderBatch *batch = (RenderBatch *)BSPQueueConsume(&bsp_thread.queue_, 0);
     return batch;
 }
 
@@ -1023,18 +1132,18 @@ static bool traverse_stop_signalled;
 void BSPTraverse()
 {
     traverse_stop_signalled = false;
-    thread_atomic_int_store(&bsp_thread.traverse_finished_, 0);
-    thread_signal_raise(&bsp_thread.signal_start_);
+    SDL_AtomicSet(&bsp_thread.traverse_finished_, 0);
+    BSPSignalRaise(&bsp_thread.signal_start_);
 }
 
 bool BSPTraversing()
 {
     if (!traverse_stop_signalled)
     {
-        traverse_stop_signalled = !!thread_atomic_int_load(&bsp_thread.traverse_finished_);
+        traverse_stop_signalled = !!SDL_AtomicGet(&bsp_thread.traverse_finished_);
     }
 
-    if (!thread_queue_count(&bsp_thread.queue_) && traverse_stop_signalled)
+    if (!BSPQueueCount(&bsp_thread.queue_) && traverse_stop_signalled)
     {
         return false;
     }
@@ -1044,18 +1153,18 @@ bool BSPTraversing()
 
 void BSPStartThread()
 {
-    thread_atomic_int_store(&bsp_thread.exit_flag_, 0);
-    thread_atomic_int_store(&bsp_thread.traverse_finished_, 1);
-    thread_signal_init(&bsp_thread.signal_start_);
-    thread_queue_init(&bsp_thread.queue_, kMaxRenderBatch, (void **)bsp_thread.render_queue_, 0);
-    bsp_thread.thread_ = thread_create(BSPTraverseProc, nullptr, THREAD_STACK_SIZE_DEFAULT);
+    SDL_AtomicSet(&bsp_thread.exit_flag_, 0);
+    SDL_AtomicSet(&bsp_thread.traverse_finished_, 1);
+    BSPSignalInit(&bsp_thread.signal_start_);
+    BSPQueueInit(&bsp_thread.queue_, kMaxRenderBatch, (void **)bsp_thread.render_queue_, 0);
+    bsp_thread.thread_ = SDL_CreateThread((SDL_ThreadFunction)BSPTraverseProc, "BSPTraverse", nullptr);
 }
 void BSPStopThread()
 {
-    thread_atomic_int_store(&bsp_thread.exit_flag_, 1);
-    thread_signal_raise(&bsp_thread.signal_start_);
-    thread_join(bsp_thread.thread_);
-    thread_signal_term(&bsp_thread.signal_start_);
+    SDL_AtomicSet(&bsp_thread.exit_flag_, 1);
+    BSPSignalRaise(&bsp_thread.signal_start_);
+    SDL_WaitThread(bsp_thread.thread_, nullptr);
+    BSPSignalTerm(&bsp_thread.signal_start_);
 }
 
 #else

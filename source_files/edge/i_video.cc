@@ -318,13 +318,17 @@ static bool InitializeWindow(DisplayMode *mode)
     }
 
 #ifndef EDGE_SOKOL
-    int version = gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
+    int major_version = 0;
+    int minor_version = 0;
 
-    if (!version || (GLAD_VERSION_MAJOR(version) == 1 && GLAD_VERSION_MINOR(version) < 3))
-        FatalError("System only supports GL %d.%d. Minimum GL version 1.3 required!\n", GLAD_VERSION_MAJOR(version),
-                   GLAD_VERSION_MINOR(version));
+    if (SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major_version) < 0 || SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor_version) < 0)
+        FatalError("Failed to determine system OpenGL version!\n");
 
-    if (GLAD_GL_ARB_texture_non_power_of_two == 0)
+    if (major_version < 1 || (major_version == 1 && minor_version < 3))
+        FatalError("System only supports GL %d.%d. Minimum GL version 1.3 required!\n", major_version,
+                   minor_version);
+
+    if (SDL_GL_ExtensionSupported("GL_ARB_texture_non_power_of_two") != SDL_TRUE)
         FatalError("System GL implementation does not support non-power-of-two textures!\n");
 #endif
 

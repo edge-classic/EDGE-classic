@@ -135,10 +135,6 @@ set (EDGE_SOKOL_SOURCE_FILES
 if (NOT EDGE_SOKOL)
   list (APPEND EDGE_SOURCE_FILES ${EDGE_GL_SOURCE_FILES})
 else()
-  if (EDGE_SOKOL_D3D11)
-    list (APPEND EDGE_SOKOL_SOURCE_FILES render/sokol/sokol_d3d11.cc)
-  endif()
-
   list (APPEND EDGE_SOURCE_FILES ${EDGE_SOKOL_SOURCE_FILES})
 endif()
 
@@ -201,10 +197,6 @@ set (EDGE_LINK_LIBRARIES
   stb
 )
 
-if (NOT EMSCRIPTEN OR (EMSCRIPTEN AND EDGE_WEB_MULTITHREADED))
-  list (APPEND EDGE_LINK_LIBRARIES thread)
-endif()
-
 list (APPEND
   EDGE_LINK_LIBRARIES
   coal
@@ -217,15 +209,10 @@ list (APPEND
 if (EDGE_SOKOL)
   list(APPEND EDGE_LINK_LIBRARIES sokol)
   if (MINGW)
-    if (EDGE_SOKOL_GL)
-      list(APPEND EDGE_LINK_LIBRARIES winmm kernel32)
-    else ()
-      list(APPEND EDGE_LINK_LIBRARIES d3d11 winmm kernel32)
-    endif()
+    list(APPEND EDGE_LINK_LIBRARIES winmm kernel32)
   endif()
 else ()
-  target_include_directories(edge-classic PRIVATE ${EDGE_LIBRARY_DIR}/glad/include/glad)
-	list(APPEND EDGE_LINK_LIBRARIES glad OpenGL::GL)
+	list(APPEND EDGE_LINK_LIBRARIES OpenGL::GL)
 endif()
 
 target_link_libraries(edge-classic PRIVATE ${EDGE_LINK_LIBRARIES})

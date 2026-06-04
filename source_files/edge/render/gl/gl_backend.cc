@@ -96,6 +96,9 @@ class GLRenderBackend : public RenderBackend
         LogPrint("OpenGL: Initialising...\n");
         CheckExtensions();
 
+        extern void LoadGL13Procs();
+        LoadGL13Procs();
+
         // read implementation limits
         glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size_);
 

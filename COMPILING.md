@@ -7,9 +7,8 @@ The following options can be passed to CMake to control certain features:
 
 - EDGE_SOKOL_GL (default OFF): Will force use of the Sokol GL 3.3 render path
 - EDGE_SOKOL_GLES3 (default OFF): Will force use of the Sokol GLES3 render path
-- EDGE_SOKOL_D3D11 (default OFF): Will force use of the Sokol Direct3D 11 render path
 - EDGE_LEGACY_GL (default OFF): Will force use of the original GL 1.3 render path. BSP traversal will not be threaded with this render path.
-  - If none of the renderer options are selected, a default will be chosen based on platform. This means Sokol D3D11 for Windows, Sokol GLES3 for Emscripten, and Sokol GL 3.3 for all other targets.
+  - If none of the renderer options are selected, a default will be chosen based on platform. This means Sokol GLES3 for Emscripten, and Sokol GL 3.3 for all other targets.
 - EDGE_SANITIZE (default OFF): Will build with AddressSanitizer support. This option is mutually exclusive with EDGE_SANITIZE_THREADS and EDGE_SANITIZE_UB. Suppressions can be found in ASanSuppress.txt.
 - EDGE_SANITIZE_THREADS (default OFF): Will build with ThreadSanitizer support. Suppressions can be found in TSanSuppress.txt. This option is mutually exclusive with EDGE_SANITIZE and EDGE_SANITIZE_UB and only works with non-MSVC builds.
 - EDGE_SANITIZE_UB (default OFF): Will build with UndefinedBehaviorSanitizer support. This option is mutually exclusive with EDGE_SANITIZE and EDGE_SANITIZE_THREADS and only works with non-MSVC builds.

@@ -881,8 +881,11 @@ static bool CheckRelativeThingCallback(MapObject *thing, void *data)
             if (top_z > move_check.floor_z &&
                 !((move_check.flags & kMapObjectFlagMissile) || (thing->flags_ & kMapObjectFlagMissile)))
             {
-                move_check.floor_z = top_z;
-                move_check.below   = thing;
+                if (!move_check.below || (top_z > move_check.below->z + move_check.below->height_))
+                {
+                    move_check.floor_z = top_z;
+                    move_check.below   = thing;
+                }
             }
             return true;
         }
@@ -893,7 +896,11 @@ static bool CheckRelativeThingCallback(MapObject *thing, void *data)
             if (thing->z < move_check.ceiling_z &&
                 !((move_check.flags & kMapObjectFlagMissile) || (thing->flags_ & kMapObjectFlagMissile)))
             {
-                move_check.ceiling_z = thing->z;
+                if (!move_check.above || (thing->z < move_check.above->z))
+                {
+                    move_check.ceiling_z = thing->z;
+                    move_check.above = thing;
+                }
             }
             return true;
         }
@@ -1193,6 +1200,13 @@ bool TryMove(MapObject *thing, float x, float y)
     }
 
     ChangeThingPosition(thing, x, y, z);
+        
+    // -AJA- 1999/07/31: Ride that rawhide :->
+    if (thing->above_object_ && !(thing->above_object_->flags_ & kMapObjectFlagFloat) &&
+        AlmostEquals(thing->above_object_->z, thing->z + thing->height_))
+    {
+        ChangeThingPosition(thing->above_object_, thing->above_object_->x + ((x - oldx) * thing->info_->ride_friction_), thing->above_object_->y + ((y - oldy) * thing->info_->ride_friction_), thing->above_object_->z);
+    }
 
     thing->SetAboveObject(move_check.above);
     thing->SetBelowObject(move_check.below);

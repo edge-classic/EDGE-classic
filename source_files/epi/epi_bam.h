@@ -103,14 +103,14 @@ inline BAMAngle BAMInterpolate(BAMAngle old_angle, BAMAngle new_angle, float alo
         return new_angle;
     else if (new_angle > old_angle)
     {
-        if (new_angle - old_angle < kBAMAngle270)
+        if (new_angle - old_angle < kBAMAngle180)
             return old_angle + (BAMAngle)(along * (new_angle - old_angle));
         else
             return old_angle - (BAMAngle)(along * (old_angle - new_angle));
     }
     else
     {
-        if (old_angle - new_angle < kBAMAngle270)
+        if (old_angle - new_angle < kBAMAngle180)
             return old_angle - (BAMAngle)(along * (old_angle - new_angle));
         else
             return old_angle + (BAMAngle)(along * (new_angle - old_angle));

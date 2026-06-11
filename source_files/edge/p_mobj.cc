@@ -871,14 +871,6 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props)
     float xmove = mo->momentum_.X;
     float ymove = mo->momentum_.Y;
 
-    // -AJA- 1999/07/31: Ride that rawhide :->
-    if (mo->above_object_ && !(mo->above_object_->flags_ & kMapObjectFlagFloat) &&
-        mo->above_object_->floor_z_ < (mo->z + mo->height_ + 1))
-    {
-        mo->above_object_->momentum_.X += xmove * mo->info_->ride_friction_;
-        mo->above_object_->momentum_.Y += ymove * mo->info_->ride_friction_;
-    }
-
     // -AJA- 1999/10/09: Reworked viscosity.
     // Dasho - Reduce impact of viscosity now that
     // movefactor and an overall lower MAXMOVE have been

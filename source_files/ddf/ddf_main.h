@@ -67,7 +67,10 @@ constexpr float kMoveFactorMinimum   = 0.000488281f;
 constexpr float kFootingFactor       = 0.228881836f;
 constexpr float kViscosityDefault    = 0.0f;
 constexpr float kDragDefault         = 0.99f;
-constexpr float kRideFrictionDefault = 0.7f;
+
+constexpr float kRideFrictionDefault = 0.0f; 
+//Lobo 2026: kRideFrictionDefault used to be 0.7f but since it never worked it was effectively 0. Now that it
+// actually works, some maps break if it's not 0
 
 struct JumpActionInfo
 {

@@ -612,6 +612,14 @@ static void DeathThink(Player *player)
 
     if (player->command_.buttons & kButtonCodeUse)
         player->player_state_ = kPlayerAwaitingRespawn;
+
+    if (player == players[display_player])
+    {
+        if (view_rotation < 75.0f)
+        {
+            view_rotation += 3.0f;
+        }
+    }
 }
 
 static void UpdatePowerups(Player *player)
@@ -816,6 +824,9 @@ bool PlayerThink(Player *player)
         }
         return true;
     }
+
+    if (player == players[display_player])
+        view_rotation = 0.0f;
 
     // Move/Look around.  Reactiontime is used to prevent movement for a
     // bit after a teleport.

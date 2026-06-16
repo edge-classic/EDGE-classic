@@ -27,6 +27,8 @@ void SetupSkyMatrices(void)
         // sgl_push_matrix();
         sgl_load_identity();
 
+        if (!AlmostEquals(view_rotation, 0.0f))
+            sgl_rotate(sgl_rad(view_rotation), 0.0f, 0.0f, 1.0f);
         sgl_rotate(sgl_rad(270.0f) - epi::RadiansFromBAM(view_vertical_angle), 1.0f, 0.0f, 0.0f);
         sgl_rotate(epi::RadiansFromBAM(view_angle), 0.0f, 0.0f, 1.0f);
     }
@@ -49,6 +51,8 @@ void SetupSkyMatrices(void)
         // sgl_push_matrix();
         sgl_load_identity();
 
+        if (!AlmostEquals(view_rotation, 0.0f))
+            sgl_rotate(sgl_rad(-view_rotation), 0.0f, 0.0f, 1.0f);
         sgl_rotate(sgl_rad(270.0f) - epi::RadiansFromBAM(view_vertical_angle), 1.0f, 0.0f, 0.0f);
 
         BAMAngle rot = view_angle;

@@ -46,6 +46,7 @@ enum ViewHeightZone
 extern float    view_cosine;
 extern float    view_sine;
 extern BAMAngle view_vertical_angle;
+extern float    view_rotation;
 
 extern Subsector        *view_subsector;
 extern RegionProperties *view_properties;

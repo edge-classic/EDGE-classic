@@ -548,7 +548,9 @@ void GameTicker(void)
 
     case kGameStateIntermission:
         GrabTicCommands();
-        MapObjectTicker();
+        if (background_camera_map_object) //Lobo 2026: if we have an Intermission camera then continue playsim 
+            MapObjectTicker();
+        
         IntermissionTicker();
         break;
 

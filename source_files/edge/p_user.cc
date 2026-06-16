@@ -761,7 +761,7 @@ bool PlayerThink(Player *player)
 
     EPI_ASSERT(player->map_object_);
 
-    if (game_state == kGameStateIntermission)
+    if (game_state == kGameStateIntermission) //if we're on an Intermission screen (with a camera) go no further
         return true;
         
     player->map_object_->interpolate_        = true;

@@ -761,6 +761,9 @@ bool PlayerThink(Player *player)
 
     EPI_ASSERT(player->map_object_);
 
+    if (game_state == kGameStateIntermission)
+        return true;
+        
     player->map_object_->interpolate_        = true;
     player->map_object_->old_x_              = player->map_object_->x;
     player->map_object_->old_y_              = player->map_object_->y;

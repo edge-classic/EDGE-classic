@@ -15,6 +15,7 @@
 - Moved Legacy of Rust to a wadfix to reduce startup warnings
 - RTS menus with only 1 option: pressing CANCEL will now behave as if USE was pressed. Both dismiss the menu
 - Ignore missing secret sfx on startup
+- Allow playsim to continue on camera-type Intermission screens
 
 
 ## General Bugfixes

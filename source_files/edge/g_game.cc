@@ -548,6 +548,7 @@ void GameTicker(void)
 
     case kGameStateIntermission:
         GrabTicCommands();
+        MapObjectTicker();
         IntermissionTicker();
         break;
 

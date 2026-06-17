@@ -87,6 +87,8 @@ class SokolRenderBackend : public RenderBackend
         sgl_load_identity();
         sgl_rotate(sgl_rad(270.0f) - epi::RadiansFromBAM(view_vertical_angle), 1.0f, 0.0f, 0.0f);
         sgl_rotate(sgl_rad(90.0f) - epi::RadiansFromBAM(view_angle), 0.0f, 0.0f, 1.0f);
+        if (!AlmostEquals(view_rotation, 0.0f))
+            sgl_rotate(sgl_rad(view_rotation), view_forward.X, view_forward.Y, view_forward.Z);
         sgl_translate(-view_x, -view_y, -view_z);
     }
 

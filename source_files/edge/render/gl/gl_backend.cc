@@ -74,6 +74,8 @@ class GLRenderBackend : public RenderBackend
         glLoadIdentity();
         glRotatef(270.0f - epi::DegreesFromBAM(view_vertical_angle), 1.0f, 0.0f, 0.0f);
         glRotatef(90.0f - epi::DegreesFromBAM(view_angle), 0.0f, 0.0f, 1.0f);
+        if (!AlmostEquals(view_rotation, 0.0f))
+            glRotatef(view_rotation, view_forward.X, view_forward.Y, view_forward.Z);
         glTranslatef(-view_x, -view_y, -view_z);
     }
 

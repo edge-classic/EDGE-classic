@@ -85,6 +85,7 @@ float view_z;
 
 float view_cosine;
 float view_sine;
+float view_rotation = 0.0f;
 
 Player *view_player;
 

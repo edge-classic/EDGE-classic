@@ -555,6 +555,12 @@ function DoesNameStartWith(TheName, ThePart)
 end
 
 function edge_footsteps()
+
+	if (player.health() <= 0) then
+        return
+    end
+	
+
     if (player.is_swimming()) then
         return
     end

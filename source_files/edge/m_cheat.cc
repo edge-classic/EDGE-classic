@@ -356,6 +356,7 @@ bool CheatResponder(InputEvent *ev)
     else if (CheckCheatSequence(&cheat_suicide, key))
     {
         TelefragMapObject(pl->map_object_, pl->map_object_, nullptr);
+        pl->health_ = 0;
 
         // -ACB- 1998/08/26 Suicide language reference
         ConsoleMessage(kConsoleHUDCenter, "%s", language["SuicideCheat"]);

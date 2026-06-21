@@ -29,7 +29,8 @@
 - Corrected several misnamed LOR SFX entries
 - Resolved FPS drop if the LIGHTING set via DDF was different to the Options->video->Lighting mode
 - Bouncing objects could very rarely cause an infinite loop
-
+- Footsteps SFX no longer continue playing when player is dead
+- Suicide cheat was not setting health to zero
 
 
 

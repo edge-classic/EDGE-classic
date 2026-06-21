@@ -46,6 +46,8 @@ void SetupSkyMatrices(void)
         glPushMatrix();
         glLoadIdentity();
 
+        if (!AlmostEquals(view_rotation, 0.0f))
+            glRotatef(view_rotation, 0.0f, 0.0f, 1.0f);
         glRotatef(270.0f - epi::DegreesFromBAM(view_vertical_angle), 1.0f, 0.0f, 0.0f);
         glRotatef(epi::DegreesFromBAM(view_angle), 0.0f, 0.0f, 1.0f);
     }
@@ -68,6 +70,8 @@ void SetupSkyMatrices(void)
         glPushMatrix();
         glLoadIdentity();
 
+        if (!AlmostEquals(view_rotation, 0.0f))
+            glRotatef(-view_rotation, 0.0f, 0.0f, 1.0f);
         glRotatef(270.0f - epi::DegreesFromBAM(view_vertical_angle), 1.0f, 0.0f, 0.0f);
 
         BAMAngle rot = view_angle;

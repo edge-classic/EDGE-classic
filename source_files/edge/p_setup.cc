@@ -2196,6 +2196,12 @@ static void LoadUDMFLineDefs()
                 case udmf::kBlockSight:
                     flags |= (lex.state_.boolean ? kLineFlagSightBlock : 0);
                     break;
+                case udmf::kBlockAttacks:
+                    flags |= (lex.state_.boolean ? kLineFlagShootBlock : 0);
+                    break;
+                case udmf::kBlockLandMonsters:
+                    flags |= (lex.state_.boolean ? kLineFlagBlockGroundedMonsters : 0);
+                    break;
                 default:
                     break;
                 }

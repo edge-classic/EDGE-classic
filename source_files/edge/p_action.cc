@@ -4419,7 +4419,7 @@ void A_Become(MapObject *mo)
 
         mo->target_visibility_ = mo->info_->translucency_;
         mo->current_attack_    = nullptr;
-        mo->model_skin_        = mo->info_->model_skin_;
+        //mo->model_skin_        = mo->info_->model_skin_;
         mo->model_last_frame_  = -1;
         mo->model_scale_       = mo->info_->model_scale_;
         mo->model_aspect_      = mo->info_->model_aspect_;
@@ -4498,7 +4498,7 @@ void A_UnBecome(MapObject *mo)
 
         mo->target_visibility_ = mo->info_->translucency_;
         mo->current_attack_    = nullptr;
-        mo->model_skin_        = mo->info_->model_skin_;
+        //mo->model_skin_        = mo->info_->model_skin_;
         mo->model_last_frame_  = -1;
         mo->model_scale_       = mo->info_->model_scale_;
         mo->model_aspect_      = mo->info_->model_aspect_;
@@ -4580,7 +4580,7 @@ void A_Morph(MapObject *mo)
 
         mo->target_visibility_ = mo->info_->translucency_;
         mo->current_attack_    = nullptr;
-        mo->model_skin_        = mo->info_->model_skin_;
+        //mo->model_skin_        = mo->info_->model_skin_;
         mo->model_last_frame_  = -1;
         mo->model_scale_       = mo->info_->model_scale_;
         mo->model_aspect_      = mo->info_->model_aspect_;
@@ -4663,7 +4663,7 @@ void A_UnMorph(MapObject *mo)
 
         mo->target_visibility_ = mo->info_->translucency_;
         mo->current_attack_    = nullptr;
-        mo->model_skin_        = mo->info_->model_skin_;
+        //mo->model_skin_        = mo->info_->model_skin_;
         mo->model_last_frame_  = -1;
         mo->model_scale_       = mo->info_->model_scale_;
         mo->model_aspect_      = mo->info_->model_aspect_;

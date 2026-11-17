@@ -1811,7 +1811,7 @@ static void CreateLuaTable_Attacks(lua_State *L, WeaponDefinition *objWep)
 static void CreateLuaTable_Weapon(lua_State *L, WeaponDefinition *objWep)
 {
     std::string temp_value;
-    int         NumberOfItems = 6;        // how many fields in a row
+    int         NumberOfItems = 7;        // how many fields in a row
     lua_createtable(L, 0, NumberOfItems); // our WEAPON table
 
     //---------------

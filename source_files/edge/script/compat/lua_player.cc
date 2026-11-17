@@ -571,12 +571,17 @@ static int PL_weapon_state(lua_State *L)
         return 1;
     }
 
-    ui_player_who->ready_weapon_ = (WeaponSelection)pw_index; // insta-switch to it
 
     int state = DDFStateFindLabel(oldWep->state_grp_, weapon_state, true /* quiet */);
     if (state == 0)
         FatalError("player.weapon_state: frame '%s' in [%s] not found!\n", weapon_state, weapon_name);
     // state += 1;
+
+    //Hacky, but lets assume if they want to go to UP states then they dont want to insta-switch
+    if (DDFCompareName(weapon_state, "UP") == 0)
+        ui_player_who->pending_weapon_ = (WeaponSelection)pw_index; // don't insta-switch to it
+    else
+        ui_player_who->ready_weapon_ = (WeaponSelection)pw_index; // insta-switch to it
 
     LuaSetPlayerSpriteDeferred(ui_player_who, kPlayerSpriteWeapon,
                                state); // refresh the sprite
@@ -1737,7 +1742,7 @@ static void CreateLuaTable_Attacks(lua_State *L, WeaponDefinition *objWep)
 
     lua_createtable(L, NumberOfAttacks, 0); // create ATTACKS table
 
-    int NumberOfAttackFields = 8;           // how many fields in a row
+    int NumberOfAttackFields = 9;           // how many fields in a row
     int CurrentAttack        = 0;           // counter
     for (CurrentAttack = 0; CurrentAttack < NumberOfAttacks; CurrentAttack++)
     {
@@ -1790,6 +1795,11 @@ static void CreateLuaTable_Attacks(lua_State *L, WeaponDefinition *objWep)
         lua_pushboolean(L, objWep->autofire_[CurrentAttack] ? 1 : 0);
         lua_setfield(L, -2, "is_automatic"); // add to ATTACK subItem table
 
+        // SPECIAL
+        temp_num = objAtck->flags_;
+        lua_pushinteger(L, temp_num);
+        lua_setfield(L, -2, "special"); // add to ATTACK subItem table
+
         lua_settable(L, -3);                 // add to ATTACKS table
     }
 
@@ -1801,7 +1811,7 @@ static void CreateLuaTable_Attacks(lua_State *L, WeaponDefinition *objWep)
 static void CreateLuaTable_Weapon(lua_State *L, WeaponDefinition *objWep)
 {
     std::string temp_value;
-    int         NumberOfItems = 4;        // how many fields in a row
+    int         NumberOfItems = 6;        // how many fields in a row
     lua_createtable(L, 0, NumberOfItems); // our WEAPON table
 
     //---------------
@@ -1823,6 +1833,26 @@ static void CreateLuaTable_Weapon(lua_State *L, WeaponDefinition *objWep)
     // weapon.sharedclip
     lua_pushboolean(L, objWep->shared_clip_ ? 1 : 0);
     lua_setfield(L, -2, "shared_clip"); // add to WEAPON Table
+    //---------------
+
+    //---------------
+    // weapon.priority
+    temp_num2 = objWep->priority_;
+    lua_pushnumber(L, temp_num2);
+    lua_setfield(L, -2, "priority"); // add to WEAPON Table
+    //---------------
+
+    //---------------
+    // weapon.dangerous
+    lua_pushboolean(L, objWep->dangerous_ ? 1 : 0);
+    lua_setfield(L, -2, "dangerous"); // add to WEAPON Table
+    //---------------
+
+    //---------------
+    // weapon.special  but only the main (1st) specials
+    temp_num2 = objWep->specials_[0];
+    lua_pushnumber(L, temp_num2);
+    lua_setfield(L, -2, "special"); // add to WEAPON Table
     //---------------
 
     //---------------
@@ -2044,6 +2074,52 @@ static int MO_render_view_tid(lua_State *L)
 
     return 1;
 }
+
+
+// player.owned_weapons()
+//
+static int PL_owned_weapons(lua_State *L)
+{
+    //const char *name = luaL_checkstring(L, 1);
+
+    int count   = 0;
+
+    for (int j = 0; j < kMaximumWeapons; j++)
+    {
+        PlayerWeapon *pw = &ui_player_who->weapons_[j];
+        
+        if (pw->owned && !(pw->flags & kPlayerWeaponRemoving))
+        {
+           count++;
+        }
+    }
+
+    if (count == 0)
+    {
+        lua_pushstring(L, ""); // Found nothing
+        return 1;
+    }
+    else
+    {
+        lua_createtable(L, 0, count);
+        count = 0;
+        for (int j = 0; j < kMaximumWeapons; j++)
+        {
+            PlayerWeapon *pw = &ui_player_who->weapons_[j];
+            
+            if (pw->owned && !(pw->flags & kPlayerWeaponRemoving))
+            {
+                count++;
+                lua_pushnumber(L, count);
+                CreateLuaTable_Weapon(L, pw->info);
+                lua_settable(L, -3);
+            }
+        }
+        return 1;
+    }
+    
+}
+
 
 // player.query_weapon(maxdistance,whatinfo,[SecAttack])
 //
@@ -2535,6 +2611,7 @@ static const luaL_Reg playerlib[] = {{"num_players", PL_num_players},
                                      {"query_weapon", PL_query_weapon},
                                      {"is_zoomed", PL_is_zoomed},
                                      {"weapon_state", PL_weapon_state},
+                                     {"owned_weapons", PL_owned_weapons},
 
                                      {"sector_light", PL_sector_light},
                                      {"sector_floor_height", PL_sector_floor_height},

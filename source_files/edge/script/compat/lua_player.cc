@@ -1578,7 +1578,7 @@ static void CreateLuaTable_Benefits(lua_State *L, MapObject *obj, bool KillBenef
         }
 
         // add it to our table
-        lua_pushnumber(L, CurrentBenefit);      // new benefit
+        lua_pushinteger(L, CurrentBenefit);      // new benefit
         lua_createtable(L, 0,
                         NumberOfBenefitFields); // create Benefit subItem table
 
@@ -1750,7 +1750,7 @@ static void CreateLuaTable_Attacks(lua_State *L, WeaponDefinition *objWep)
         const DamageClass *damtype;
 
         // add it to our table
-        lua_pushnumber(L, CurrentAttack);      // new attack
+        lua_pushinteger(L, CurrentAttack);      // new attack
         lua_createtable(L, 0,
                         NumberOfAttackFields); // create attack subItem table
 
@@ -1838,7 +1838,7 @@ static void CreateLuaTable_Weapon(lua_State *L, WeaponDefinition *objWep)
     //---------------
     // weapon.priority
     temp_num2 = objWep->priority_;
-    lua_pushnumber(L, temp_num2);
+    lua_pushinteger(L, temp_num2);
     lua_setfield(L, -2, "priority"); // add to WEAPON Table
     //---------------
 
@@ -1851,7 +1851,7 @@ static void CreateLuaTable_Weapon(lua_State *L, WeaponDefinition *objWep)
     //---------------
     // weapon.special  but only the main (1st) specials
     temp_num2 = objWep->specials_[0];
-    lua_pushnumber(L, temp_num2);
+    lua_pushinteger(L, temp_num2);
     lua_setfield(L, -2, "special"); // add to WEAPON Table
     //---------------
 

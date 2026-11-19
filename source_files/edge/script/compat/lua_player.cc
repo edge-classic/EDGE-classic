@@ -547,8 +547,8 @@ static int PL_weapon_state(lua_State *L)
 
     // WeaponDefinition *info =
     // ui_player_who->weapons_[ui_player_who->ready_weapon_].info;
-    WeaponDefinition *oldWep = weapondefs.Lookup(weapon_name);
-    if (!oldWep)
+    WeaponDefinition *newWep = weapondefs.Lookup(weapon_name);
+    if (!newWep)
     {
         FatalError("player.weapon_state: Unknown weapon name '%s'.\n", weapon_name);
     }
@@ -561,7 +561,7 @@ static int PL_weapon_state(lua_State *L)
         if (!ui_player_who->weapons_[pw_index].owned)
             continue;
 
-        if (ui_player_who->weapons_[pw_index].info == oldWep)
+        if (ui_player_who->weapons_[pw_index].info == newWep)
             break;
     }
 
@@ -572,17 +572,23 @@ static int PL_weapon_state(lua_State *L)
     }
 
 
-    int state = DDFStateFindLabel(oldWep->state_grp_, weapon_state, true /* quiet */);
+    int state = DDFStateFindLabel(newWep->state_grp_, weapon_state, true /* quiet */);
     if (state == 0)
         FatalError("player.weapon_state: frame '%s' in [%s] not found!\n", weapon_state, weapon_name);
     // state += 1;
 
     //Hacky, but lets assume if they want to go to UP states then they dont want to insta-switch
     if (DDFCompareName(weapon_state, "UP") == 0)
+    {
+        if (newWep->specials_[0] & WeaponFlagAnimated)
+            ui_player_who->ready_weapon_ = KWeaponSelectionNone;
+        
         ui_player_who->pending_weapon_ = (WeaponSelection)pw_index; // don't insta-switch to it
+    }
     else
+    {
         ui_player_who->ready_weapon_ = (WeaponSelection)pw_index; // insta-switch to it
-
+    }
     LuaSetPlayerSpriteDeferred(ui_player_who, kPlayerSpriteWeapon,
                                state); // refresh the sprite
 

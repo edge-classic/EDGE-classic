@@ -547,6 +547,7 @@ static int PL_weapon_state(lua_State *L)
 
     // WeaponDefinition *info =
     // ui_player_who->weapons_[ui_player_who->ready_weapon_].info;
+   
     WeaponDefinition *newWep = weapondefs.Lookup(weapon_name);
     if (!newWep)
     {
@@ -577,11 +578,18 @@ static int PL_weapon_state(lua_State *L)
         FatalError("player.weapon_state: frame '%s' in [%s] not found!\n", weapon_state, weapon_name);
     // state += 1;
 
-    //Hacky, but lets assume if they want to go to UP states then they dont want to insta-switch
+    //Hacky, but lets assume if they want to go to UP states then they do not want to insta-switch
+    // and want to see the UP animation
     if (DDFCompareName(weapon_state, "UP") == 0)
     {
+        //current weapon is animated don't do the down animation
+        if (ui_player_who->weapons_[ui_player_who->ready_weapon_].info->specials_[0] & WeaponFlagAnimated)
+            ui_player_who->ready_weapon_ = KWeaponSelectionNone;
+
+        //new weapon is animated don't do the down animation
         if (newWep->specials_[0] & WeaponFlagAnimated)
             ui_player_who->ready_weapon_ = KWeaponSelectionNone;
+
         
         ui_player_who->pending_weapon_ = (WeaponSelection)pw_index; // don't insta-switch to it
     }
@@ -1139,6 +1147,7 @@ static std::string AuxStringReplaceAll(std::string str, const std::string &from,
         str.replace(start_pos, from.length(), to);
         start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
     }
+
     return str;
 }
 
@@ -1235,7 +1244,7 @@ static std::string GetQueryInfoFromMobj(MapObject *obj, int whatinfo)
             if (temp_string.empty()) // fallback to DDFTHING entry name
             {
                 temp_string = obj->info_->name_;
-                temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
+                //temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
             }
         }
         break;
@@ -1327,7 +1336,7 @@ static std::string GetQueryInfoFromWeapon(MapObject *obj, int whatinfo, bool sec
     {
     case 1: // name
         temp_string = objWep->name_;
-        temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
+        //temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
         break;
 
     case 2: // ZOOM_FACTOR
@@ -1499,7 +1508,7 @@ static void CreateLuaTable_Benefits(lua_State *L, MapObject *obj, bool KillBenef
             {
                 WeaponDefinition *objWep = list->sub.weap;
                 BenefitName              = objWep->name_;
-                BenefitName              = AuxStringReplaceAll(BenefitName, std::string("_"), std::string(" "));
+                //BenefitName              = AuxStringReplaceAll(BenefitName, std::string("_"), std::string(" "));
             }
             BenefitType   = 0;
             BenefitAmount = 1;
@@ -1622,7 +1631,7 @@ void CreateLuaTable_Mobj(lua_State *L, MapObject *mo)
     if (temp_value.empty())                        // fallback to DDFTHING entry name
     {
         temp_value = mo->info_->name_;
-        temp_value = AuxStringReplaceAll(temp_value, std::string("_"), std::string(" "));
+        //temp_value = AuxStringReplaceAll(temp_value, std::string("_"), std::string(" "));
     }
 
     lua_pushstring(L, temp_value.c_str());
@@ -1762,7 +1771,7 @@ static void CreateLuaTable_Attacks(lua_State *L, WeaponDefinition *objWep)
 
         // NAME
         temp_string = objAtck->name_;
-        temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
+        //temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
         lua_pushstring(L, temp_string.c_str());
         lua_setfield(L, -2, "name"); // add to ATTACK subItem table
 
@@ -1823,7 +1832,7 @@ static void CreateLuaTable_Weapon(lua_State *L, WeaponDefinition *objWep)
     //---------------
     // weapon.name
     temp_value = objWep->name_;
-    temp_value = AuxStringReplaceAll(temp_value, std::string("_"), std::string(" "));
+    //temp_value = AuxStringReplaceAll(temp_value, std::string("_"), std::string(" "));
     lua_pushstring(L, temp_value.c_str());
     lua_setfield(L, -2, "name"); // add to WEAPON Table
     //---------------
@@ -2274,7 +2283,7 @@ static int Game_info(lua_State *L)
     if (g->description_.empty())
     {
         temp_value = g->name_;
-        temp_value = AuxStringReplaceAll(temp_value, std::string("_"), std::string(" "));
+        //temp_value = AuxStringReplaceAll(temp_value, std::string("_"), std::string(" "));
     }
     else
     {

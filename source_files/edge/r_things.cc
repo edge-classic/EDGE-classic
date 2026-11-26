@@ -716,6 +716,9 @@ void RenderWeaponSprites(Player *p)
 
 void RenderCrosshair(Player *p)
 {
+    if (p->ready_weapon_ < 0) //Lobo 2026: not holding a weapon so no crosshair
+        return;
+
     if (view_is_zoomed && p->weapons_[p->ready_weapon_].info->zoom_state_ > 0)
     {
         // Only skip crosshair if there is a dedicated zoom state, which

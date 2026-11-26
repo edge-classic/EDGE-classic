@@ -569,8 +569,8 @@ static void PL_weapon_state(coal::VM *vm, int argc)
 
     // WeaponDefinition *info =
     // ui_player_who->weapons_[ui_player_who->ready_weapon_].info;
-    WeaponDefinition *oldWep = weapondefs.Lookup(weapon_name);
-    if (!oldWep)
+    WeaponDefinition *newWep = weapondefs.Lookup(weapon_name);
+    if (!newWep)
     {
         FatalError("player.weapon_state: Unknown weapon name '%s'.\n", weapon_name);
     }
@@ -583,7 +583,7 @@ static void PL_weapon_state(coal::VM *vm, int argc)
         if (!ui_player_who->weapons_[pw_index].owned)
             continue;
 
-        if (ui_player_who->weapons_[pw_index].info == oldWep)
+        if (ui_player_who->weapons_[pw_index].info == newWep)
             break;
     }
 
@@ -593,12 +593,30 @@ static void PL_weapon_state(coal::VM *vm, int argc)
         return;
     }
 
-    ui_player_who->ready_weapon_ = (WeaponSelection)pw_index; // insta-switch to it
-
-    int state = DDFStateFindLabel(oldWep->state_grp_, weapon_state, true /* quiet */);
+    int state = DDFStateFindLabel(newWep->state_grp_, weapon_state, true /* quiet */);
     if (state == 0)
         FatalError("player.weapon_state: frame '%s' in [%s] not found!\n", weapon_state, weapon_name);
     // state += 1;
+
+    //Hacky, but lets assume if they want to go to UP states then they do not want to insta-switch
+    // and want to see the UP animation
+    if (DDFCompareName(weapon_state, "UP") == 0)
+    {
+        //current weapon is animated don't do the down animation
+        if (ui_player_who->weapons_[ui_player_who->ready_weapon_].info->specials_[0] & WeaponFlagAnimated)
+            ui_player_who->ready_weapon_ = KWeaponSelectionNone;
+
+        //new weapon is animated don't do the down animation
+        if (newWep->specials_[0] & WeaponFlagAnimated)
+            ui_player_who->ready_weapon_ = KWeaponSelectionNone;
+
+        
+        ui_player_who->pending_weapon_ = (WeaponSelection)pw_index; // don't insta-switch to it
+    }
+    else
+    {
+        ui_player_who->ready_weapon_ = (WeaponSelection)pw_index; // insta-switch to it
+    }
 
     COAL_SetPlayerSpriteDeferred(ui_player_who, kPlayerSpriteWeapon,
                                  state); // refresh the sprite
@@ -1245,7 +1263,7 @@ static std::string GetQueryInfoFromMobj(MapObject *obj, int whatinfo)
             if (temp_string.empty()) // fallback to DDFTHING entry name
             {
                 temp_string = obj->info_->name_;
-                temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
+                //temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
             }
         }
         break;
@@ -1339,7 +1357,7 @@ static std::string GetQueryInfoFromWeapon(MapObject *obj, int whatinfo, bool sec
     {
     case 1: // name
         temp_string = objWep->name_;
-        temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
+        //temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
         break;
 
     case 2: // ZOOM_FACTOR
